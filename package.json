@@ -10,18 +10,20 @@
     "typecheck": "tsc --noEmit",
     "cek-klaim": "node scripts/cek-klaim.mjs",
     "cek-db": "node --env-file=.env.local scripts/cek-db.mjs",
-    "impor-konten": "node --env-file=.env.local scripts/impor-konten.mjs",
-    "impor-draf": "node --env-file=.env.local scripts/impor-draf.mjs",
-    "buat-admin": "node --env-file=.env.local scripts/buat-admin.mjs"
+    "buat-admin": "node --env-file=.env.local scripts/buat-admin.mjs",
+    "benih-konten": "node --env-file=.env.local scripts/benih-konten.mjs"
   },
   "dependencies": {
     "@node-rs/argon2": "2.2.1",
+    "fflate": "0.8.3",
     "mongodb": "7.7.0",
     "next": "16.3.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-markdown": "10.1.0",
     "remark-gfm": "4.0.1",
+    "sharp": "0.35.5",
+    "uqr": "0.1.3",
     "yaml": "2.9.1",
     "zod": "4.6.5"
   },

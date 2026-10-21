@@ -4,7 +4,27 @@ Catat setiap perubahan isi materi, kuis, atau sumber di sini. Format: tanggal, v
 
 Setelah versi dibekukan untuk penelitian, perubahan konten inti hanya boleh dilakukan dengan persetujuan peneliti.
 
-> **Sejak 2026-10-20 konten dikelola lewat halaman admin (`/admin/`).** Riwayat perubahan modul tercatat otomatis di **Log Audit** (koleksi `log_audit`, bisa diunduh sebagai JSON). Berkas ini tetap dipakai untuk mencatat perubahan kuis, daftar sumber, dan keputusan pembekuan versi.
+> **Sejak PRD v2.0 (2026-10-21)** konten dikelola per versi di panel admin (`/admin/konten/`, `/admin/versi/`). Setiap perubahan lewat panel tercatat otomatis di log aktivitas (`/admin/log/`, bisa diunduh CSV). Berkas ini mencatat perubahan naskah benih (`scripts/benih/naskah-v2/`) dan keputusan penguncian versi.
+
+## Konten contoh diterbitkan di database utama (2026-10-21)
+
+- Naskah benih v2 (6 modul, 20 materi, 60 soal) diterbitkan sebagai **konten contoh** (`npm run benih-konten -- --contoh`) agar website dapat dicoba. Versi bertanda `contoh`, tidak dapat dikunci.
+- Wajib dihapus atau diganti konten tervalidasi sebelum responden penelitian mulai (Versi Konten → Hapus Konten Contoh).
+
+## Menu Sehat 0.1.0 & Tips Sehari-hari 0.1.0 (2026-10-21, draf, PERLU VALIDASI AHLI)
+
+- Halaman bacaan pendukung baru untuk responden: **Menu Sehat** (`src/data/menu-sehat.ts`: isi piring, 6 kelompok makanan dianjurkan dengan contoh & porsi, 4 kelompok yang perlu dibatasi dengan pengganti, cara memasak) dan **Tips Sehari-hari** (`src/data/tips.ts`: 22 tips dalam 5 kategori, "tips hari ini" bergilir).
+- Isi disarikan dari naskah benih Modul 2–5 (NHLBI, Pedoman Gizi Seimbang, Permenkes GGL). Belum selesai: TODO verifikasi proporsi "Isi Piringku" dan ukuran porsi bersama ahli gizi.
+- Bukan bagian modul/kuis dan tidak dihitung dalam progres.
+
+## Benih v2 — struktur PRD v2.0 (2026-10-21, draf, PERLU VALIDASI AHLI)
+
+- **Struktur baru:** 6 modul, 20 materi sesuai tabel PRD v2.0 Bagian 13 (teks PRD menyebut 18 materi, tabelnya 20; benih mengikuti tabel). Setiap materi punya tujuan pembelajaran, isi dengan kotak contoh penerapan, Poin Penting, rangkuman, sumber, dan kuis 3 soal (total 60 soal).
+- **Modul 6** berganti menjadi "Rangkuman dan Rencana Saya" (6.1 Rangkuman prinsip DASH, 6.2 Menyusun rencana makan sehat pribadi); tidak ada lagi kuis besar.
+- **Teks dipakai ulang** dari naskah 0.2/0.3 (dipindah ke `scripts/benih/naskah-v1/`) dan dipecah per materi. Materi baru/diperluas: 1.2 contoh, 1.3 pengendalian, 2.2 kuis, 3.2 protein, 3.3 susu rendah lemak, 3.5 contoh porsi, 4.3 contoh label, 5.2 pengganti makanan, 5.3 dukungan keluarga, 6.2 rencana pribadi.
+- **Kuis:** 15 soal lama (k01–k15) dipakai ulang di materi yang sesuai; 45 soal baru ditulis per tujuan pembelajaran materi. Semua perlu validasi ahli dan tidak boleh sama dengan butir pretest/posttest.
+- **Belum selesai:** TODO verifikasi sumber (tabel kategori tekanan darah PERHI 2021, ukuran porsi lauk, tabel porsi NHLBI, contoh menu).
+- Diimpor dengan `npm run benih-konten` sebagai versi kerja draf; terbit setelah validasi ahli dan persetujuan super admin.
 
 ## 0.3.0 — konten tambahan sesuai mockup fitur (2026-10-20, draf, PERLU VALIDASI AHLI)
 

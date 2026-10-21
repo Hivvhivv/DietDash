@@ -1,8 +1,3 @@
-// Versi website & konten yang dipakai dalam penelitian.
-// Naikkan versi setiap ada perubahan konten dan catat di CHANGELOG-KONTEN.md.
-export const VERSI_KONTEN = '0.3.0';
-export const STATUS_KONTEN = 'Draf — belum divalidasi ahli';
-
 export const NAMA_SITUS = 'DASH Sehat';
 export const SLOGAN = 'Langkah Sehat, Tekanan Darah Lebih Terkontrol';
 

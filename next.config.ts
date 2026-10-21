@@ -4,7 +4,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   trailingSlash: true,
   // Modul native/driver dijalankan langsung oleh Node, tidak dibundel.
-  serverExternalPackages: ['@node-rs/argon2', 'mongodb'],
+  serverExternalPackages: ['@node-rs/argon2', 'mongodb', 'sharp'],
+  // forbidden() untuk halaman khusus super admin (403).
+  experimental: { authInterrupts: true },
   async headers() {
     return [
       {

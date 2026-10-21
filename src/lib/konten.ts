@@ -1,58 +1,107 @@
-// Lapisan akses konten untuk HALAMAN PUBLIK.
-//
-// Semua halaman mengambil konten hanya lewat fungsi di file ini. Sumbernya koleksi
-// `modul_versi` di MongoDB, dan yang ditampilkan HANYA versi berstatus "disetujui"
-// (PRD bagian 13: semua responden menerima konten yang sama dan sudah disetujui peneliti).
-import { koleksi, type DokVersiModul } from './db';
+// Membaca struktur konten satu versi: Modul → Materi → Kuis (PRD v2.0 Bagian 5).
+// Responden selalu membaca versi aktif (app_settings.versi_aktif_id); admin dapat membaca versi mana pun untuk pratinjau.
+import type { ObjectId } from 'mongodb';
+import { koleksi, type DokKuis, type DokMateri, type DokModul, type DokSoal, type DokVersi } from './db';
+import { ambilPengaturan } from './pengaturan';
 import { estimasiMenit } from '@/data/situs';
-import { pecahMateri, type Materi } from './materi';
-import type { DataModul } from './skema';
 
-export { NAMA_ILUSTRASI, type NamaIlustrasi } from './skema';
-export type { Materi } from './materi';
-
-export interface Modul extends DataModul {
-  id: string;
-  versi: string;
-  isi: string; // naskah lengkap dalam Markdown
-  pengantar: string; // teks sebelum materi pertama
-  materi: Materi[];
-  estimasi_menit: number; // seluruh modul
+export interface MateriTerurut extends DokMateri {
+  nomor: string; // "2.1"
+  indeks: number; // urutan global, mulai 0
+  urutan_dalam_modul: number; // mulai 1
+  jumlah_dalam_modul: number;
+  modul: Pick<DokModul, 'kunci' | 'judul' | 'urutan'> & { nomor: number };
+  menit: number;
+  kuis: (DokKuis & { jumlah_soal: number }) | null;
 }
 
-// Estimasi modul dihitung dari seluruh teks yang dibaca pengguna.
-export function keModul(dok: Pick<DokVersiModul, 'modul_id' | 'versi' | 'data' | 'isi'>): Modul {
-  const d = dok.data;
-  const teks = [d.judul, ...d.tujuan, dok.isi, ...d.poin_penting, d.rangkuman].join(' ');
-  const { pengantar, materi } = pecahMateri(dok.isi, d.judul);
-  return {
-    ...d,
-    id: dok.modul_id,
-    versi: dok.versi,
-    isi: dok.isi,
-    pengantar,
-    materi,
-    estimasi_menit: estimasiMenit(teks),
-  };
+export interface ModulTerurut extends DokModul {
+  nomor: number;
+  materi: MateriTerurut[];
 }
 
-export async function ambilSemuaModul(): Promise<Modul[]> {
-  const { modulVersi } = await koleksi();
-  const dok = await modulVersi
-    .find({ status: 'disetujui' })
-    .sort({ 'data.urutan': 1 })
-    .toArray();
-  return dok.map(keModul);
+export interface StrukturVersi {
+  versi: DokVersi;
+  modul: ModulTerurut[];
+  materi: MateriTerurut[]; // urutan belajar lintas modul
 }
 
-export async function ambilModul(id: string): Promise<Modul | undefined> {
-  const { modulVersi } = await koleksi();
-  const dok = await modulVersi.findOne({ modul_id: id, status: 'disetujui' });
-  return dok ? keModul(dok) : undefined;
+export function menitBaca(m: Pick<DokMateri, 'estimasi_menit' | 'judul' | 'tujuan' | 'isi' | 'poin_penting' | 'rangkuman'>): number {
+  if (m.estimasi_menit) return m.estimasi_menit;
+  return estimasiMenit([m.judul, ...m.tujuan, m.isi, ...m.poin_penting, m.rangkuman].join(' '));
 }
 
-export type RingkasanModul = Pick<Modul, 'id' | 'urutan' | 'judul'>;
+export async function ambilStruktur(versionId: ObjectId): Promise<StrukturVersi | null> {
+  const k = await koleksi();
+  const versi = await k.versi.findOne({ _id: versionId });
+  if (!versi) return null;
+  const [modul, materi, kuis, jumlahSoal] = await Promise.all([
+    k.modul.find({ version_id: versionId, diarsipkan: false }).sort({ urutan: 1 }).toArray(),
+    k.materi.find({ version_id: versionId, diarsipkan: false }).sort({ urutan: 1 }).toArray(),
+    k.kuis.find({ version_id: versionId }).toArray(),
+    k.soal
+      .aggregate<{ _id: string; n: number }>([
+        { $match: { version_id: versionId } },
+        { $group: { _id: '$kuis_kunci', n: { $sum: 1 } } },
+      ])
+      .toArray(),
+  ]);
+  const nSoal = new Map(jumlahSoal.map((x) => [x._id, x.n]));
+  const kuisPerMateri = new Map(kuis.map((q) => [q.materi_kunci, { ...q, jumlah_soal: nSoal.get(q.kunci) ?? 0 }]));
 
-export function ringkas(m: Modul): RingkasanModul {
-  return { id: m.id, urutan: m.urutan, judul: m.judul };
+  const hasilModul: ModulTerurut[] = [];
+  const urut: MateriTerurut[] = [];
+  modul.forEach((md, i) => {
+    const nomorModul = i + 1;
+    const milik = materi.filter((x) => x.modul_kunci === md.kunci);
+    const daftar = milik.map((x, j) => {
+      const m: MateriTerurut = {
+        ...x,
+        nomor: `${nomorModul}.${j + 1}`,
+        indeks: urut.length + j,
+        urutan_dalam_modul: j + 1,
+        jumlah_dalam_modul: milik.length,
+        modul: { kunci: md.kunci, judul: md.judul, urutan: md.urutan, nomor: nomorModul },
+        menit: menitBaca(x),
+        kuis: kuisPerMateri.get(x.kunci) ?? null,
+      };
+      return m;
+    });
+    urut.push(...daftar);
+    hasilModul.push({ ...md, nomor: nomorModul, materi: daftar });
+  });
+  return { versi, modul: hasilModul, materi: urut };
+}
+
+export async function versiAktif(): Promise<DokVersi | null> {
+  const atur = await ambilPengaturan();
+  if (!atur.versi_aktif_id) return null;
+  const { versi } = await koleksi();
+  return versi.findOne({ _id: atur.versi_aktif_id });
+}
+
+// Teks versi konten untuk kaki halaman (mis. 'Versi konten v1.0 (dikunci untuk penelitian)').
+export async function labelVersiAktif(): Promise<string> {
+  const v = await versiAktif();
+  if (!v) return 'Konten belum diterbitkan';
+  return `Versi konten ${v.label}${v.status === 'dikunci' ? ' (dikunci untuk penelitian)' : ''}`;
+}
+
+export async function strukturAktif(): Promise<StrukturVersi | null> {
+  const v = await versiAktif();
+  return v ? ambilStruktur(v._id) : null;
+}
+
+export async function ambilSoalKuis(versionId: ObjectId, kuisKunci: string): Promise<DokSoal[]> {
+  const { soal } = await koleksi();
+  return soal.find({ version_id: versionId, kuis_kunci: kuisKunci }).sort({ urutan: 1 }).toArray();
+}
+
+// Daftar pustaka gabungan dari seluruh materi versi aktif (untuk halaman Sumber Materi).
+export async function daftarPustakaAktif(): Promise<{ sitasi: string; materi: string[] }[]> {
+  const s = await strukturAktif();
+  if (!s) return [];
+  const peta = new Map<string, string[]>();
+  for (const m of s.materi) for (const sumber of m.sumber) peta.set(sumber, [...(peta.get(sumber) ?? []), m.nomor]);
+  return [...peta.entries()].map(([sitasi, materi]) => ({ sitasi, materi })).sort((a, b) => a.sitasi.localeCompare(b.sitasi));
 }

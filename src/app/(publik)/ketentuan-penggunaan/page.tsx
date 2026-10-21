@@ -11,7 +11,6 @@ export default function KetentuanPenggunaan() {
   return (
     <>
       <KepalaHalaman
-        remah={[{ href: '/tentang/', label: 'Tentang' }]}
         label="Draf"
         judul="Ketentuan Penggunaan"
         ringkasan="Dengan menggunakan DASH Sehat, Anda menyetujui ketentuan berikut."
@@ -22,8 +21,7 @@ export default function KetentuanPenggunaan() {
           <p>
             DASH Sehat berisi informasi umum tentang pola makan DASH untuk keperluan edukasi dan
             penelitian. Website ini tidak memberikan diagnosis, resep, rekomendasi obat, atau rencana
-            diet pribadi, dan tidak menggantikan konsultasi dengan dokter atau tenaga kesehatan. Lihat{' '}
-            <Link href="/tentang/#batasan">batasan edukasi</Link>.
+            diet pribadi, dan tidak menggantikan konsultasi dengan dokter atau tenaga kesehatan.
           </p>
         </section>
         <section className="kartu bagian-kartu">
@@ -37,10 +35,10 @@ export default function KetentuanPenggunaan() {
         <section className="kartu bagian-kartu">
           <h2>3. Akun</h2>
           <ul>
-            <li>Akun tidak wajib. Akun hanya untuk menyimpan progres belajar.</li>
-            <li>Jaga kerahasiaan kata sandi Anda dan jangan memakai kata sandi yang sama dengan akun lain.</li>
-            <li>Satu akun untuk satu orang. Jangan membuat akun atas nama orang lain.</li>
-            <li>Anda dapat menghapus akun kapan saja dari halaman Akun Saya.</li>
+            <li>Akun dibutuhkan untuk mempelajari materi agar progres dan urutan belajar tercatat.</li>
+            <li>Jaga kerahasiaan kode akses Anda. Jangan berikan kode kepada siapa pun, termasuk orang yang mengaku petugas.</li>
+            <li>Satu nomor HP untuk satu akun. Jangan membuat akun atas nama orang lain.</li>
+            <li>Anda dapat mengundurkan diri kapan saja dari halaman Profil.</li>
           </ul>
         </section>
         <section className="kartu bagian-kartu">
@@ -60,7 +58,7 @@ export default function KetentuanPenggunaan() {
         <section className="kartu bagian-kartu">
           <h2>6. Data pribadi</h2>
           <p>
-            Penggunaan data pribadi dijelaskan dalam <Link href="/kebijakan-privasi/">Kebijakan Privasi</Link>.
+            Penggunaan data pribadi dijelaskan di <Link href="/privasi/">halaman Privasi</Link>.
           </p>
         </section>
       </div>

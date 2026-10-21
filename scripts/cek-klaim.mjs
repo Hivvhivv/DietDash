@@ -36,15 +36,17 @@ function periksaTeks(teks, sumber) {
   });
 }
 
-const folderModul = join(akar, 'src', 'content', 'modul');
-for (const f of readdirSync(folderModul).filter((f) => f.endsWith('.md'))) {
-  const jalur = join(folderModul, f);
+// Naskah benih konten (scripts/benih/naskah-v2). Konten yang sudah diimpor dikelola di panel admin,
+// dan panel menjalankan pemeriksaan klaim yang sama saat konten ditandai siap ditinjau.
+const folderNaskah = join(akar, 'scripts', 'benih', 'naskah-v2');
+for (const f of readdirSync(folderNaskah).filter((f) => f.endsWith('.md'))) {
+  const jalur = join(folderNaskah, f);
   periksaTeks(readFileSync(jalur, 'utf8'), relative(akar, jalur));
 }
 
-for (const folder of ['app', 'components']) {
+for (const folder of ['app', 'components', 'data']) {
   const dasar = join(akar, 'src', folder);
-  for (const f of readdirSync(dasar, { recursive: true }).filter((f) => f.endsWith('.tsx'))) {
+  for (const f of readdirSync(dasar, { recursive: true }).filter((f) => /\.tsx?$/.test(f))) {
     const jalur = join(dasar, f);
     periksaTeks(readFileSync(jalur, 'utf8'), relative(akar, jalur));
   }
@@ -52,9 +54,9 @@ for (const folder of ['app', 'components']) {
 
 // Pada kuis, pilihan jawaban yang salah memang sengaja berisi klaim keliru,
 // jadi yang diperiksa hanya pertanyaan dan umpan balik.
-const { daftarSoal } = await import('../src/data/kuis.ts');
+const { daftarSoal } = await import('./benih/kuis-v1.ts');
 for (const s of daftarSoal) {
-  periksaTeks(`${s.pertanyaan}\n${s.umpan_balik}`, `src/data/kuis.ts [${s.id}]`);
+  periksaTeks(`${s.pertanyaan}\n${s.umpan_balik}`, `scripts/benih/kuis-v1.ts [${s.id}]`);
 }
 
 if (todo.length) {

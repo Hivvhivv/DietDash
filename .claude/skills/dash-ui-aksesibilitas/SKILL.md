@@ -1,85 +1,76 @@
 ---
 name: dash-ui-aksesibilitas
-description: Membangun atau mengubah halaman, komponen, gaya, dan tata letak DASH Sehat (Beranda, Daftar Modul, Detail Materi, Kuis, Tentang, Sumber). Gunakan untuk pekerjaan UI/front-end agar sesuai standar visual, mobile-first, dan aksesibilitas di PRD.
+description: Membangun atau mengubah halaman, komponen, gaya, dan tata letak DASH Sehat (halaman publik, daftar/masuk/token, dashboard belajar, modul, materi, kuis, profil, panel admin). Gunakan untuk pekerjaan UI/front-end agar sesuai standar visual, mobile-first, dan aksesibilitas PRD 14–15.
 ---
 
 # UI dan Aksesibilitas DASH Sehat
 
-Rujukan lengkap: `docs/PRD.md` bagian 5, 7, 8, 10, dan 11.
+Rujukan lengkap: `docs/PRD.md` bagian 6, 8, 9, 14, dan 15.
 
 ## Token desain
 
-Token ada di `src/styles/global.css` (Next.js App Router; komponen di `src/components/`, halaman di `src/app/`). Pakai komponen Server secara default; tambahkan `'use client'` hanya untuk bagian interaktif. Gunakan `next/link` untuk tautan internal. Nilai awalnya:
+Token ada di `src/styles/global.css` (Next.js App Router; komponen di `src/components/`, halaman di `src/app/`). Pakai Server Component secara default; `'use client'` hanya untuk bagian interaktif.
 
 ```css
 :root {
-  --warna-utama: #2E7D5B;        /* hijau lembut, untuk tombol & aksen */
-  --warna-utama-muda: #E6F4EC;   /* latar kotak Poin Penting / kartu */
-  --warna-latar: #FAFCFA;
-  --warna-teks: #1F2A24;         /* kontras tinggi terhadap latar */
-  --warna-teks-sekunder: #4A5A51;
-  --warna-garis: #D5E3DA;
-  --warna-benar: #1B7F3B;
-  --warna-salah: #B3261E;
-  --ukuran-teks: 1.125rem;       /* 18px; minimum 16px */
+  --warna-utama: #2e7d5b;      /* hijau lembut */
+  --warna-utama-muda: #e6f4ec;
+  --warna-latar: #fafcfa;
+  --warna-teks: #1f2a24;
+  --warna-benar: #1b7f3b;
+  --warna-salah: #b3261e;
+  --ukuran-teks: 1.125rem;     /* 18px; minimum 16px */
   --tinggi-baris: 1.6;
-  --radius: 12px;
-  --sentuh-min: 44px;
+  --sentuh-min: 48px;          /* PRD 14: target sentuh 48×48 */
 }
 ```
 
-Nilai warna boleh disesuaikan, tetapi setiap pasangan teks/latar harus lolos kontras WCAG AA (≥4.5:1 teks biasa, ≥3:1 teks besar & komponen UI).
+Setiap pasangan teks/latar harus lolos kontras ≥4,5:1 (≥3:1 untuk teks besar & komponen UI).
 
 ## Aturan tata letak
 
-- **Mobile-first**: tulis gaya untuk lebar 360px dulu, lalu `min-width` breakpoint untuk tablet/desktop.
-- Lebar baca maksimum ±65–70 karakter (`max-width: 40rem`) untuk teks materi.
-- Tidak boleh ada scroll horizontal di 320px. Gambar `max-width: 100%; height: auto`.
-- Navigasi sederhana: maksimal 4–5 tautan utama (Beranda, Materi, Kuis, Tentang). Di ponsel boleh menu ringkas, tapi tetap bisa diakses keyboard.
-- Tombol minimal 44×44px, jarak antar tombol cukup agar tidak salah tekan.
+- Mobile-first; diuji mulai **360px**. Tidak ada scroll horizontal di sisi responden; tabel lebar dibungkus `.tabel-gulir`.
+- Lebar baca ±40rem untuk teks materi (`.wadah-baca`).
+- Satu layar, satu tugas utama. Tombol aksi utama memakai kata kerja jelas: "Mulai Materi", "Kerjakan Kuis", "Periksa Jawaban", "Lanjutkan Belajar".
 - Tanpa animasi berat; hormati `prefers-reduced-motion`.
+- Panel admin boleh lebih padat, dirancang untuk komputer tetapi tetap terbaca di tablet.
 
-## Pola desain yang sudah dipakai (ikuti untuk halaman baru)
+## Pola yang sudah dipakai
 
-- **Font:** Plus Jakarta Sans (teks), Caveat (hanya kutipan/catatan bergaya tulisan tangan). Keduanya lewat `next/font` di `src/app/layout.tsx`.
-- **Kepala halaman:** setiap halaman publik selain beranda memakai `<KepalaHalaman>` (pita hijau muda, lencana, satu-satunya `<h1>`, ringkasan, ilustrasi). Jangan menulis `<h1>` sendiri.
-- **Ilustrasi:** gambar PNG di `public/gambar/` (peta di `src/data/gambar.ts`), ditampilkan pada ukuran aslinya (140×110) agar tidak buram. Ilustrasi dekoratif `alt=""`.
-- **Kotak:** `.kotak` (hijau muda), `.kotak-peringatan` (kuning), judul kotak dengan ikon dalam lingkaran `.kotak-ikon`. Kartu putih `.kartu` dengan sudut 16px.
-- **Tombol:** `.tombol` (utama), `.tombol-sekunder` (garis), `.tombol-lembut` (hijau muda, untuk kartu), `.tombol-besar` (aksi utama halaman).
-- **Klaim manfaat** memakai "membantu"/"mendukung", bukan janji hasil.
+- **Alur masuk:** `/` langsung mengalihkan ke `/masuk/` (tanpa splash). Masuk, Daftar, Lupa Token ada di grup `(akun)` dengan `<HalamanAkun ilustrasi judul ringkasan sorotan kutipan>` (kartu dua kolom: panel hijau berisi merek, sorotan, ilustrasi SVG, kutipan tulisan tangan; panel putih berisi judul dan formulir; kolom berikon lewat prop `ikon`/`ujung` pada `<Bidang>`; kartu "Simpan Kode Akses" hanya nama + kode akses) (ilustrasi SVG dari `IlustrasiAkun`, judul tebal, tombol `.tombol-besar` selebar kolom; dua kolom mulai 56rem). Halaman masuk admin (`/admin/masuk/`, verifikasi, atur 2FA, undangan) memakai `KerangkaAkun` + `HalamanAkun ilustrasi="admin"`. Pengalih `<PilihMasuk aktif="responden|admin">` ada di kedua halaman masuk. Halaman tanpa login hanya Masuk, Daftar, Lupa Token, Privasi, Ketentuan; jangan menaut dari sana ke halaman yang wajib masuk.
+- **Area responden & admin:** tata letak panel (menu samping `panel-sisi` + bilah atas `panel-atas` + isi `panel-isi`). Responden: `KerangkaResponden` + `MenuResponden` dengan **navbar atas** (`.navbar`, menu sebaris mulai 80rem, di bawahnya tombol Menu; di ponsel sempit tombol hanya ikon dan slogan disembunyikan); admin: layout `(panel)` + `MenuAdmin` dengan menu samping. Isi halaman memakai `.dasbor-kepala`, `.kartu-stat` (kartu angka dengan `.ubin-ikon`), `.kartu-panel`, `.kartu-lanjut`. Grafik garis: `GrafikGaris` (tooltip `<title>` + tabel pembaca layar di dalam `div.sr-only`, jangan beri `sr-only` langsung pada `<table>` karena bisa melebarkan halaman).
+- **Kerangka:** `KerangkaPublik` (kepala + menu + kaki dengan batasan edukasi dan label versi konten aktif). Prop `dalam` dipakai layout `(belajar)`: menu lengkap (Belajar, Pengenalan, Tentang, Sumber, Bantuan, Profil) dan kaki lengkap; tanpa `dalam`, tamu hanya melihat tombol Masuk/Daftar dan tautan Privasi, Ketentuan, Lupa Token. Panel admin memakai layout `src/app/admin/(panel)/layout.tsx`.
+- **Kepala halaman:** `<KepalaHalaman>` berisi satu-satunya `<h1>`, remah, lencana, ringkasan. Jangan menulis `<h1>` sendiri di halaman publik/belajar.
+- **Formulir:** `<Bidang>` (label, petunjuk, galat di dekat kolom via `aria-describedby`) dan `<Pesan>` (galat umum `role="alert"`, sukses `role="status"`), kelas `.form-admin`. Server Action dengan `useActionState`; formulir harus tetap berfungsi tanpa JavaScript bila memungkinkan.
+- **Status materi:** `<LencanaStatusMateri>` — 🔒 Terkunci, ○ Tersedia, ◐ Sedang dipelajari, ✓ Selesai (ikon + teks, warna hanya penguat). Status versi konten: `<LencanaVersi>`.
+- **Kotak:** `.kotak` (hijau muda), `.kotak-peringatan` (kuning), `.kotak-contoh`, `.kotak-poin`, `.kotak-info`. Kartu `.kartu`.
+- **Tombol:** `.tombol`, `.tombol-sekunder`, `.tombol-lembut`, `.tombol-besar`, `.tombol-bahaya`, `.tombol-kecil` (tetap 48px tinggi).
+- **Token:** `.token-besar` (monospace besar) dengan `aria-label` per karakter; `.input-token` untuk kolom token.
+- **Grafik admin:** batang horizontal satu seri (`.grafik-batang`), label & nilai selalu tertulis.
 
-## Komponen per halaman
+## Halaman responden (PRD 9)
 
-**Beranda**: logo + nama "DASH Sehat"; judul "Mulai Kenali Diet DASH untuk Tekanan Darah yang Lebih Terkontrol"; deskripsi singkat; tombol utama "Mulai Belajar" (ke Daftar Modul / Modul 1); tombol sekunder "Lihat Materi"; ringkasan manfaat; pratinjau modul; footer (info website, privasi, sumber). Tanpa paksaan login.
+- **Dashboard belajar:** sapaan nama, tombol besar "Lanjutkan Belajar" ke posisi terakhir (materi atau soal kuis yang belum dijawab), "X dari Y materi selesai" + batang progres, daftar modul dengan jumlah selesai, tautan Profil/Bantuan/Privasi/Keluar. Tanpa grafik kesehatan atau peringkat.
+- **Modul:** tujuan modul + kartu materi (nomor, judul, menit, status, tombol "Mulai Materi"/"Lanjutkan"/"Baca Lagi"; terkunci → "Selesaikan kuis Materi X dulu").
+- **Materi:** urutan tetap (lihat skill konten); penanda "Materi 2 dari 3"; tidak ada tombol "Materi Berikutnya" sebelum kuis selesai.
+- **Kuis:** "Soal 2 dari 4"; satu soal per layar dalam `<fieldset>`/`<legend>`; pilihan berupa label besar ≥48px; "Periksa Jawaban" aktif setelah memilih; umpan balik ✓/✗ + teks + jawaban benar + penjelasan lewat `aria-live="polite"`; ringkasan akhir dengan tombol sesuai mode.
+- **Daftar/Simpan Token:** konfirmasi "Pastikan nomor ini benar: 0812-3456-7890"; halaman token dengan Salin, Simpan sebagai Gambar, centang konfirmasi.
 
-**Daftar Modul**: 6 kartu berurutan, masing-masing judul, deskripsi satu kalimat, ilustrasi sederhana, tombol "Buka Materi". Tampilkan nomor urut agar urutan jelas.
+## Checklist aksesibilitas (WCAG 2.1 AA)
 
-**Detail Materi**: mengikuti struktur di skill `dash-konten-edukasi`. Kotak "Poin Penting" diberi ikon + label teks, bukan hanya warna latar. Navigasi bawah: "Materi Sebelumnya", "Materi Berikutnya", "Kembali ke Daftar Modul" (sembunyikan Sebelumnya di modul 1, ganti Berikutnya menjadi "Ke Kuis" di modul 5/6 sesuai alur).
-
-**Kuis**: satu soal per layar; indikator "Soal 2 dari 10"; opsi sebagai tombol radio besar (`<fieldset>` + `<legend>`); tombol "Periksa Jawaban" nonaktif sampai opsi dipilih; umpan balik muncul dengan ikon ✓/✗ **dan** teks "Benar"/"Belum tepat" plus penjelasan; umumkan umpan balik lewat `aria-live="polite"`; ringkasan hasil di akhir dengan tombol "Pelajari Kembali Materi". Nada positif, tanpa skor yang mempermalukan.
-
-**Tentang**: tujuan edukasi, identitas tim/institusi (jika disetujui), pernyataan bukan pengganti konsultasi medis, kontak penelitian, privasi.
-
-**Batasan edukasi**: tampilkan pengingat singkat "Informasi ini untuk edukasi dan tidak menggantikan saran dokter atau tenaga kesehatan" di footer semua halaman.
-
-## Checklist aksesibilitas
-
-- [ ] HTML semantik: `<header>`, `<nav>`, `<main>`, `<footer>`, satu `<h1>` per halaman, heading berurutan.
-- [ ] `lang="id"` pada `<html>`.
-- [ ] Tautan "Lewati ke konten utama" di awal halaman.
-- [ ] Semua elemen interaktif bisa dijangkau Tab dan punya fokus yang terlihat jelas (`:focus-visible`).
-- [ ] Gambar informatif punya `alt` deskriptif berbahasa Indonesia; gambar dekoratif `alt=""`.
-- [ ] Label formulir eksplisit (`<label for>`); pesan kesalahan menjelaskan cara memperbaiki dan dihubungkan via `aria-describedby`.
-- [ ] Teks bisa diperbesar sampai 200% tanpa terpotong.
-- [ ] Status penting (benar/salah, selesai/belum) tidak hanya lewat warna.
+- [ ] HTML semantik, `lang="id"`, satu `<h1>`, heading berurutan, tautan "Lewati ke konten utama".
+- [ ] Semua fungsi bisa dengan keyboard; fokus terlihat (`:focus-visible`).
+- [ ] Gambar informatif punya `alt` (wajib di panel admin); dekoratif `alt=""`.
+- [ ] Label formulir eksplisit; pesan kesalahan menjelaskan cara memperbaiki, dekat kolomnya.
+- [ ] Teks bisa diperbesar 200% tanpa terpotong.
+- [ ] Status penting tidak hanya lewat warna.
 
 ## Performa
 
-- Gambar dalam WebP/AVIF atau SVG untuk ilustrasi, ukuran disesuaikan, `loading="lazy"` di bawah lipatan, sertakan `width`/`height`.
-- Hindari font web berat; jika dipakai, maksimal 1–2 keluarga dengan `font-display: swap`.
-- Materi utama harus tetap terbaca tanpa JavaScript bila memungkinkan (render statis).
+- Gambar unggahan otomatis WebP ≤1200px (sharp); ilustrasi bawaan PNG kecil dengan `width`/`height`.
+- Halaman materi tampil <3 detik di 4G; jawaban kuis tersimpan <1 detik dengan antrean offline di perangkat.
 - Tidak ada skrip pelacakan pihak ketiga.
 
 ## Verifikasi sebelum selesai
 
-Cek di lebar 320px, 375px, 768px, dan 1280px; navigasi dengan keyboard saja; jalankan Lighthouse/axe bila tersedia dan perbaiki pelanggaran aksesibilitas.
+Cek di 360px, 768px, dan 1280px; navigasi keyboard saja. Catatan: screenshot Chrome headless dengan `--window-size` di bawah ±500px memotong sisi kanan (artefak), jadi jangan menyimpulkan ada scroll horizontal dari itu saja; pakai emulasi perangkat bila perlu.

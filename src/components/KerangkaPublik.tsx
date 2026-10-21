@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import Logo from './Logo';
 import MenuUtama from './MenuUtama';
-import { NAMA_SITUS, SLOGAN, BATASAN_EDUKASI, VERSI_KONTEN, STATUS_KONTEN } from '@/data/situs';
+import { NAMA_SITUS, SLOGAN, BATASAN_EDUKASI } from '@/data/situs';
+import { labelVersiAktif } from '@/lib/konten';
 
 function Merek() {
   return (
@@ -15,8 +16,24 @@ function Merek() {
   );
 }
 
-// Kepala, isi utama, dan kaki halaman untuk seluruh halaman publik.
-export default function KerangkaPublik({ children }: { children: React.ReactNode }) {
+// Tautan kaki halaman. Halaman info (Tentang, Sumber, Bantuan) hanya untuk responden yang sudah masuk;
+// Privasi dan Ketentuan selalu publik karena dirujuk saat mendaftar.
+const tautanDalam = [
+  { href: '/tentang/', label: 'Tentang' },
+  { href: '/privasi/', label: 'Privasi' },
+  { href: '/ketentuan-penggunaan/', label: 'Ketentuan Penggunaan' },
+  { href: '/tentang/#batasan', label: 'Batasan Edukasi' },
+  { href: '/sumber/', label: 'Sumber Materi' },
+  { href: '/tentang/#kontak', label: 'Kontak' },
+];
+const tautanPublik = [
+  { href: '/privasi/', label: 'Privasi' },
+  { href: '/ketentuan-penggunaan/', label: 'Ketentuan Penggunaan' },
+  { href: '/lupa-token/', label: 'Lupa Kode Akses' },
+];
+
+// Kepala, isi utama, dan kaki halaman. `dalam` = area responden yang sudah masuk.
+export default async function KerangkaPublik({ children, dalam = false }: { children: React.ReactNode; dalam?: boolean }) {
   return (
     <>
       <a className="lewati-konten" href="#konten-utama">
@@ -26,7 +43,7 @@ export default function KerangkaPublik({ children }: { children: React.ReactNode
       <header className="kepala">
         <div className="wadah kepala-isi">
           <Merek />
-          <MenuUtama />
+          <MenuUtama dalam={dalam} />
         </div>
       </header>
 
@@ -39,27 +56,11 @@ export default function KerangkaPublik({ children }: { children: React.ReactNode
           <Merek />
           <nav aria-label="Tautan kaki halaman">
             <ul className="kaki-tautan">
-              <li>
-                <Link href="/tentang/">Tentang</Link>
-              </li>
-              <li>
-                <Link href="/kebijakan-privasi/">Kebijakan Privasi</Link>
-              </li>
-              <li>
-                <Link href="/ketentuan-penggunaan/">Ketentuan Penggunaan</Link>
-              </li>
-              <li>
-                <Link href="/tentang/#batasan">Batasan Edukasi</Link>
-              </li>
-              <li>
-                <Link href="/rangkuman/">Rangkuman Materi</Link>
-              </li>
-              <li>
-                <Link href="/sumber/">Sumber Materi</Link>
-              </li>
-              <li>
-                <Link href="/tentang/#kontak">Kontak</Link>
-              </li>
+              {(dalam ? tautanDalam : tautanPublik).map((t) => (
+                <li key={t.href}>
+                  <Link href={t.href}>{t.label}</Link>
+                </li>
+              ))}
             </ul>
           </nav>
           <div className="kaki-hak">
@@ -71,9 +72,7 @@ export default function KerangkaPublik({ children }: { children: React.ReactNode
         </div>
         <div className="wadah">
           <p className="kaki-versi">
-            <span>
-              Versi konten {VERSI_KONTEN} ({STATUS_KONTEN})
-            </span>
+            <span>{await labelVersiAktif()}</span>
             <a href="/admin/masuk/" rel="nofollow">
               Masuk admin
             </a>

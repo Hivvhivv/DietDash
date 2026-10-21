@@ -1,12 +1,13 @@
-// Membuat akun admin baru (tidak ada pendaftaran admin lewat website).
+// Membuat akun SUPER ADMIN pertama (tidak ada pendaftaran admin lewat website).
+// Admin berikutnya diundang dari panel (/admin/kelola-admin/).
 // Jalankan di terminal: npm run buat-admin
-// Kata sandi diketik tersembunyi dan hanya disimpan dalam bentuk hash argon2id.
+// Kata sandi diketik tersembunyi dan hanya disimpan sebagai hash Argon2id.
+// Autentikasi dua faktor (TOTP) diatur saat masuk pertama kali.
 import { stdin, stdout } from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { hash } from '@node-rs/argon2';
 import { MongoClient, ObjectId } from 'mongodb';
 import { KOLEKSI, pastikanIndeks } from '../src/lib/indeks.ts';
-import { PERAN_ADMIN } from '../src/lib/skema.ts';
 
 const { MONGODB_URI, MONGODB_DB } = process.env;
 if (!MONGODB_URI || !MONGODB_DB) {
@@ -39,39 +40,51 @@ function tanyaTersembunyi(pertanyaan) {
   });
 }
 
-function periksaSandi(sandi, username) {
-  if (sandi.length < 12) return 'Kata sandi minimal 12 karakter.';
-  if (/^\d+$/.test(sandi)) return 'Kata sandi tidak boleh hanya angka (hindari tanggal lahir atau nomor telepon).';
-  if (/\d{1,2}[-/.]?\d{1,2}[-/.]?\d{2,4}/.test(sandi) && sandi.replace(/\D/g, '').length >= 6) {
-    return 'Kata sandi terlihat seperti tanggal. Gunakan kalimat sandi yang lain.';
-  }
-  if (/(\+?62|0)8\d{7,}/.test(sandi)) return 'Kata sandi tidak boleh memuat nomor telepon.';
-  if (sandi.toLowerCase().includes(username)) return 'Kata sandi tidak boleh memuat nama pengguna.';
+// Sama dengan periksaSandiAdmin() di src/lib/admin-auth.ts.
+function periksaSandi(sandi, email) {
+  if (sandi.length < 12) return 'Kata sandi admin minimal 12 karakter.';
+  if (sandi.length > 200) return 'Kata sandi terlalu panjang.';
+  if (/^\d+$/.test(sandi)) return 'Kata sandi jangan hanya angka.';
+  const lokal = email.split('@')[0] ?? '';
+  if (lokal.length >= 4 && sandi.toLowerCase().includes(lokal)) return 'Kata sandi jangan memuat alamat email.';
   return null;
 }
 
-const rl = createInterface({ input: stdin, output: stdout });
-const username = (await rl.question('Nama pengguna admin (huruf kecil/angka/titik/garis bawah): ')).trim().toLowerCase();
-if (!/^[a-z0-9._]{3,32}$/.test(username)) {
-  console.error('✗ Nama pengguna harus 3–32 karakter: huruf kecil, angka, titik, atau garis bawah.');
+// Mode otomatis khusus pengujian di database uji (tanpa prompt).
+const otomatis = process.env.BUAT_ADMIN_EMAIL && process.env.BUAT_ADMIN_SANDI;
+if (otomatis && !/_uji$/.test(MONGODB_DB)) {
+  console.error('✗ Mode otomatis hanya untuk database uji (nama berakhiran _uji).');
   process.exit(1);
 }
-const peran = (await rl.question(`Peran (${PERAN_ADMIN.join(' / ')}): `)).trim().toLowerCase();
-if (!PERAN_ADMIN.includes(peran)) {
-  console.error(`✗ Peran harus salah satu dari: ${PERAN_ADMIN.join(', ')}`);
-  process.exit(1);
-}
-rl.close();
 
-const sandi = await tanyaTersembunyi('Kata sandi (min. 12 karakter, tidak tampil): ');
-const masalah = periksaSandi(sandi, username);
+let email, nama, sandi;
+if (otomatis) {
+  email = process.env.BUAT_ADMIN_EMAIL.trim().toLowerCase();
+  nama = process.env.BUAT_ADMIN_NAMA ?? 'Admin Uji';
+  sandi = process.env.BUAT_ADMIN_SANDI;
+} else {
+  const rl = createInterface({ input: stdin, output: stdout });
+  email = (await rl.question('Email super admin: ')).trim().toLowerCase();
+  nama = (await rl.question('Nama: ')).trim();
+  rl.close();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    console.error('✗ Format email belum benar.');
+    process.exit(1);
+  }
+  if (nama.length < 2) {
+    console.error('✗ Isi nama.');
+    process.exit(1);
+  }
+  sandi = await tanyaTersembunyi('Kata sandi (min. 12 karakter, tidak tampil): ');
+  const ulang = await tanyaTersembunyi('Ulangi kata sandi: ');
+  if (ulang !== sandi) {
+    console.error('✗ Kata sandi tidak sama.');
+    process.exit(1);
+  }
+}
+const masalah = periksaSandi(sandi, email);
 if (masalah) {
   console.error('✗ ' + masalah);
-  process.exit(1);
-}
-const ulang = await tanyaTersembunyi('Ulangi kata sandi: ');
-if (ulang !== sandi) {
-  console.error('✗ Kata sandi tidak sama.');
   process.exit(1);
 }
 
@@ -80,28 +93,30 @@ try {
   await klien.connect();
   const db = klien.db(MONGODB_DB);
   await pastikanIndeks(db);
-  const admin = db.collection(KOLEKSI.admin);
-  if (await admin.findOne({ username })) {
-    console.error(`✗ Admin "${username}" sudah ada.`);
+  const admins = db.collection(KOLEKSI.admin);
+  if (await admins.findOne({ email })) {
+    console.error('✗ Email ini sudah terdaftar sebagai admin.');
     process.exitCode = 1;
   } else {
-    const sekarang = new Date();
-    await admin.insertOne({
+    await admins.insertOne({
       _id: new ObjectId(),
-      username,
+      email,
+      nama,
       password_hash: await hash(sandi),
-      peran,
+      totp_rahasia: null,
+      totp_aktif: false,
+      peran: 'super_admin',
       aktif: true,
-      dibuat_pada: sekarang,
+      dibuat_pada: new Date(),
     });
     await db.collection(KOLEKSI.logAudit).insertOne({
       _id: new ObjectId(),
-      waktu: sekarang,
-      admin: 'skrip-buat-admin',
-      aksi: 'buat_admin',
-      keterangan: `Admin "${username}" (${peran}) dibuat.`,
+      waktu: new Date(),
+      admin: 'skrip buat-admin',
+      aksi: 'buat_super_admin',
+      objek: email,
     });
-    console.log(`✓ Admin "${username}" dengan peran ${peran} berhasil dibuat.`);
+    console.log(`✓ Super admin ${email} dibuat. Masuk di /admin/masuk/ lalu atur aplikasi autentikator (2FA).`);
   }
 } finally {
   await klien.close();

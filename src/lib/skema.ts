@@ -1,51 +1,49 @@
-// Skema konten modul. Dipakai bersama oleh pembaca berkas Markdown, skrip impor,
-// dan formulir admin, supaya aturan validasinya selalu sama.
+// Skema validasi konten (PRD v2.0 Bagian 5 dan 10). Dipakai panel admin dan skrip benih.
 // File ini sengaja tanpa alias impor (@/...) agar bisa dipakai langsung oleh skrip Node.
 import { z } from 'zod';
 
 export const NAMA_ILUSTRASI = ['jantung', 'piring', 'porsi', 'menu', 'langkah', 'kuis'] as const;
 export type NamaIlustrasi = (typeof NAMA_ILUSTRASI)[number];
 
-export const POLA_VERSI = /^\d+\.\d+\.\d+$/;
-export const POLA_ID_MODUL = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-const teks = (label: string) => z.string().trim().min(1, `${label} wajib diisi.`);
-
-export const skemaDataModul = z.object({
-  urutan: z.number().int().min(1, 'Urutan minimal 1.').max(20, 'Urutan maksimal 20.'),
-  judul: teks('Judul'),
-  deskripsi_kartu: teks('Deskripsi kartu'),
-  ilustrasi: z.enum(NAMA_ILUSTRASI, 'Pilih salah satu ilustrasi.'),
-  ilustrasi_alt: teks('Teks alternatif ilustrasi'),
-  tujuan: z
+const teks = (label: string, maks = 2000) =>
+  z.string().trim().min(1, `${label} wajib diisi.`).max(maks, `${label} terlalu panjang.`);
+const daftar = (label: string, min: number, maks: number) =>
+  z
     .array(z.string().trim().min(1))
-    .min(2, 'Tulis 2–4 tujuan pembelajaran.')
-    .max(4, 'Tulis 2–4 tujuan pembelajaran.'),
-  poin_penting: z
-    .array(z.string().trim().min(1))
-    .min(3, 'Tulis 3–5 poin penting.')
-    .max(5, 'Tulis 3–5 poin penting.'),
-  rangkuman: teks('Rangkuman'),
-  sumber: z.array(z.string()).min(1, 'Pilih minimal satu sumber.'),
+    .min(min, `Tulis ${min}–${maks} ${label}.`)
+    .max(maks, `Tulis ${min}–${maks} ${label}.`);
+
+export const skemaModul = z.object({
+  judul: teks('Judul', 120),
+  deskripsi: teks('Deskripsi', 240),
+  tujuan: daftar('tujuan modul', 1, 5),
 });
 
-export type DataModul = z.infer<typeof skemaDataModul>;
+export const skemaMateri = z.object({
+  judul: teks('Judul', 160),
+  tujuan: daftar('tujuan pembelajaran', 1, 5),
+  isi: teks('Isi materi', 60_000),
+  poin_penting: daftar('poin penting', 1, 6),
+  rangkuman: teks('Rangkuman', 3000),
+  estimasi_menit: z.number().int().min(1).max(120).nullable(),
+  sumber: z.array(z.string().trim().min(1)).max(20),
+});
 
-export const skemaVersi = z
-  .string()
-  .trim()
-  .regex(POLA_VERSI, 'Format versi harus angka.angka.angka, misalnya 0.2.0.');
+export const skemaKuis = z.object({
+  judul: teks('Judul kuis', 160),
+  petunjuk: teks('Petunjuk', 1000),
+  mode: z.enum(['A', 'B']),
+  batas_lulus: z.number().int().min(1).max(100),
+});
 
-// Frontmatter berkas Markdown = data modul + nomor versi.
-export const skemaFrontmatter = skemaDataModul.extend({ versi: skemaVersi });
+export const skemaSoal = z.object({
+  teks: teks('Teks pertanyaan', 1000),
+  penjelasan: teks('Penjelasan jawaban', 1500),
+  pilihan: z
+    .array(z.object({ teks: teks('Pilihan jawaban', 400), benar: z.boolean() }))
+    .min(3, 'Isi 3–4 pilihan jawaban.')
+    .max(4, 'Isi 3–4 pilihan jawaban.')
+    .refine((p) => p.filter((x) => x.benar).length === 1, 'Tandai tepat satu jawaban yang benar.'),
+});
 
-export const STATUS_VERSI = ['draf', 'disetujui', 'diarsipkan'] as const;
-export type StatusVersi = (typeof STATUS_VERSI)[number];
-
-export const PERAN_ADMIN = ['peneliti', 'editor'] as const;
-export type PeranAdmin = (typeof PERAN_ADMIN)[number];
-
-export function pisahFrontmatter(mentah: string): { yaml: string; isi: string } | null {
-  const cocok = mentah.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  return cocok ? { yaml: cocok[1], isi: cocok[2] } : null;
-}
+export const PERAN_ADMIN = ['admin', 'super_admin'] as const;

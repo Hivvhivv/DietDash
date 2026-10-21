@@ -1,86 +1,70 @@
 ---
 name: dash-privasi-penelitian
-description: Panduan wajib saat menyentuh akun, login, penyimpanan progres, pencatatan waktu, analitik, data peserta, dashboard pengguna/admin, atau pengelolaan versi konten DASH Sehat. Gunakan sebelum menambah fitur yang menyimpan atau mengirim data apa pun.
+description: Panduan wajib saat menyentuh akun responden (nomor HP + token), sesi, admin & 2FA, progres, kuis, pencatatan waktu baca, ekspor, log aktivitas, pengaturan penelitian, atau versi konten DASH Sehat. Gunakan sebelum menambah fitur yang menyimpan, menampilkan, atau mengirim data apa pun.
 ---
 
 # Privasi, Keamanan, dan Kebutuhan Penelitian
 
-Rujukan lengkap: `docs/PRD.md` bagian 4, 6, 8, 11 (Keamanan), 12, dan 13.
+Rujukan lengkap: `docs/PRD.md` bagian 3, 7, 10.5–10.7, 11, 12, 15 (Keamanan), 16, dan 17.
 
-## Langkah 0: pastikan fitur memang diminta
+## Data yang boleh disimpan (PRD 12 & 16)
 
-Akun, progres, riwayat, pencatatan waktu, dan dashboard admin adalah fitur **opsional**. Sebelum membangunnya, pastikan peneliti meminta secara eksplisit dan sudah menetapkan:
+| Data | Koleksi | Catatan |
+|---|---|---|
+| Nama, nomor HP (+62…), hash token, waktu persetujuan/kelayakan, aktif, mundur | `respondents` | Identitas; terpisah dari data belajar |
+| ID peserta (DS-xxxx), status sampel, tanda pretest | `participants` | Dipakai untuk analisis & ekspor |
+| Riwayat akun (token dibuat/diganti/direset, nomor/nama diganti, nonaktif, mundur) | `token_events` | Siapa & alasan |
+| Progres per materi (dibuka, selesai, detik baca, versi, buka manual) | `material_progress` | Kunci materi stabil lintas versi |
+| Percobaan kuis + jawaban per soal | `quiz_attempts` | Percobaan pertama ditandai; jawaban tidak dapat diubah |
+| Admin (email, hash sandi, rahasia TOTP, peran), undangan, sesi, percobaan masuk | `admins`, `admin_invites`, `sessions`, `percobaan_login` | Undangan & sesi disimpan sebagai hash |
+| Log aktivitas admin | `log_audit` | Hanya tambah |
 
-- tujuan pengumpulan data,
-- data apa saja yang dikumpulkan,
-- lama penyimpanan,
-- siapa yang boleh mengakses,
-- prosedur penghapusan.
+**Jangan pernah** meminta atau menyimpan: email responden, NIK, alamat, tanggal lahir, nomor rekam medis, angka tekanan darah, obat, atau data kesehatan lain. Menambah kolom data baru memerlukan permintaan eksplisit peneliti dan pembaruan halaman Privasi.
 
-Jika salah satu belum jelas, tanyakan dulu. Jangan menganggap data di daftar PRD bagian 12 otomatis wajib dikumpulkan.
+Terdaftarnya seseorang sudah mengungkap bahwa ia memiliki hipertensi → daftar nomor HP diperlakukan sebagai data sensitif.
 
-## Keputusan yang sudah diambil (2026-10-20)
+## Akun responden (PRD 7)
 
-- Peneliti memilih **akun peserta dengan email** (daftar mandiri) agar progres bisa dipantau. Pendaftaran wajib mencentang persetujuan Kebijakan Privasi; versi kebijakan yang disetujui disimpan (`VERSI_KEBIJAKAN`).
-- Lupa kata sandi ditangani lewat tautan atur ulang buatan peneliti (24 jam, sekali pakai) sampai ada layanan pengirim email.
-- Peserta dapat menghapus akunnya sendiri; peneliti dapat menghapus satu atau semua data peserta. Semua tindakan admin terhadap data peserta tercatat di log audit.
-- **Belum diputuskan:** lama penyimpanan data dan lokasi server (TODO di `/kebijakan-privasi/`). Jangan mengarang nilainya.
+- Semua fitur (materi, kuis, Pengenalan, Tentang, Sumber, Bantuan) hanya setelah masuk. Privasi dan Ketentuan Penggunaan wajib tetap publik agar calon responden bisa membacanya sebelum menyetujui.
 
-## Pilihan arsitektur
+- Daftar mandiri: nama (2–50), nomor HP (08…/628…/+628… → disimpan `+628…`, unik), centang kelayakan (bila diaktifkan di Pengaturan) dan persetujuan. Pendaftaran bisa ditutup admin.
+- **Kode akses 6 angka** (di kode: `token`), tampil `482 917` **sekali** bersama nama, disimpan sebagai hash Argon2id. Pola lemah (111111, 123456, 121212, 123123) tidak pernah dibuat (`kodeLemah`). Masuk mengabaikan spasi dan tanda hubung. Di teks untuk responden sebut "kode akses".
+- **ID peserta tidak ditampilkan kepada responden** (keputusan peneliti 2026-10-21); hanya untuk admin, ekspor, dan analisis.
+- Responden tidak bisa belajar sebelum mencentang "Saya sudah menyimpan token saya" (`token_disimpan_pada`).
+- Sesi: token sesi acak (hash SHA-256 di DB), cookie `HttpOnly` + `SameSite=Lax` (+ `Secure` di produksi). "Ingat saya" = 30 hari sejak terakhir aktif (sufiks `.i` diperpanjang oleh `src/proxy.ts`); tanpa itu cookie sesi peramban.
+- Batas: 5 gagal / 15 menit per nomor, plus batas per IP; daftar dibatasi per IP.
+- Reset token oleh admin / ganti token oleh responden → token lama tidak berlaku dan semua sesi dihapus; progres tetap. Tercatat di riwayat akun dan log.
+- Pesan kesalahan memakai teks PRD 7.7 (`PESAN` di `src/lib/responden.ts`).
 
-**Opsi 1 — Tanpa akun (default).** Tidak ada backend data peserta. Progres boleh disimpan di `localStorage` perangkat saja (tidak dikirim ke server), dibungkus `try/catch`, dan website tetap berfungsi bila penyimpanan kosong/diblokir. Beri tahu pengguna bahwa progres hanya tersimpan di perangkat ini.
+## Admin (PRD 7.8)
 
-**Opsi 2 — Akun sederhana dengan kode peserta.**
-- Login memakai kode peserta dari peneliti + kata sandi/PIN yang dibuat peserta, atau tautan masuk sekali pakai.
-- Formulir singkat, instruksi jelas, pesan kesalahan yang menjelaskan cara memperbaiki.
-- Wajib ada tombol "Keluar" dan mekanisme pemulihan akses yang aman (mis. reset oleh peneliti setelah verifikasi).
-- Tabel akun hanya berisi kode peserta, bukan nama/identitas. Kunci pemetaan kode ↔ identitas disimpan peneliti di luar sistem website.
+- Email + kata sandi ≥12 (Argon2id) + TOTP wajib. Sesi tahap "sandi" (10 menit) → setelah kode benar, sesi baru tahap "penuh" (idle 30 menit).
+- Tidak ada pendaftaran admin: super admin pertama via `npm run buat-admin`; lainnya via undangan 48 jam (hash token, sekali pakai).
+- `wajibAdmin()` di setiap halaman/aksi/route admin; tanpa sesi → 404. `wajibAdmin('super_admin')` untuk Versi, Admin, Log → 403 bagi admin biasa.
 
-## Larangan data
+## Aturan tampilan & ekspor
 
-Jangan pernah meminta atau menyimpan:
-- NIK, alamat lengkap, nomor rekam medis, nomor telepon, tanggal lahir lengkap;
-- nilai tekanan darah, obat yang diminum, atau data kesehatan lain yang tidak disetujui protokol.
+- Nomor HP selalu tersamarkan (`0812****7890`). Nomor lengkap hanya lewat tombol "Lihat nomor lengkap" yang tercatat di log.
+- Nomor HP, nama, token, dan data pribadi tidak boleh masuk URL, judul halaman, atau log aplikasi. Pencarian nama/nomor di daftar responden dilakukan di peramban (nomor dicocokkan via hash), saringan di URL hanya berisi status/tanggal.
+- Ekspor (CSV/Excel) memakai ID peserta saja, tanpa nama dan nomor HP; bawaan hanya `responden_penelitian`; nama berkas memuat label versi & tanggal; setiap ekspor tercatat di log.
+- Tidak ada analitik, pixel, atau pelacak pihak ketiga. Lama baca dicatat di server sendiri (`/api/baca/`) hanya saat halaman aktif dan berhenti setelah 5 menit tanpa interaksi.
 
-Jangan pernah menyarankan tanggal lahir, nomor rekam medis, atau nomor telepon sebagai kata sandi; tolak pola tersebut saat validasi bila memungkinkan.
+## Konsistensi intervensi (PRD 17)
 
-## Keamanan teknis
+- Semua responden menerima versi konten, urutan materi, dan mode kuis yang sama. Mode A/B diterapkan ke semua kuis sekaligus; validasi versi menolak mode campuran.
+- Versi dikunci sebelum responden pertama mendaftar. Perbaikan setelah dikunci = versi perbaikan (super admin, alasan wajib). Mengganti versi terkunci dengan versi biasa wajib beralasan (penyimpangan protokol).
+- Buka kunci manual wajib alasan dan tercatat. Pembukaan manual, perbaikan konten, dan ekspor adalah bahan laporan penyimpangan protokol.
+- Progres = keterlaksanaan intervensi (fidelity). Jangan menampilkannya sebagai efektivitas atau keberhasilan klinis.
+- Pretest/posttest tidak ada di website. Gerbang pretest (opsional) hanya berupa tanda dari admin.
 
-- HTTPS wajib di lingkungan publik; set HSTS.
-- Kata sandi di-hash dengan algoritma modern (argon2id atau bcrypt dengan cost memadai). Jangan menyimpan teks asli atau hash cepat (MD5/SHA1).
-- Sesi: cookie `HttpOnly`, `Secure`, `SameSite=Lax`; kedaluwarsa wajar; regenerasi ID sesi setelah login.
-- Batasi percobaan login (rate limiting).
-- Kode peserta dan data pribadi tidak boleh muncul di URL, query string, judul halaman, atau log yang bisa diakses publik.
-- Akses admin dibatasi per peran; admin tidak bisa mengubah materi yang sudah dibekukan atau melihat data di luar kewenangan.
-- Tidak memakai analitik/pixel pihak ketiga. Jika pencatatan akses diperlukan, simpan minimal (kode peserta, modul, waktu) di server sendiri.
-- Rahasia (kunci API, kredensial DB) di variabel lingkungan, tidak di-commit.
+## Pengaturan penelitian (`app_settings`)
 
-## Dashboard pengguna (jika akun aktif)
+Keputusan terbuka PRD 20 menjadi pengaturan: pendaftaran dibuka, pernyataan kelayakan, gerbang pretest, batas tidak aktif (bawaan 7 hari), batas intervensi (bawaan 14 hari), nomor WhatsApp peneliti, mode kuis bawaan. Ubah lewat `/admin/pengaturan/` (tercatat di log), bukan di kode.
 
-Isi hanya: sapaan singkat, tombol "Lanjutkan Belajar", daftar modul dengan status "Belum dipelajari"/"Selesai" (ikon + teks), indikator progres sederhana, tautan kuis, tautan privasi & bantuan.
+## Masih menunggu keputusan
 
-Jangan menambahkan grafik kesehatan, statistik tekanan darah, notifikasi berlebihan, gamifikasi kompetitif, atau peringkat antarpengguna. Progres **tidak boleh** dibingkai sebagai keberhasilan klinis.
+Lama penyimpanan data, penanganan data responden yang mundur, lokasi server, dan teks persetujuan final (TODO di `/privasi/`). Jangan mengarang nilainya.
 
-## Konsistensi intervensi penelitian
+## Pengujian
 
-- Semua peserta menerima konten inti dan urutan modul yang sama; jangan membuat A/B test atau personalisasi konten.
-- Versi konten tercatat (nomor versi di tiap file konten + `CHANGELOG-KONTEN.md`). Tampilkan versi website di footer atau halaman Tentang.
-- Setelah versi dibekukan, perubahan konten inti hanya dengan persetujuan peneliti.
-- Kuis latihan terpisah dari pretest/posttest. Website tidak boleh mengubah jawaban instrumen secara otomatis atau menampilkan kunci pretest sebelum posttest.
-- Jika pretest/posttest diintegrasikan, simpan di sistem penelitian yang aman dengan kode peserta, dan jangan tampilkan hasil individu ke pengguna lain.
-- Metrik seperti jumlah klik, lama kunjungan, atau persentase modul selesai bukan ukuran efektivitas intervensi; jangan menampilkannya seolah-olah demikian.
-
-## Admin pengelola konten
-
-Fitur ini sudah dibangun (MongoDB, `/admin/`). Saat mengubah atau menambahnya:
-
-- Halaman publik membaca lewat `src/lib/konten.ts` (hanya status `disetujui`); operasi admin di `src/lib/konten-admin.ts`. Jangan mengakses koleksi langsung dari halaman.
-- Koleksi `modul_versi`: `modul_id`, `versi`, `status` (`draf` | `disetujui` | `diarsipkan`), `data`, `isi`, `catatan`, `dibuat_oleh`, `dibuat_pada`, `disetujui_oleh`, `disetujui_pada`. Indeks unik parsial menjamin satu `disetujui` per modul.
-- Validasi input admin dengan skema di `src/lib/skema.ts`. Render tetap lewat `react-markdown` dengan `skipHtml`.
-- Setiap halaman admin, Server Action, dan Route Handler memanggil `wajibAdmin()` (peran `peneliti` untuk menyetujui). `src/proxy.ts` hanya pemeriksaan cepat.
-- Kata sandi admin di-hash argon2id (`@node-rs/argon2`); sesi berupa token acak yang disimpan sebagai hash SHA-256, cookie `HttpOnly` + `SameSite=Lax` (+ `Secure` di produksi), kedaluwarsa 8 jam; maksimal 5 gagal masuk per akun / 20 per IP dalam 15 menit.
-- Catat setiap tindakan lewat `catatAudit()`; jangan pernah menghapus versi yang pernah tayang atau entri log audit.
-
-## Halaman privasi
-
-Jelaskan dengan bahasa sederhana: data apa yang dikumpulkan (atau bahwa tidak ada), untuk apa, berapa lama disimpan, siapa yang mengakses, cara meminta penghapusan, dan kontak peneliti.
+Uji yang menulis data hanya di database `_uji`. Setelah selesai, bersihkan database uji dan build ulang dari database asli.

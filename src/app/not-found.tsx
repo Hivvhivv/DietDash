@@ -18,8 +18,8 @@ export default function TidakDitemukan() {
           <Link className="tombol" href="/">
             Ke Beranda
           </Link>
-          <Link className="tombol tombol-sekunder" href="/materi/">
-            Lihat Materi
+          <Link className="tombol tombol-sekunder" href="/belajar/">
+            Ke Dashboard Belajar
           </Link>
         </div>
       </KepalaHalaman>
