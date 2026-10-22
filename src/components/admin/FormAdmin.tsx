@@ -103,7 +103,8 @@ export function FormTerimaUndangan({ token, email }: { token: string; email: str
   );
 }
 
-export function FormUndangAdmin() {
+// peran diisi bila role sudah dipilih di luar formulir (halaman Tambah Pengguna).
+export function FormUndangAdmin({ peran }: { peran?: 'admin' | 'super_admin' } = {}) {
   const [status, aksi, menunggu] = useActionState(aksiUndangAdmin, undefined);
   const [salin, setSalin] = useState(false);
   return (
@@ -126,13 +127,17 @@ export function FormUndangAdmin() {
       )}
       <div className="bidang-baris">
         <Bidang id="email" label="Email calon admin" type="email" defaultValue={status?.nilai?.email} galat={status?.kolom === 'email' ? status.pesan : null} />
-        <div className="bidang">
-          <label htmlFor="peran">Peran</label>
-          <select id="peran" name="peran" defaultValue="admin">
-            <option value="admin">Admin (kelola konten & pantau responden)</option>
-            <option value="super_admin">Super admin (juga terbitkan, kunci versi, kelola admin)</option>
-          </select>
-        </div>
+        {peran ? (
+          <input type="hidden" name="peran" value={peran} />
+        ) : (
+          <div className="bidang">
+            <label htmlFor="peran">Peran</label>
+            <select id="peran" name="peran" defaultValue="admin">
+              <option value="admin">Admin (kelola konten & pantau responden)</option>
+              <option value="super_admin">Super admin (juga terbitkan, kunci versi, kelola admin)</option>
+            </select>
+          </div>
+        )}
       </div>
       <button type="submit" className="tombol" disabled={menunggu}>
         {menunggu ? 'Membuat…' : 'Buat undangan'}

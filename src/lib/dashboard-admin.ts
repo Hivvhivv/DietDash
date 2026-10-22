@@ -1,9 +1,11 @@
 // Data tambahan dashboard admin: jumlah konten, aktivitas terbaru, dan penggunaan harian.
 // Penggunaan harian dihitung dari catatan belajar yang sudah ada (tanpa pelacakan baru).
-import { koleksi, type DokLogAudit } from './db';
+import type { BarisMonitor } from '@/components/admin/TabelMonitor';
+import { koleksi, type DokAdmin, type DokLogAudit } from './db';
+import { sha256 } from './identitas';
 import { ambilStruktur, versiAktif } from './konten';
 import { versiKerja } from './konten-admin';
-import { daftarResponden } from './monitor';
+import { daftarResponden, type BarisResponden } from './monitor';
 
 const ZONA = 'Asia/Jakarta';
 const HARI_MS = 86_400_000;
@@ -68,6 +70,7 @@ const KALIMAT: Record<string, (e: DokLogAudit) => [string, JenisAktivitas]> = {
   benih_konten: (e) => [`Konten awal diimpor (${e.keterangan ?? ''})`, 'versi'],
   benih_konten_terbit_uji: (e) => [`Konten uji diimpor dan diterbitkan (${e.keterangan ?? ''})`, 'versi'],
   buat_super_admin: (e) => [`Super admin dibuat (${e.objek ?? ''})`, 'akun'],
+  tambah_responden: (e) => [`Responden ${e.objek ?? ''} ditambahkan oleh super admin`, 'pengguna'],
   reset_token: (e) => [`Kode akses baru dibuat untuk ${e.objek ?? 'responden'}`, 'pengguna'],
   buka_kunci_manual: (e) => [`Materi dibuka manual untuk ${e.objek ?? 'responden'}`, 'pengguna'],
   ubah_status_sampel: (e) => [`Status sampel ${e.objek ?? ''} diubah`, 'pengguna'],
@@ -182,4 +185,55 @@ export function waktuRelatif(d: Date, sekarang = Date.now()): string {
   if (abs < 86_400) return rtf.format(Math.round(detik / 3600), 'hour');
   if (abs < 30 * 86_400) return rtf.format(Math.round(detik / 86_400), 'day');
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: ZONA });
+}
+
+// ---------- Baris tabel pengguna (Dashboard & Manajemen Pengguna) ----------
+
+export function barisMonitorResponden(b: BarisResponden, sekarang = Date.now()): BarisMonitor {
+  return {
+    id_peserta: b.id_peserta,
+    nama: b.nama,
+    kontak: b.nomor_samar,
+    hp_hash: sha256(b.nomor_hp),
+    peran: 'responden',
+    href: `/admin/responden/${b.id_peserta}/`,
+    sampel: b.status_sampel === 'responden_penelitian',
+    status_akun: b.status_akun,
+    status_belajar: b.status_belajar,
+    persen: b.persen,
+    selesai: b.selesai,
+    total: b.total,
+    materi_berikutnya: b.materi_saat_ini,
+    terakhir_aktif: waktuRelatif(b.terakhir_aktif, sekarang),
+    waktu_aktif: b.terakhir_aktif.getTime(),
+    waktu_daftar: b.dibuat_pada.getTime(),
+    tidak_aktif: b.tidak_aktif,
+    mendekati_batas: b.mendekati_batas,
+    menit_baca: Math.round((b.ringkasan?.daftar.reduce((n, d) => n + (d.progres?.detik_baca ?? 0), 0) ?? 0) / 60),
+    pretest: b.pretest_selesai,
+  };
+}
+
+export function barisMonitorAdmin(a: Pick<DokAdmin, 'email' | 'nama' | 'peran' | 'aktif' | 'dibuat_pada'>): BarisMonitor {
+  return {
+    id_peserta: '—',
+    nama: a.nama,
+    kontak: a.email,
+    peran: a.peran,
+    href: '/admin/admins/',
+    sampel: false,
+    status_akun: a.aktif ? 'aktif' : 'nonaktif',
+    status_belajar: null,
+    persen: 0,
+    selesai: 0,
+    total: 0,
+    materi_berikutnya: '—',
+    terakhir_aktif: '—',
+    waktu_aktif: 0,
+    waktu_daftar: a.dibuat_pada.getTime(),
+    tidak_aktif: false,
+    mendekati_batas: false,
+    menit_baca: 0,
+    pretest: false,
+  };
 }

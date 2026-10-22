@@ -68,25 +68,42 @@ export async function daftar(masukan: {
   }
   await catatPercobaan([kunciIp]);
 
-  const { responden, peserta } = await koleksi();
+  const { responden } = await koleksi();
   if (await responden.findOne({ nomor_hp: nomor })) {
     return { ok: false, pesan: PESAN.nomorTerdaftar, kolom: 'nomor' };
   }
 
+  const h = await buatAkun({ nama: masukan.nama, nomor, layak: masukan.layak, tokenDisimpan: false, sampel: 'responden_penelitian' });
+  if (!h.ok) return h;
+  await catatRiwayat(h.id, 'token_dibuat', 'responden');
+  await buatSesi({ pemilik_id: h.id, jenis: 'responden', ingat: true });
+  return { ok: true, token: h.token, id_peserta: h.id_peserta, nomor_hp: nomor };
+}
+
+// Menyimpan akun responden baru + ID peserta unik. Dipakai daftar mandiri dan "Tambah Pengguna" oleh super admin.
+async function buatAkun(m: {
+  nama: string;
+  nomor: string;
+  layak: boolean;
+  tokenDisimpan: boolean;
+  sampel: DokPeserta['status_sampel'];
+}): Promise<Hasil<{ id: ObjectId; token: string; id_peserta: string }>> {
+  const { responden, peserta } = await koleksi();
+  const nomor = m.nomor;
   const token = buatToken();
   const sekarang = new Date();
   const id = new ObjectId();
   try {
     await responden.insertOne({
       _id: id,
-      nama: masukan.nama.trim(),
+      nama: m.nama.trim(),
       nomor_hp: nomor,
       token_hash: await hash(token),
-      token_disimpan_pada: null,
+      token_disimpan_pada: m.tokenDisimpan ? sekarang : null,
       nomor_terverifikasi_pada: null,
       aktif: true,
       persetujuan_pada: sekarang,
-      kelayakan_pada: masukan.layak ? sekarang : null,
+      kelayakan_pada: m.layak ? sekarang : null,
       mundur_pada: null,
       dibuat_pada: sekarang,
       terakhir_aktif: sekarang,
@@ -107,7 +124,7 @@ export async function daftar(masukan: {
         _id: new ObjectId(),
         respondent_id: id,
         id_peserta: calon,
-        status_sampel: 'responden_penelitian',
+        status_sampel: m.sampel,
         pretest_selesai_pada: null,
       });
       idPeserta = calon;
@@ -115,9 +132,27 @@ export async function daftar(masukan: {
       if (!(e instanceof MongoServerError && e.code === 11000)) throw e;
     }
   }
-  await catatRiwayat(id, 'token_dibuat', 'responden');
-  await buatSesi({ pemilik_id: id, jenis: 'responden', ingat: true });
-  return { ok: true, token, id_peserta: idPeserta, nomor_hp: nomor };
+  return { ok: true, id, token, id_peserta: idPeserta };
+}
+
+// Super admin menambahkan responden (mis. lansia yang dibantu peneliti mendaftar). Kelayakan dan persetujuan
+// dinyatakan langsung kepada peneliti; kode akses tampil sekali dan diserahkan langsung ke responden.
+export async function tambahRespondenOlehAdmin(
+  adminEmail: string,
+  masukan: { nama: string; nomor: string; sampel: DokPeserta['status_sampel']; konfirmasi: boolean },
+): Promise<Hasil<{ token: string; id_peserta: string; nomor_hp: string }>> {
+  const galatNama = periksaNama(masukan.nama);
+  if (galatNama) return { ok: false, pesan: galatNama, kolom: 'nama' };
+  const nomor = normalkanNomorHp(masukan.nomor);
+  if (!nomor) return { ok: false, pesan: PESAN.nomorTidakValid, kolom: 'nomor' };
+  if (!masukan.konfirmasi) {
+    return { ok: false, pesan: 'Centang konfirmasi bahwa calon responden memenuhi kriteria dan sudah menyetujui ikut penelitian.', kolom: 'konfirmasi' };
+  }
+  const h = await buatAkun({ nama: masukan.nama, nomor, layak: true, tokenDisimpan: true, sampel: masukan.sampel });
+  if (!h.ok) return h.kolom === 'nomor' ? { ok: false, pesan: 'Nomor ini sudah terdaftar sebagai responden. Cari di Manajemen Pengguna untuk melihat akunnya.', kolom: 'nomor' } : h;
+  await catatRiwayat(h.id, 'dibuat_admin', adminEmail);
+  await catatAudit({ admin: adminEmail, aksi: 'tambah_responden', objek: h.id_peserta, keterangan: masukan.sampel === 'bukan_sampel' ? 'Bukan sampel' : 'Responden penelitian' });
+  return { ok: true, token: h.token, id_peserta: h.id_peserta, nomor_hp: nomor };
 }
 
 // ---------- Masuk & sesi ----------

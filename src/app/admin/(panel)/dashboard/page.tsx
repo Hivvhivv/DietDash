@@ -6,7 +6,7 @@ import TabelMonitor, { type BarisMonitor } from '@/components/admin/TabelMonitor
 import Ikon from '@/components/Ikon';
 import { srcGambarModul } from '@/data/gambar';
 import { wajibAdmin } from '@/lib/admin-auth';
-import { jumlahKonten, penggunaanMingguan, waktuRelatif } from '@/lib/dashboard-admin';
+import { barisMonitorResponden, jumlahKonten, penggunaanMingguan } from '@/lib/dashboard-admin';
 import { ringkasanDashboard } from '@/lib/monitor';
 
 export const metadata: Metadata = { title: 'Dashboard' };
@@ -30,23 +30,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   ];
 
   const sekarang = Date.now();
-  const barisMonitor: BarisMonitor[] = baris.map((b) => ({
-    id_peserta: b.id_peserta,
-    nama: b.nama,
-    nomor_samar: b.nomor_samar,
-    sampel: b.status_sampel === 'responden_penelitian',
-    status_akun: b.status_akun,
-    status_belajar: b.status_belajar,
-    persen: b.persen,
-    selesai: b.selesai,
-    total: b.total,
-    materi_berikutnya: b.materi_saat_ini,
-    terakhir_aktif: waktuRelatif(b.terakhir_aktif, sekarang),
-    tidak_aktif: b.tidak_aktif,
-    mendekati_batas: b.mendekati_batas,
-    menit_baca: Math.round((b.ringkasan?.daftar.reduce((n, d) => n + (d.progres?.detik_baca ?? 0), 0) ?? 0) / 60),
-    pretest: b.pretest_selesai,
-  }));
+  const barisMonitor: BarisMonitor[] = baris.map((b) => barisMonitorResponden(b, sekarang));
 
   // Per modul: berapa responden penelitian yang sudah mulai dan sudah menuntaskan modul.
   const sampel = baris.filter((b) => b.status_sampel === 'responden_penelitian');

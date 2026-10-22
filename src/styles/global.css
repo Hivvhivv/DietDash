@@ -5890,7 +5890,8 @@ a.beranda-kartu:hover .beranda-kartu-panah {
   font-size: 1rem;
 }
 
-.tabel-monitor td:first-child {
+.tabel-monitor td:first-child,
+.tabel-monitor thead th {
   white-space: nowrap;
 }
 
@@ -6142,6 +6143,222 @@ a.beranda-kartu:hover .beranda-kartu-panah {
 @media (min-width: 80rem) {
   .kisi-status-modul {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ===== Tambah Pengguna Baru ===== */
+.pilih-peran {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: 0;
+}
+
+.pilih-peran legend {
+  margin-bottom: 0.6rem;
+  font-weight: 800;
+}
+
+.pilih-peran-kisi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.75rem;
+}
+
+.pilih-peran-kartu {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: start;
+  min-height: var(--sentuh-min);
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--warna-garis);
+  border-radius: 16px;
+  background: var(--warna-permukaan);
+  cursor: pointer;
+}
+
+.pilih-peran-kartu input {
+  width: 20px;
+  height: 20px;
+  margin: 0.15rem 0 0;
+  accent-color: var(--warna-utama);
+}
+
+.pilih-peran-kartu > span {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.pilih-peran-aktif {
+  border-color: var(--warna-utama);
+  background: #f1f9f4;
+}
+
+.tambah-hasil-data {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 2px dashed var(--warna-utama);
+  border-radius: 16px;
+  background: #f6fbf8;
+}
+
+.tambah-hasil-data dt {
+  font-size: 0.85rem;
+  color: var(--warna-teks-sekunder);
+}
+
+.tambah-hasil-data dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.tambah-hasil-data .token-tampil {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+}
+
+/* ===== Manajemen Pengguna ===== */
+.pengguna-kepala .dasbor-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pengguna-kepala .dasbor-label .lencana {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.pengguna-kepala h1 {
+  margin-top: 0.25rem;
+}
+
+.kisi-kartu-pengguna {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.kisi-kartu-pengguna > li {
+  margin: 0;
+}
+
+.kartu-pengguna {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--warna-garis);
+  border-radius: 18px;
+  background: var(--warna-permukaan);
+}
+
+.kartu-pengguna-kepala {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.kartu-pengguna-judul {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--warna-teks-sekunder);
+}
+
+.kartu-pengguna-angka {
+  margin: 0.25rem 0 0;
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #123d2c;
+}
+
+.kartu-pengguna-sub {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--warna-teks-sekunder);
+}
+
+.kartu-pengguna > .label-kecil {
+  flex: 1;
+  margin: 0;
+}
+
+.kartu-pengguna-catatan {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  margin: 0.4rem 0 0;
+  padding: 0.4rem 0.75rem;
+  border-radius: 12px;
+  background: #f3f7f4;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--warna-utama-tua);
+  text-decoration: none;
+}
+
+a.kartu-pengguna-catatan:hover {
+  background: var(--warna-utama-muda);
+}
+
+.monitor-saring-lengkap {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  align-items: end;
+}
+
+.monitor-saring-lengkap .monitor-cari {
+  grid-column: span 2;
+}
+
+.monitor-reset {
+  min-height: var(--sentuh-min);
+}
+
+.monitor-avatar-admin {
+  background: #e3ecfa;
+  color: #1a4f8f;
+}
+
+.lencana-peran-responden {
+  border-color: transparent;
+  background: var(--warna-utama-muda);
+  color: var(--warna-utama-tua);
+}
+
+.lencana-peran-admin {
+  border-color: transparent;
+  background: #e3ecfa;
+  color: #1a4f8f;
+}
+
+.lencana-peran-super_admin {
+  border-color: transparent;
+  background: #efe7fb;
+  color: #5b2d91;
+}
+
+.monitor-lompat {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  color: var(--warna-teks-sekunder);
+}
+
+@media (max-width: 40rem) {
+  .monitor-saring-lengkap .monitor-cari {
+    grid-column: auto;
   }
 }
 

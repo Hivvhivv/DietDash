@@ -8,13 +8,17 @@ import { formatNomorHp, formatToken } from '@/lib/identitas';
 import { strukturAktif } from '@/lib/konten';
 import { simpanPengaturan } from '@/lib/pengaturan';
 import { bukaKunciManual } from '@/lib/progres';
-import { resetTokenOlehAdmin, ubahStatusAkun } from '@/lib/responden';
+import { resetTokenOlehAdmin, tambahRespondenOlehAdmin, ubahStatusAkun } from '@/lib/responden';
 
 export interface StatusAksiAdmin {
   pesan?: string;
   sukses?: string;
   token?: string;
   nomor?: string;
+  id_peserta?: string;
+  nama?: string;
+  kolom?: string;
+  nilai?: Record<string, string>;
 }
 
 const teks = (fd: FormData, k: string) => String(fd.get(k) ?? '');
@@ -22,6 +26,27 @@ const teks = (fd: FormData, k: string) => String(fd.get(k) ?? '');
 async function cariResponden(idPeserta: string) {
   const { peserta } = await koleksi();
   return peserta.findOne({ id_peserta: idPeserta });
+}
+
+// Tambah Pengguna Baru (role Responden), khusus super admin. Kode akses tampil sekali.
+export async function aksiTambahResponden(_: StatusAksiAdmin | undefined, fd: FormData): Promise<StatusAksiAdmin> {
+  const admin = await wajibAdmin('super_admin');
+  const nilai = { nama: teks(fd, 'nama'), nomor: teks(fd, 'nomor'), sampel: teks(fd, 'sampel') };
+  const h = await tambahRespondenOlehAdmin(admin.email, {
+    nama: nilai.nama,
+    nomor: nilai.nomor,
+    sampel: nilai.sampel === 'bukan_sampel' ? 'bukan_sampel' : 'responden_penelitian',
+    konfirmasi: fd.get('konfirmasi') === 'ya',
+  });
+  if (!h.ok) return { pesan: h.pesan, kolom: h.kolom, nilai };
+  revalidatePath('/admin/responden/');
+  return {
+    sukses: 'Akun responden dibuat. Serahkan nama, nomor HP, dan kode akses ini langsung kepada responden. Kode tidak akan ditampilkan lagi.',
+    token: formatToken(h.token),
+    nomor: formatNomorHp(h.nomor_hp),
+    id_peserta: h.id_peserta,
+    nama: nilai.nama.trim(),
+  };
 }
 
 export async function aksiResetToken(_: StatusAksiAdmin | undefined, fd: FormData): Promise<StatusAksiAdmin> {
@@ -102,12 +127,13 @@ export async function aksiPengaturan(_: StatusAksiAdmin | undefined, fd: FormDat
     pendaftaran_dibuka: fd.get('pendaftaran_dibuka') === 'ya',
     batas_tidak_aktif_hari: angka('batas_tidak_aktif_hari', 1, 90, 7),
     batas_intervensi_hari: angka('batas_intervensi_hari', 1, 180, 14),
+    target_responden: angka('target_responden', 0, 10000, 0),
     wajib_pernyataan_kelayakan: fd.get('wajib_pernyataan_kelayakan') === 'ya',
     gerbang_pretest: fd.get('gerbang_pretest') === 'ya',
     nomor_whatsapp_peneliti: teks(fd, 'nomor_whatsapp_peneliti').replace(/[^\d+]/g, '').slice(0, 20),
   };
   await simpanPengaturan(ubah, admin.email);
-  await catatAudit({ admin: admin.email, aksi: 'ubah_pengaturan', keterangan: `Pendaftaran ${ubah.pendaftaran_dibuka ? 'dibuka' : 'ditutup'}; tidak aktif ${ubah.batas_tidak_aktif_hari} hari; intervensi ${ubah.batas_intervensi_hari} hari; kelayakan ${ubah.wajib_pernyataan_kelayakan ? 'wajib' : 'tidak'}; gerbang pretest ${ubah.gerbang_pretest ? 'aktif' : 'tidak'}` });
+  await catatAudit({ admin: admin.email, aksi: 'ubah_pengaturan', keterangan: `Pendaftaran ${ubah.pendaftaran_dibuka ? 'dibuka' : 'ditutup'}; tidak aktif ${ubah.batas_tidak_aktif_hari} hari; intervensi ${ubah.batas_intervensi_hari} hari; target ${ubah.target_responden || 'belum ditetapkan'} responden; kelayakan ${ubah.wajib_pernyataan_kelayakan ? 'wajib' : 'tidak'}; gerbang pretest ${ubah.gerbang_pretest ? 'aktif' : 'tidak'}` });
   revalidatePath('/', 'layout');
   return { sukses: 'Pengaturan tersimpan.' };
 }

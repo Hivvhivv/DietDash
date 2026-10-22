@@ -34,6 +34,7 @@ export interface DokPeserta {
 
 export type JenisRiwayatAkun =
   | 'token_dibuat'
+  | 'dibuat_admin'
   | 'token_diganti_responden'
   | 'token_direset_admin'
   | 'nomor_diganti'
@@ -94,6 +95,7 @@ export interface DokPengaturan {
   batas_intervensi_hari: number;
   wajib_pernyataan_kelayakan: boolean;
   gerbang_pretest: boolean;
+  target_responden: number; // kuota sampel penelitian; 0 = belum ditetapkan
   nomor_whatsapp_peneliti: string;
   versi_aktif_id: ObjectId | null;
   diubah_pada: Date;

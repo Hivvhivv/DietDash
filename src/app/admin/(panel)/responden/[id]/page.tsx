@@ -16,6 +16,7 @@ const LABEL_RIWAYAT: Record<string, string> = {
   token_dibuat: 'Kode akses dibuat',
   token_diganti_responden: 'Kode akses diganti responden',
   token_direset_admin: 'Kode akses dibuat ulang oleh admin',
+  dibuat_admin: 'Akun dibuat oleh super admin',
   nomor_diganti: 'Nomor HP diganti',
   nama_diganti: 'Nama diganti',
   mengundurkan_diri: 'Mengundurkan diri',

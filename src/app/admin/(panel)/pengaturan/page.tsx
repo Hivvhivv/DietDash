@@ -51,6 +51,11 @@ export default async function Pengaturan() {
               <label htmlFor="batas_intervensi_hari">Lama intervensi (hari)</label>
               <input id="batas_intervensi_hari" name="batas_intervensi_hari" type="number" min={1} max={180} defaultValue={a.batas_intervensi_hari} />
             </div>
+            <div className="bidang">
+              <label htmlFor="target_responden">Target jumlah responden penelitian</label>
+              <p className="petunjuk">Kuota sampel untuk kartu “Total Responden”. Isi 0 bila belum ditetapkan.</p>
+              <input id="target_responden" name="target_responden" type="number" min={0} max={10000} defaultValue={a.target_responden} />
+            </div>
           </div>
         </fieldset>
         <fieldset>

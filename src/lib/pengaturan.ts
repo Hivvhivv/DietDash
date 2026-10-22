@@ -8,6 +8,7 @@ export const PENGATURAN_BAWAAN: Omit<DokPengaturan, '_id' | 'diubah_pada' | 'diu
   batas_intervensi_hari: 14,
   wajib_pernyataan_kelayakan: true,
   gerbang_pretest: false,
+  target_responden: 0,
   nomor_whatsapp_peneliti: '',
   versi_aktif_id: null,
 };

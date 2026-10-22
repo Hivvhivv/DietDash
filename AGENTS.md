@@ -34,6 +34,7 @@ DASH Sehat adalah platform edukasi diet DASH (*Dietary Approaches to Stop Hypert
 
 - Tanpa sesi admin, semua `/admin/*` (kecuali masuk/undangan) → **404**. Admin biasa di area super admin → **403** (`forbidden()`).
 - Akun super admin pertama dibuat lewat `npm run buat-admin`; admin lain diundang dari `/admin/admins/` (tautan 48 jam, dikirim manual karena website tidak mengirim email).
+- **Tambah Pengguna Baru** (`/admin/responden/tambah/`, khusus super admin): pilih role. *Responden*: nama + nomor HP + kelompok + centang wajib bahwa kelayakan & persetujuan sudah dinyatakan kepada peneliti; kode akses 6 angka tampil sekali (hash Argon2id), `token_disimpan_pada` langsung terisi, tercatat di riwayat akun (`dibuat_admin`) dan log (`tambah_responden`). *Admin/Super admin*: undangan 48 jam seperti di atas.
 
 ## Skill yang tersedia
 

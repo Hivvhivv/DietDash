@@ -26,7 +26,7 @@ Terdaftarnya seseorang sudah mengungkap bahwa ia memiliki hipertensi → daftar 
 
 - Semua fitur (materi, Menu Sehat, Tips, Pengenalan, Tentang, Sumber) hanya setelah masuk. Privasi dan Ketentuan Penggunaan wajib tetap publik agar calon responden bisa membacanya sebelum menyetujui.
 
-- Daftar mandiri: nama (2–50), nomor HP (08…/628…/+628… → disimpan `+628…`, unik), centang kelayakan (bila diaktifkan di Pengaturan) dan persetujuan. Pendaftaran bisa ditutup admin.
+- Daftar mandiri: nama (2–50), nomor HP (08…/628…/+628… → disimpan `+628…`, unik), centang kelayakan (bila diaktifkan di Pengaturan) dan persetujuan. Pendaftaran bisa ditutup admin. Super admin juga bisa menambah responden di `/admin/responden/tambah/` (wajib centang bahwa kelayakan & persetujuan sudah dinyatakan langsung; kode akses tampil sekali; tercatat di riwayat akun dan log).
 - **Kode akses 6 angka** (di kode: `token`), tampil `482 917` **sekali** bersama nama, disimpan sebagai hash Argon2id. Pola lemah (111111, 123456, 121212, 123123) tidak pernah dibuat (`kodeLemah`). Masuk mengabaikan spasi dan tanda hubung. Di teks untuk responden sebut "kode akses".
 - **ID peserta tidak ditampilkan kepada responden** (keputusan peneliti 2026-10-21); hanya untuk admin, ekspor, dan analisis.
 - Responden tidak bisa belajar sebelum mencentang "Saya sudah menyimpan token saya" (`token_disimpan_pada`).
