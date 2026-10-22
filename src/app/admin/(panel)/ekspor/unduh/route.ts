@@ -5,12 +5,12 @@ import { catatAudit } from '@/lib/db';
 import { dataEkspor, type JenisEkspor } from '@/lib/monitor';
 import { buatCsv, buatXlsx } from '@/lib/xlsx';
 
-const NAMA: Record<JenisEkspor, string> = { ringkasan: 'ringkasan', progres: 'progres', jawaban: 'jawaban-kuis' };
+const NAMA: Record<JenisEkspor, string> = { ringkasan: 'ringkasan', progres: 'progres' };
 
 export async function GET(req: Request) {
   const admin = await wajibAdmin();
   const url = new URL(req.url);
-  const jenis = (['ringkasan', 'progres', 'jawaban'].includes(url.searchParams.get('jenis') ?? '') ? url.searchParams.get('jenis') : 'ringkasan') as JenisEkspor;
+  const jenis = (['ringkasan', 'progres'].includes(url.searchParams.get('jenis') ?? '') ? url.searchParams.get('jenis') : 'ringkasan') as JenisEkspor;
   const format = url.searchParams.get('format') === 'xlsx' ? 'xlsx' : 'csv';
   const semua = url.searchParams.get('cakupan') === 'semua';
   const { label, baris } = await dataEkspor(jenis, semua);

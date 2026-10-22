@@ -1,14 +1,13 @@
-// Akun admin: email + kata sandi (Argon2id) + autentikasi dua faktor TOTP wajib (PRD v2.0 Bagian 7.8).
+// Akun admin: email + kata sandi (Argon2id), langsung masuk tanpa 2FA (keputusan peneliti 2026-10-22, menyimpang dari PRD 7.8).
 // Admin tidak bisa mendaftar sendiri; akun dibuat lewat undangan super admin (berlaku 48 jam).
 import { randomBytes } from 'node:crypto';
 import { hash, verify } from '@node-rs/argon2';
 import { ObjectId } from 'mongodb';
-import { forbidden, notFound, redirect } from 'next/navigation';
+import { forbidden, notFound } from 'next/navigation';
 import { alamatIp, catatPercobaan, hapusPercobaan, kunciBatas, sudahDibatasi } from './batas';
-import { catatAudit, koleksi, type DokAdmin, type DokSesi, type PeranAdmin } from './db';
+import { catatAudit, koleksi, type PeranAdmin } from './db';
 import { sha256 } from './identitas';
 import { bacaSesi, buatSesi, hapusSemuaSesi, hapusSesiIni } from './sesi';
-import { buatRahasiaTotp, cekKodeTotp } from './totp';
 
 export type Hasil<T = object> = ({ ok: true } & T) | { ok: false; pesan: string; kolom?: string };
 
@@ -33,8 +32,8 @@ export function periksaSandiAdmin(sandi: string, email: string): string | null {
 
 export const normalkanEmail = (e: string) => e.trim().toLowerCase();
 
-// Langkah 1: kata sandi. Berhasil → sesi tahap "sandi" (10 menit) untuk langkah 2FA.
-export async function masukAdmin(emailMentah: string, sandi: string): Promise<Hasil<{ perluAtur2fa: boolean }>> {
+// Email + kata sandi benar → sesi admin penuh (idle 30 menit). Percobaan salah dibatasi per email dan per IP.
+export async function masukAdmin(emailMentah: string, sandi: string): Promise<Hasil> {
   const email = normalkanEmail(emailMentah);
   const kunciEmail = kunciBatas('admin', email);
   const kunciIp = kunciBatas('admin-ip', await alamatIp());
@@ -51,48 +50,9 @@ export async function masukAdmin(emailMentah: string, sandi: string): Promise<Ha
     return { ok: false, pesan: 'Email atau kata sandi salah.' };
   }
   await hapusPercobaan(kunciEmail);
-  await buatSesi({ pemilik_id: akun._id, jenis: 'admin', tahap: 'sandi' });
-  return { ok: true, perluAtur2fa: !akun.totp_aktif };
-}
-
-export async function adminTahapSandi(): Promise<{ sesi: DokSesi; akun: DokAdmin } | null> {
-  const sesi = await bacaSesi('admin');
-  if (!sesi || sesi.tahap !== 'sandi') return null;
-  const { admin } = await koleksi();
-  const akun = await admin.findOne({ _id: sesi.pemilik_id, aktif: true });
-  return akun ? { sesi, akun } : null;
-}
-
-// Rahasia TOTP untuk pengaturan pertama (dibuat sekali, dipakai sampai 2FA aktif).
-export async function rahasiaPengaturan2fa(akun: DokAdmin): Promise<string> {
-  if (akun.totp_rahasia && !akun.totp_aktif) return akun.totp_rahasia;
-  const rahasia = buatRahasiaTotp();
-  const { admin } = await koleksi();
-  await admin.updateOne({ _id: akun._id, totp_aktif: false }, { $set: { totp_rahasia: rahasia } });
-  return rahasia;
-}
-
-// Langkah 2: kode 6 digit dari aplikasi autentikator. Berhasil → sesi baru tahap "penuh".
-export async function verifikasi2fa(kode: string): Promise<Hasil> {
-  const t = await adminTahapSandi();
-  if (!t) return { ok: false, pesan: 'Sesi masuk sudah berakhir. Masukkan email dan kata sandi lagi.' };
-  const kunci = kunciBatas('admin-2fa', t.akun._id.toHexString());
-  if (await sudahDibatasi([{ kunci, batas: 5 }])) {
-    return { ok: false, pesan: 'Terlalu banyak kode salah. Coba lagi dalam 15 menit.' };
-  }
-  if (!t.akun.totp_rahasia || !cekKodeTotp(t.akun.totp_rahasia, kode)) {
-    await catatPercobaan([kunci]);
-    return { ok: false, pesan: 'Kode belum cocok. Pastikan jam di HP benar, lalu ketik kode terbaru.' };
-  }
-  const { admin } = await koleksi();
-  if (!t.akun.totp_aktif) {
-    await admin.updateOne({ _id: t.akun._id }, { $set: { totp_aktif: true } });
-    await catatAudit({ admin: t.akun.email, aksi: 'aktifkan_2fa' });
-  }
-  await hapusPercobaan(kunci);
-  await hapusSesiIni('admin'); // ganti token sesi setelah 2FA (cegah session fixation)
-  await buatSesi({ pemilik_id: t.akun._id, jenis: 'admin', tahap: 'penuh' });
-  await catatAudit({ admin: t.akun.email, aksi: 'masuk' });
+  await hapusSesiIni('admin'); // ganti token sesi setiap masuk (cegah session fixation)
+  await buatSesi({ pemilik_id: akun._id, jenis: 'admin', tahap: 'penuh' });
+  await catatAudit({ admin: akun.email, aksi: 'masuk' });
   return { ok: true };
 }
 
@@ -100,7 +60,7 @@ export async function adminSaatIni(): Promise<AdminAktif | null> {
   const sesi = await bacaSesi('admin');
   if (!sesi || sesi.tahap !== 'penuh') return null;
   const { admin } = await koleksi();
-  const akun = await admin.findOne({ _id: sesi.pemilik_id, aktif: true, totp_aktif: true });
+  const akun = await admin.findOne({ _id: sesi.pemilik_id, aktif: true });
   return akun ? { id: akun._id, email: akun.email, nama: akun.nama, peran: akun.peran } : null;
 }
 
@@ -110,7 +70,6 @@ export async function adminSaatIni(): Promise<AdminAktif | null> {
 export async function wajibAdmin(peran?: 'super_admin'): Promise<AdminAktif> {
   const a = await adminSaatIni();
   if (!a) {
-    if (await adminTahapSandi()) redirect('/admin/masuk/verifikasi/');
     notFound();
   }
   if (peran === 'super_admin' && a.peran !== 'super_admin') forbidden();
@@ -164,8 +123,6 @@ export async function terimaUndangan(token: string, nama: string, sandi: string)
     email: u.email,
     nama: nama.trim(),
     password_hash: await hash(sandi),
-    totp_rahasia: null,
-    totp_aktif: false,
     peran: u.peran,
     aktif: true,
     dibuat_pada: new Date(),
@@ -176,18 +133,14 @@ export async function terimaUndangan(token: string, nama: string, sandi: string)
 
 export async function ubahAdmin(
   id: ObjectId,
-  tindakan: 'nonaktifkan' | 'aktifkan' | 'reset_2fa',
+  tindakan: 'nonaktifkan' | 'aktifkan',
   oleh: AdminAktif,
 ): Promise<Hasil> {
   if (id.equals(oleh.id)) return { ok: false, pesan: 'Anda tidak dapat mengubah akun Anda sendiri dari sini.' };
   const { admin } = await koleksi();
   const akun = await admin.findOne({ _id: id });
   if (!akun) return { ok: false, pesan: 'Admin tidak ditemukan.' };
-  const set =
-    tindakan === 'reset_2fa'
-      ? { totp_aktif: false, totp_rahasia: null }
-      : { aktif: tindakan === 'aktifkan' };
-  await admin.updateOne({ _id: id }, { $set: set });
+  await admin.updateOne({ _id: id }, { $set: { aktif: tindakan === 'aktifkan' } });
   if (tindakan !== 'aktifkan') await hapusSemuaSesi(id);
   await catatAudit({ admin: oleh.email, aksi: `${tindakan}_admin`, objek: akun.email });
   return { ok: true };

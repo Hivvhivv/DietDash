@@ -1,7 +1,7 @@
-// Membaca struktur konten satu versi: Modul → Materi → Kuis (PRD v2.0 Bagian 5).
+// Membaca struktur konten satu versi: Modul → Materi (PRD v2.0 Bagian 5; kuis tidak dipakai sejak 2026-10-22).
 // Responden selalu membaca versi aktif (app_settings.versi_aktif_id); admin dapat membaca versi mana pun untuk pratinjau.
 import type { ObjectId } from 'mongodb';
-import { koleksi, type DokKuis, type DokMateri, type DokModul, type DokSoal, type DokVersi } from './db';
+import { koleksi, type DokMateri, type DokModul, type DokVersi } from './db';
 import { ambilPengaturan } from './pengaturan';
 import { estimasiMenit } from '@/data/situs';
 
@@ -10,9 +10,8 @@ export interface MateriTerurut extends DokMateri {
   indeks: number; // urutan global, mulai 0
   urutan_dalam_modul: number; // mulai 1
   jumlah_dalam_modul: number;
-  modul: Pick<DokModul, 'kunci' | 'judul' | 'urutan'> & { nomor: number };
+  modul: Pick<DokModul, 'kunci' | 'judul' | 'urutan' | 'gambar'> & { nomor: number };
   menit: number;
-  kuis: (DokKuis & { jumlah_soal: number }) | null;
 }
 
 export interface ModulTerurut extends DokModul {
@@ -35,19 +34,10 @@ export async function ambilStruktur(versionId: ObjectId): Promise<StrukturVersi 
   const k = await koleksi();
   const versi = await k.versi.findOne({ _id: versionId });
   if (!versi) return null;
-  const [modul, materi, kuis, jumlahSoal] = await Promise.all([
+  const [modul, materi] = await Promise.all([
     k.modul.find({ version_id: versionId, diarsipkan: false }).sort({ urutan: 1 }).toArray(),
     k.materi.find({ version_id: versionId, diarsipkan: false }).sort({ urutan: 1 }).toArray(),
-    k.kuis.find({ version_id: versionId }).toArray(),
-    k.soal
-      .aggregate<{ _id: string; n: number }>([
-        { $match: { version_id: versionId } },
-        { $group: { _id: '$kuis_kunci', n: { $sum: 1 } } },
-      ])
-      .toArray(),
   ]);
-  const nSoal = new Map(jumlahSoal.map((x) => [x._id, x.n]));
-  const kuisPerMateri = new Map(kuis.map((q) => [q.materi_kunci, { ...q, jumlah_soal: nSoal.get(q.kunci) ?? 0 }]));
 
   const hasilModul: ModulTerurut[] = [];
   const urut: MateriTerurut[] = [];
@@ -61,9 +51,8 @@ export async function ambilStruktur(versionId: ObjectId): Promise<StrukturVersi 
         indeks: urut.length + j,
         urutan_dalam_modul: j + 1,
         jumlah_dalam_modul: milik.length,
-        modul: { kunci: md.kunci, judul: md.judul, urutan: md.urutan, nomor: nomorModul },
+        modul: { kunci: md.kunci, judul: md.judul, urutan: md.urutan, gambar: md.gambar, nomor: nomorModul },
         menit: menitBaca(x),
-        kuis: kuisPerMateri.get(x.kunci) ?? null,
       };
       return m;
     });
@@ -90,11 +79,6 @@ export async function labelVersiAktif(): Promise<string> {
 export async function strukturAktif(): Promise<StrukturVersi | null> {
   const v = await versiAktif();
   return v ? ambilStruktur(v._id) : null;
-}
-
-export async function ambilSoalKuis(versionId: ObjectId, kuisKunci: string): Promise<DokSoal[]> {
-  const { soal } = await koleksi();
-  return soal.find({ version_id: versionId, kuis_kunci: kuisKunci }).sort({ urutan: 1 }).toArray();
 }
 
 // Daftar pustaka gabungan dari seluruh materi versi aktif (untuk halaman Sumber Materi).

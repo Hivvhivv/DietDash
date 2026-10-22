@@ -21,16 +21,6 @@ poin_penting:
   - Bila sesekali kembali ke kebiasaan lama, mulailah lagi pada waktu makan berikutnya.
 rangkuman: Kebiasaan makan sehat lebih mudah dibangun melalui perubahan kecil yang dilakukan terus-menerus. Setelah satu perubahan terasa biasa, tambahkan perubahan berikutnya. Target yang jelas, kecil, dan bisa dicapai membantu kita tetap bersemangat.
 sumber: [nhlbi-panduan, pgs-2014]
-kuis:
-  - k14
-  - k10
-  - teks: Apa yang sebaiknya dilakukan bila suatu hari Anda kembali makan makanan asin?
-    pilihan:
-      - Berhenti mencoba karena sudah gagal
-      - Mulai lagi pada waktu makan berikutnya
-      - Mengganti semua menu besok sekaligus
-    benar: 1
-    penjelasan: Sesekali kembali ke kebiasaan lama itu wajar. Yang penting adalah melanjutkan lagi pada waktu makan berikutnya.
 ```
 
 Mengubah semua kebiasaan makan sekaligus sering terasa berat. Cara yang lebih mudah adalah memulai dari satu atau dua perubahan kecil. Setelah terasa biasa, tambahkan perubahan berikutnya.
@@ -65,28 +55,6 @@ poin_penting:
   - Menyiapkan bahan sekaligus dan memasak dengan cara cepat menghemat waktu.
 rangkuman: Makanan sehat tidak harus mahal. Bahan lokal seperti tempe, tahu, telur, ikan lokal, serta sayur dan buah musiman mudah didapat dan terjangkau. Hambatan waktu dapat diatasi dengan menyiapkan bahan sekaligus, membuat bumbu dasar tanpa garam, dan memilih cara memasak yang cepat.
 sumber: [nhlbi-panduan, pgs-2014]
-kuis:
-  - teks: Manakah cara berhemat yang tetap sesuai DASH?
-    pilihan:
-      - Membeli sayur dan buah yang sedang musim
-      - Membeli makanan kemasan dalam jumlah banyak
-      - Mengganti lauk dengan kerupuk
-    benar: 0
-    penjelasan: Sayur dan buah musiman biasanya lebih murah dan segar. Makanan kemasan dan kerupuk sering tinggi garam.
-  - teks: Bagaimana cara menghemat waktu memasak sayur?
-    pilihan:
-      - Tidak makan sayur sama sekali
-      - Mencuci dan memotong sayur untuk dua hari sekaligus
-      - Selalu membeli gorengan
-    benar: 1
-    penjelasan: Menyiapkan sayur sekaligus lalu menyimpannya dalam wadah tertutup di lemari es membuat memasak lebih cepat.
-  - teks: Ikan lokal mana yang bisa menjadi pilihan lauk terjangkau?
-    pilihan:
-      - Ikan kembung, lele, atau nila
-      - Ikan asin
-      - Ikan kalengan dalam saus
-    benar: 0
-    penjelasan: Ikan lokal seperti kembung, tongkol, lele, dan nila terjangkau dan tidak tinggi garam bila dimasak tanpa banyak garam.
 ```
 
 ### Biaya
@@ -130,28 +98,6 @@ poin_penting:
   - Minta keluarga mengingatkan dengan cara yang ramah.
 rangkuman: Kebiasaan makan biasanya terbentuk bersama keluarga, sehingga perubahan lebih ringan bila keluarga ikut mendukung. Ajak keluarga memasak bersama, masak dengan sedikit garam untuk semua orang, dan sepakati cara saling mengingatkan yang ramah.
 sumber: [nhlbi-panduan]
-kuis:
-  - teks: Mengapa sebaiknya memasak dengan sedikit garam untuk seluruh keluarga?
-    pilihan:
-      - Karena anggota keluarga lain juga mendapat manfaat pola makan sehat
-      - Karena garam dilarang untuk anak-anak sama sekali
-      - Karena memasak dua menu selalu lebih murah
-    benar: 0
-    penjelasan: Memasak satu menu dengan sedikit garam memudahkan Anda dan membuat seluruh keluarga ikut menerapkan pola makan sehat.
-  - teks: Cara mengingatkan yang paling mendukung adalah…
-    pilihan:
-      - Menyalahkan bila salah makan
-      - Mengingatkan dengan ramah dan mengajak bersama
-      - Diam saja
-    benar: 1
-    penjelasan: Dukungan yang ramah membuat perubahan terasa lebih ringan dan lebih mudah dipertahankan.
-  - teks: Kegiatan mana yang melibatkan keluarga dalam pola makan DASH?
-    pilihan:
-      - Memasak bersama dan mencoba resep baru dengan rempah
-      - Makan sendiri-sendiri dengan menu berbeda
-      - Menyimpan banyak kerupuk di rumah
-    benar: 0
-    penjelasan: Memasak bersama dan mencoba resep dengan bumbu rempah membantu keluarga terbiasa dengan rasa yang kurang asin.
 ```
 
 Kebiasaan makan biasanya terbentuk bersama keluarga. Perubahan akan lebih ringan bila keluarga ikut mendukung.

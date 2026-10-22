@@ -29,9 +29,8 @@ export default function Sambutan({ nama }: { nama: string }) {
       konten: (
         <ol className="langkah-belajar">
           <li>Baca materi sampai akhir. Setiap materi hanya butuh beberapa menit.</li>
-          <li>Tekan <strong>Kerjakan Kuis</strong> dan jawab soal satu per satu.</li>
-          <li>Baca penjelasan setiap jawaban. Kuis ini latihan, bukan ujian.</li>
-          <li>Setelah kuis selesai, materi berikutnya terbuka.</li>
+          <li>Materi berikutnya terbuka setelah Anda membuka materi sebelumnya.</li>
+          <li>Tekan <strong>Lanjut ke Materi</strong> di bagian bawah untuk pindah ke materi berikutnya.</li>
         </ol>
       ),
     },
@@ -40,16 +39,13 @@ export default function Sambutan({ nama }: { nama: string }) {
       konten: (
         <ul className="daftar-ikon">
           <li>
-            <span className="lencana lencana-materi-terkunci">🔒 Terkunci</span> Selesaikan kuis materi sebelumnya dulu.
+            <span className="lencana lencana-materi-terkunci">🔒 Terkunci</span> Baca dulu materi sebelumnya.
           </li>
           <li>
-            <span className="lencana lencana-materi-tersedia">○ Tersedia</span> Materi siap dibaca.
+            <span className="lencana lencana-materi-tersedia">○ Belum dibaca</span> Materi sudah terbuka dan siap dibaca.
           </li>
           <li>
-            <span className="lencana lencana-materi-sedang">◐ Sedang dipelajari</span> Materi sudah dibuka, kuis belum selesai.
-          </li>
-          <li>
-            <span className="lencana lencana-materi-selesai">✓ Selesai</span> Kuis sudah selesai. Anda bisa membaca lagi kapan saja.
+            <span className="lencana lencana-materi-selesai">✓ Selesai</span> Materi sudah dibaca. Anda bisa membacanya lagi kapan saja.
           </li>
         </ul>
       ),

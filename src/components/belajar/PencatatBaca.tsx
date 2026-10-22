@@ -1,15 +1,21 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { aksiBukaMateri } from '@/app/aksi-responden';
 
 const BATAS_DIAM_MS = 5 * 60_000; // berhenti menghitung setelah 5 menit tanpa interaksi (PRD 11.4)
 const KIRIM_TIAP_MS = 30_000;
 
-// Menandai materi "sedang dipelajari" dan mencatat lama membaca saat halaman aktif di layar.
+// Menandai materi selesai saat dibuka (materi berikutnya ikut terbuka) dan mencatat lama membaca saat halaman aktif.
 export default function PencatatBaca({ materiKunci }: { materiKunci: string }) {
+  const router = useRouter();
   useEffect(() => {
-    aksiBukaMateri(materiKunci).catch(() => {});
+    aksiBukaMateri(materiKunci)
+      .then((h) => {
+        if (h.baru) router.refresh(); // perbarui daftar materi & tombol Selanjutnya
+      })
+      .catch(() => {});
     let terakhirInteraksi = Date.now();
     let terkumpul = 0;
     let detakTerakhir = Date.now();
@@ -53,6 +59,6 @@ export default function PencatatBaca({ materiKunci }: { materiKunci: string }) {
       window.clearInterval(kirimBerkala);
       document.removeEventListener('visibilitychange', saatSembunyi);
     };
-  }, [materiKunci]);
+  }, [materiKunci, router]);
   return null;
 }

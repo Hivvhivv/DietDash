@@ -1,4 +1,4 @@
-// Panel konten admin (PRD v2.0 Bagian 10). Semua modul, materi, dan kuis dibuat di sini.
+// Panel konten admin (PRD v2.0 Bagian 10). Semua modul dan materi dibuat di sini (kuis tidak dipakai sejak 2026-10-22).
 //
 // Model versi:
 // - Hanya ada satu "versi kerja" (draf / siap_ditinjau) pada satu waktu; admin mengedit versi ini.
@@ -12,10 +12,8 @@ import {
   ambilKlien,
   catatAudit,
   koleksi,
-  type DokKuis,
   type DokMateri,
   type DokModul,
-  type DokSoal,
   type DokVersi,
   type GambarModul,
 } from './db';
@@ -46,16 +44,12 @@ async function klonIsi(dariId: ObjectId | null, keId: ObjectId): Promise<void> {
   if (!dariId) return;
   const k = await koleksi();
   const ganti = <T extends { _id: ObjectId; version_id: ObjectId }>(d: T): T => ({ ...d, _id: new ObjectId(), version_id: keId });
-  const [modul, materi, kuis, soal] = await Promise.all([
+  const [modul, materi] = await Promise.all([
     k.modul.find({ version_id: dariId }).toArray(),
     k.materi.find({ version_id: dariId }).toArray(),
-    k.kuis.find({ version_id: dariId }).toArray(),
-    k.soal.find({ version_id: dariId }).toArray(),
   ]);
   if (modul.length) await k.modul.insertMany(modul.map(ganti));
   if (materi.length) await k.materi.insertMany(materi.map(ganti));
-  if (kuis.length) await k.kuis.insertMany(kuis.map(ganti));
-  if (soal.length) await k.soal.insertMany(soal.map(ganti));
 }
 
 export async function buatVersiKerja(admin: AdminAktif): Promise<Hasil<{ id: ObjectId }>> {
@@ -123,11 +117,8 @@ async function siapkanUbah(admin: AdminAktif): Promise<Hasil<{ versi: DokVersi }
 
 async function adaProgres(materiKunci: string[]): Promise<boolean> {
   if (!materiKunci.length) return false;
-  const { progres, percobaan } = await koleksi();
-  return !!(
-    (await progres.findOne({ materi_kunci: { $in: materiKunci } })) ||
-    (await percobaan.findOne({ materi_kunci: { $in: materiKunci } }))
-  );
+  const { progres } = await koleksi();
+  return !!(await progres.findOne({ materi_kunci: { $in: materiKunci } }));
 }
 
 async function rapikanUrutan<T extends { _id: ObjectId; urutan: number }>(kol: Collection<T>, filter: Filter<T>) {
@@ -194,9 +185,6 @@ export async function hapusAtauArsipModul(admin: AdminAktif, kunci: string): Pro
     await catatAudit({ admin: admin.email, aksi: 'arsipkan_modul', objek: md.judul });
     return { ok: true, diarsipkan: true };
   }
-  const kuisKunci = (await k.kuis.find({ version_id: s.versi._id, materi_kunci: { $in: materi.map((m) => m.kunci) } }).toArray()).map((q) => q.kunci);
-  await k.soal.deleteMany({ version_id: s.versi._id, kuis_kunci: { $in: kuisKunci } });
-  await k.kuis.deleteMany({ version_id: s.versi._id, kunci: { $in: kuisKunci } });
   await k.materi.deleteMany({ version_id: s.versi._id, modul_kunci: kunci });
   await k.modul.deleteOne({ _id: md._id });
   await rapikanUrutan(k.modul, { version_id: s.versi._id });
@@ -223,6 +211,7 @@ export interface MasukanMateri {
   rangkuman: string;
   estimasi_menit: number | null;
   sumber: string[];
+  gambar: { id: string; alt: string } | null;
 }
 
 export async function simpanMateri(admin: AdminAktif, kunci: string | null, modulKunci: string, m: MasukanMateri): Promise<Hasil<{ kunci: string }>> {
@@ -240,18 +229,6 @@ export async function simpanMateri(admin: AdminAktif, kunci: string | null, modu
   const baru = buatKunci();
   const urutan = (await k.materi.countDocuments({ version_id: vId, modul_kunci: modulKunci })) + 1;
   await k.materi.insertOne({ _id: new ObjectId(), version_id: vId, kunci: baru, modul_kunci: modulKunci, urutan, ...m, diarsipkan: false });
-  // Setiap materi memiliki tepat satu kuis.
-  const atur = await ambilPengaturan();
-  await k.kuis.insertOne({
-    _id: new ObjectId(),
-    version_id: vId,
-    kunci: buatKunci(),
-    materi_kunci: baru,
-    judul: `Kuis: ${m.judul}`,
-    petunjuk: 'Pilih satu jawaban untuk setiap soal, lalu tekan "Periksa Jawaban". Ini latihan, bukan ujian.',
-    mode: atur.mode_kuis_bawaan,
-    batas_lulus: atur.batas_lulus_bawaan,
-  });
   await catatAudit({ admin: admin.email, aksi: 'buat_materi', objek: m.judul });
   return { ok: true, kunci: baru };
 }
@@ -283,122 +260,10 @@ export async function hapusAtauArsipMateri(admin: AdminAktif, kunci: string): Pr
     await catatAudit({ admin: admin.email, aksi: 'arsipkan_materi', objek: m.judul });
     return { ok: true, diarsipkan: true, modul_kunci: m.modul_kunci };
   }
-  const kuis = await k.kuis.findOne({ version_id: s.versi._id, materi_kunci: kunci });
-  if (kuis) {
-    await k.soal.deleteMany({ version_id: s.versi._id, kuis_kunci: kuis.kunci });
-    await k.kuis.deleteOne({ _id: kuis._id });
-  }
   await k.materi.deleteOne({ _id: m._id });
   await rapikanUrutan(k.materi, { version_id: s.versi._id, modul_kunci: m.modul_kunci });
   await catatAudit({ admin: admin.email, aksi: 'hapus_materi', objek: m.judul });
   return { ok: true, diarsipkan: false, modul_kunci: m.modul_kunci };
-}
-
-// ---------- Kuis & soal ----------
-
-export async function simpanKuis(admin: AdminAktif, kuisKunci: string, q: Pick<DokKuis, 'judul' | 'petunjuk' | 'mode' | 'batas_lulus'>): Promise<Hasil> {
-  const s = await siapkanUbah(admin);
-  if (!s.ok) return s;
-  const { kuis } = await koleksi();
-  const r = await kuis.updateOne({ version_id: s.versi._id, kunci: kuisKunci }, { $set: q });
-  if (r.matchedCount === 0) return gagal('Kuis tidak ditemukan.');
-  await catatAudit({ admin: admin.email, aksi: 'ubah_kuis', objek: q.judul });
-  return { ok: true };
-}
-
-export async function terapkanModeSemuaKuis(admin: AdminAktif, mode: 'A' | 'B', batas: number): Promise<Hasil<{ jumlah: number }>> {
-  const s = await siapkanUbah(admin);
-  if (!s.ok) return s;
-  const { kuis } = await koleksi();
-  const r = await kuis.updateMany({ version_id: s.versi._id }, { $set: { mode, batas_lulus: batas } });
-  await simpanPengaturan({ mode_kuis_bawaan: mode, batas_lulus_bawaan: batas }, admin.email);
-  await catatAudit({ admin: admin.email, aksi: 'terapkan_mode_kuis', keterangan: `Mode ${mode}${mode === 'B' ? `, batas lulus ${batas}%` : ''}` });
-  return { ok: true, jumlah: r.modifiedCount };
-}
-
-export interface MasukanSoal {
-  teks: string;
-  penjelasan: string;
-  gambar: { id: string; alt: string } | null;
-  pilihan: { teks: string; benar: boolean }[];
-}
-
-export async function simpanSoal(admin: AdminAktif, kuisKunci: string, soalKunci: string | null, m: MasukanSoal): Promise<Hasil<{ kunci: string }>> {
-  const s = await siapkanUbah(admin);
-  if (!s.ok) return s;
-  const { soal, kuis } = await koleksi();
-  const vId = s.versi._id;
-  if (!(await kuis.findOne({ version_id: vId, kunci: kuisKunci }))) return gagal('Kuis tidak ditemukan.');
-  if (soalKunci) {
-    const lama = await soal.findOne({ version_id: vId, kunci: soalKunci });
-    if (!lama) return gagal('Soal tidak ditemukan.');
-    // Pertahankan kunci pilihan yang sudah ada agar jawaban lama tetap terbaca.
-    const pilihan = m.pilihan.map((p, i) => ({ kunci: lama.pilihan[i]?.kunci ?? buatKunci(), ...p }));
-    await soal.updateOne({ _id: lama._id }, { $set: { teks: m.teks, penjelasan: m.penjelasan, gambar: m.gambar, pilihan } });
-    await catatAudit({ admin: admin.email, aksi: 'ubah_soal', objek: m.teks.slice(0, 80) });
-    return { ok: true, kunci: soalKunci };
-  }
-  const baru = buatKunci();
-  const urutan = (await soal.countDocuments({ version_id: vId, kuis_kunci: kuisKunci })) + 1;
-  await soal.insertOne({
-    _id: new ObjectId(),
-    version_id: vId,
-    kunci: baru,
-    kuis_kunci: kuisKunci,
-    urutan,
-    teks: m.teks,
-    penjelasan: m.penjelasan,
-    gambar: m.gambar,
-    pilihan: m.pilihan.map((p) => ({ kunci: buatKunci(), ...p })),
-  });
-  await catatAudit({ admin: admin.email, aksi: 'buat_soal', objek: m.teks.slice(0, 80) });
-  return { ok: true, kunci: baru };
-}
-
-export async function geserSoal(admin: AdminAktif, soalKunci: string, arah: -1 | 1): Promise<Hasil> {
-  const s = await siapkanUbah(admin);
-  if (!s.ok) return s;
-  const { soal } = await koleksi();
-  const x = await soal.findOne({ version_id: s.versi._id, kunci: soalKunci });
-  if (!x) return gagal('Soal tidak ditemukan.');
-  const daftar = await soal.find({ version_id: s.versi._id, kuis_kunci: x.kuis_kunci }).sort({ urutan: 1 }).toArray();
-  const i = daftar.findIndex((d) => d.kunci === soalKunci);
-  const j = i + arah;
-  if (j < 0 || j >= daftar.length) return { ok: true };
-  await soal.updateOne({ _id: daftar[i]._id }, { $set: { urutan: daftar[j].urutan } });
-  await soal.updateOne({ _id: daftar[j]._id }, { $set: { urutan: daftar[i].urutan } });
-  return { ok: true };
-}
-
-export async function duplikatSoal(admin: AdminAktif, soalKunci: string): Promise<Hasil> {
-  const s = await siapkanUbah(admin);
-  if (!s.ok) return s;
-  const { soal } = await koleksi();
-  const x = await soal.findOne({ version_id: s.versi._id, kunci: soalKunci });
-  if (!x) return gagal('Soal tidak ditemukan.');
-  const urutan = (await soal.countDocuments({ version_id: s.versi._id, kuis_kunci: x.kuis_kunci })) + 1;
-  await soal.insertOne({
-    ...x,
-    _id: new ObjectId(),
-    kunci: buatKunci(),
-    urutan,
-    teks: `${x.teks} (salinan)`,
-    pilihan: x.pilihan.map((p) => ({ ...p, kunci: buatKunci() })),
-  });
-  await catatAudit({ admin: admin.email, aksi: 'duplikat_soal', objek: x.teks.slice(0, 80) });
-  return { ok: true };
-}
-
-export async function hapusSoal(admin: AdminAktif, soalKunci: string): Promise<Hasil> {
-  const s = await siapkanUbah(admin);
-  if (!s.ok) return s;
-  const { soal } = await koleksi();
-  const x = await soal.findOne({ version_id: s.versi._id, kunci: soalKunci });
-  if (!x) return gagal('Soal tidak ditemukan.');
-  await soal.deleteOne({ _id: x._id });
-  await rapikanUrutan(soal, { version_id: s.versi._id, kuis_kunci: x.kuis_kunci });
-  await catatAudit({ admin: admin.email, aksi: 'hapus_soal', objek: x.teks.slice(0, 80) });
-  return { ok: true };
 }
 
 // ---------- Validasi (PRD 10.4) ----------
@@ -414,11 +279,8 @@ const GAMBAR_TANPA_ALT = /!\[\s*\]\(/;
 export async function validasiVersi(versionId: ObjectId): Promise<MasalahValidasi[]> {
   const st = await ambilStruktur(versionId);
   if (!st) return [{ lokasi: 'Versi', pesan: 'Versi tidak ditemukan.' }];
-  const { soal } = await koleksi();
-  const semuaSoal = await soal.find({ version_id: versionId }).toArray();
   const masalah: MasalahValidasi[] = [];
   if (st.modul.length === 0) masalah.push({ lokasi: 'Konten', pesan: 'Belum ada modul.' });
-  const mode = new Set<string>();
   for (const md of st.modul) {
     const lokasiModul = `Modul ${md.nomor}`;
     const tModul = `/admin/konten/modul/${md.kunci}/`;
@@ -436,27 +298,7 @@ export async function validasiVersi(versionId: ObjectId): Promise<MasalahValidas
       if (GAMBAR_TANPA_ALT.test(m.isi)) masalah.push({ lokasi, pesan: 'Ada gambar di isi materi yang belum punya teks alternatif.', tautan: t });
       const klaim = cariKlaimTerlarang([m.judul, m.isi, ...m.poin_penting, m.rangkuman].join('\n'));
       if (klaim.length) masalah.push({ lokasi, pesan: `Ada kemungkinan klaim berlebihan: "${klaim.join('", "')}". Ubah kalimatnya (lihat PRD 13).`, tautan: t });
-      if (!m.kuis) {
-        masalah.push({ lokasi, pesan: 'Materi belum punya kuis.', tautan: t });
-        continue;
-      }
-      mode.add(m.kuis.mode);
-      const tKuis = `/admin/konten/materi/${m.kunci}/kuis/`;
-      const daftar = semuaSoal.filter((x) => x.kuis_kunci === m.kuis!.kunci);
-      if (daftar.length < 3) masalah.push({ lokasi, pesan: `Kuis baru punya ${daftar.length} soal (minimal 3).`, tautan: tKuis });
-      daftar.forEach((x, i) => {
-        if (x.pilihan.filter((p) => p.benar).length !== 1) masalah.push({ lokasi: `${lokasi}, soal ${i + 1}`, pesan: 'Harus ada tepat satu kunci jawaban.', tautan: tKuis });
-        if (x.pilihan.length < 3 || x.pilihan.length > 4) masalah.push({ lokasi: `${lokasi}, soal ${i + 1}`, pesan: 'Isi 3–4 pilihan jawaban.', tautan: tKuis });
-        if (!x.penjelasan.trim()) masalah.push({ lokasi: `${lokasi}, soal ${i + 1}`, pesan: 'Penjelasan jawaban wajib diisi.', tautan: tKuis });
-        if (x.gambar && !x.gambar.alt.trim()) masalah.push({ lokasi: `${lokasi}, soal ${i + 1}`, pesan: 'Gambar soal belum punya teks alternatif.', tautan: tKuis });
-        // Pilihan salah boleh memuat klaim keliru; yang diperiksa hanya pertanyaan dan penjelasan.
-        const klaimSoal = cariKlaimTerlarang(`${x.teks}\n${x.penjelasan}`);
-        if (klaimSoal.length) masalah.push({ lokasi: `${lokasi}, soal ${i + 1}`, pesan: `Ada kemungkinan klaim berlebihan: "${klaimSoal.join('", "')}".`, tautan: tKuis });
-      });
     }
-  }
-  if (mode.size > 1) {
-    masalah.push({ lokasi: 'Kuis', pesan: 'Mode penyelesaian kuis harus sama untuk semua kuis selama penelitian (gunakan "Terapkan ke semua kuis").', tautan: '/admin/konten/kuis/' });
   }
   return masalah;
 }
@@ -525,7 +367,7 @@ export async function kembalikanKeDraf(admin: AdminAktif): Promise<Hasil> {
   return { ok: true };
 }
 
-// Menghapus seluruh konten contoh (modul, materi, kuis, soal) sekaligus, termasuk bila sedang terbit.
+// Menghapus seluruh konten contoh (modul dan materi) sekaligus, termasuk bila sedang terbit.
 // Data progres responden uji coba tidak dihapus; tandai akun uji coba sebagai "bukan sampel".
 export async function hapusKontenContoh(admin: AdminAktif, versionId: ObjectId, alasan: string): Promise<Hasil<{ wasAktif: boolean }>> {
   if (admin.peran !== 'super_admin') return gagal('Hanya super admin yang dapat menghapus konten contoh.');
@@ -538,8 +380,6 @@ export async function hapusKontenContoh(admin: AdminAktif, versionId: ObjectId, 
   await Promise.all([
     k.modul.deleteMany({ version_id: v._id }),
     k.materi.deleteMany({ version_id: v._id }),
-    k.kuis.deleteMany({ version_id: v._id }),
-    k.soal.deleteMany({ version_id: v._id }),
   ]);
   await k.versi.deleteOne({ _id: v._id, contoh: true });
   if (wasAktif) await simpanPengaturan({ versi_aktif_id: null }, admin.email);
@@ -555,8 +395,6 @@ export async function hapusVersiKerja(admin: AdminAktif): Promise<Hasil> {
   await Promise.all([
     k.modul.deleteMany({ version_id: v._id }),
     k.materi.deleteMany({ version_id: v._id }),
-    k.kuis.deleteMany({ version_id: v._id }),
-    k.soal.deleteMany({ version_id: v._id }),
   ]);
   await k.versi.deleteOne({ _id: v._id, status: { $in: ['draf', 'siap_ditinjau'] } });
   await catatAudit({ admin: admin.email, aksi: 'buang_versi_kerja', objek: v.label });
@@ -571,13 +409,10 @@ export async function ambilModulKerja(kunci: string): Promise<DokModul | null> {
   return modul.findOne({ version_id: v._id, kunci });
 }
 
-export async function ambilMateriKerja(kunci: string): Promise<{ materi: DokMateri; kuis: DokKuis | null; soal: DokSoal[] } | null> {
+export async function ambilMateriKerja(kunci: string): Promise<{ materi: DokMateri } | null> {
   const v = await versiKerja();
   if (!v) return null;
   const k = await koleksi();
   const materi = await k.materi.findOne({ version_id: v._id, kunci });
-  if (!materi) return null;
-  const kuis = await k.kuis.findOne({ version_id: v._id, materi_kunci: kunci });
-  const soal = kuis ? await k.soal.find({ version_id: v._id, kuis_kunci: kuis.kunci }).sort({ urutan: 1 }).toArray() : [];
-  return { materi, kuis, soal };
+  return materi ? { materi } : null;
 }

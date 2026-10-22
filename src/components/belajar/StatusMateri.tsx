@@ -3,8 +3,7 @@ import type { StatusMateri } from '@/lib/progres';
 // Status selalu ditampilkan dengan ikon DAN teks, tidak hanya warna (PRD 6, 14).
 const DATA: Record<StatusMateri, { ikon: string; teks: string }> = {
   terkunci: { ikon: '🔒', teks: 'Terkunci' },
-  tersedia: { ikon: '○', teks: 'Tersedia' },
-  sedang: { ikon: '◐', teks: 'Sedang dipelajari' },
+  tersedia: { ikon: '○', teks: 'Belum dibaca' },
   selesai: { ikon: '✓', teks: 'Selesai' },
 };
 

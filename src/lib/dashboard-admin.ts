@@ -20,13 +20,12 @@ export async function jumlahKonten() {
     contoh: !!v?.contoh,
     modul: s?.modul.length ?? 0,
     materi: s?.materi.length ?? 0,
-    soal: s?.materi.reduce((n, m) => n + (m.kuis?.jumlah_soal ?? 0), 0) ?? 0,
   };
 }
 
 // ---------- Aktivitas terbaru ----------
 
-export type JenisAktivitas = 'konten' | 'kuis' | 'pengguna' | 'versi' | 'data' | 'akun';
+export type JenisAktivitas = 'konten' | 'pengguna' | 'versi' | 'data' | 'akun';
 
 export interface Aktivitas {
   teks: string;
@@ -46,14 +45,21 @@ const KALIMAT: Record<string, (e: DokLogAudit) => [string, JenisAktivitas]> = {
   ubah_materi: (e) => [`Materi ${kutip(e.objek)} diperbarui`, 'konten'],
   hapus_materi: (e) => [`Materi ${kutip(e.objek)} dihapus`, 'konten'],
   arsipkan_materi: (e) => [`Materi ${kutip(e.objek)} diarsipkan`, 'konten'],
-  buat_soal: () => ['Pertanyaan kuis baru ditambahkan', 'kuis'],
-  ubah_soal: () => ['Pertanyaan kuis diperbarui', 'kuis'],
-  hapus_soal: () => ['Pertanyaan kuis dihapus', 'kuis'],
+  buat_soal: () => ['Pertanyaan kuis baru ditambahkan', 'konten'],
+  ubah_soal: () => ['Pertanyaan kuis diperbarui', 'konten'],
+  hapus_soal: () => ['Pertanyaan kuis dihapus', 'konten'],
   benih_konten_contoh: (e) => [`Konten contoh diimpor dan diterbitkan (${e.keterangan ?? ''})`, 'versi'],
   hapus_konten_contoh: () => ['Konten contoh dihapus', 'versi'],
-  duplikat_soal: () => ['Pertanyaan kuis diduplikasi', 'kuis'],
-  ubah_kuis: (e) => [`Pengaturan ${e.objek ?? 'kuis'} diperbarui`, 'kuis'],
-  terapkan_mode_kuis: (e) => [`Aturan selesai kuis diubah (${e.keterangan ?? ''})`, 'kuis'],
+  duplikat_soal: () => ['Pertanyaan kuis diduplikasi', 'konten'],
+  ubah_kuis: (e) => [`Pengaturan ${e.objek ?? 'kuis'} diperbarui`, 'konten'],
+  terapkan_mode_kuis: (e) => [`Aturan selesai kuis diubah (${e.keterangan ?? ''})`, 'konten'],
+  buat_tips: (e) => [`Tips ${kutip(e.objek)} ditambahkan`, 'konten'],
+  ubah_tips: (e) => [`Tips ${kutip(e.objek)} diperbarui`, 'konten'],
+  hapus_tips: (e) => [`Tips ${kutip(e.objek)} dihapus`, 'konten'],
+  terbitkan_tips: (e) => [`Tips ${kutip(e.objek)} ditampilkan`, 'konten'],
+  sembunyikan_tips: (e) => [`Tips ${kutip(e.objek)} disembunyikan`, 'konten'],
+  benih_tips_contoh: (e) => [`Tips contoh diimpor (${e.keterangan ?? ''})`, 'konten'],
+  hapus_tips_contoh: (e) => [`Tips contoh dihapus (${e.keterangan ?? ''})`, 'konten'],
   buat_versi_kerja: () => ['Versi kerja konten dibuat', 'versi'],
   buat_versi_perbaikan: (e) => [`Versi perbaikan dibuat dari ${e.objek ?? 'versi terkunci'}`, 'versi'],
   tandai_siap_ditinjau: (e) => [`${e.objek ?? 'Versi'} ditandai siap ditinjau`, 'versi'],
@@ -72,7 +78,7 @@ const KALIMAT: Record<string, (e: DokLogAudit) => [string, JenisAktivitas]> = {
 };
 
 // Aksi rutin yang tidak perlu tampil di ringkasan (tetap ada di Log Aktivitas).
-const ABAIKAN = new Set(['masuk', 'keluar', 'gagal_masuk', 'aktifkan_2fa', 'lihat_nomor_lengkap', 'unggah_gambar', 'unduh_log', 'urutkan_modul', 'urutkan_materi']);
+const ABAIKAN = new Set(['masuk', 'keluar', 'gagal_masuk', 'aktifkan_2fa', 'lihat_nomor_lengkap', 'unggah_gambar', 'unduh_log', 'urutkan_modul', 'urutkan_materi', 'urutkan_tips']);
 
 export async function aktivitasTerbaru(jumlah = 5): Promise<Aktivitas[]> {
   const k = await koleksi();
@@ -106,8 +112,27 @@ export interface TitikHarian {
 }
 
 // Responden penelitian yang punya kegiatan belajar tercatat pada hari itu:
-// mendaftar, membuka materi pertama kali, menyelesaikan materi, memulai atau menjawab kuis.
+// mendaftar atau membuka materi.
 export async function penggunaanHarian(hari: number): Promise<TitikHarian[]> {
+  return (await aktifPerHari(hari)).map(({ ids: _ids, ...t }) => t);
+}
+
+export interface TitikMingguan {
+  label: string; // tanggal akhir minggu, mis. "21 Okt"
+  aktif: number; // responden penelitian unik yang aktif dalam minggu itu
+}
+
+// Tren keterlibatan per minggu (7 hari berjalan; minggu terakhir berakhir hari ini). Label = tanggal akhir minggu.
+export async function penggunaanMingguan(minggu: number): Promise<TitikMingguan[]> {
+  const hari = await aktifPerHari(minggu * 7);
+  return Array.from({ length: minggu }, (_, i) => {
+    const potong = hari.slice(i * 7, i * 7 + 7);
+    const ids = new Set(potong.flatMap((h) => [...h.ids]));
+    return { label: potong[6].label, aktif: ids.size };
+  });
+}
+
+async function aktifPerHari(hari: number): Promise<(TitikHarian & { ids: Set<string> })[]> {
   const k = await koleksi();
   const mulai = new Date(Date.now() - (hari - 1) * HARI_MS);
   const batas = new Date(`${kunciHari(mulai)}T00:00:00+07:00`);
@@ -121,19 +146,14 @@ export async function penggunaanHarian(hari: number): Promise<TitikHarian[]> {
     if (!perHari.has(h)) perHari.set(h, new Set());
     perHari.get(h)!.add(id);
   };
-  const [responden, progres, percobaan] = await Promise.all([
+  const [responden, progres] = await Promise.all([
     k.responden.find({ dibuat_pada: { $gte: batas } }, { projection: { dibuat_pada: 1 } }).toArray(),
     k.progres.find({ $or: [{ dibuka_pada: { $gte: batas } }, { selesai_pada: { $gte: batas } }] }).toArray(),
-    k.percobaan.find({ $or: [{ mulai_pada: { $gte: batas } }, { 'jawaban.dijawab_pada': { $gte: batas } }] }).toArray(),
   ]);
   for (const r of responden) catat(r._id.toHexString(), r.dibuat_pada);
   for (const p of progres) {
     catat(p.respondent_id.toHexString(), p.dibuka_pada);
     catat(p.respondent_id.toHexString(), p.selesai_pada);
-  }
-  for (const x of percobaan) {
-    catat(x.respondent_id.toHexString(), x.mulai_pada);
-    for (const j of x.jawaban) catat(x.respondent_id.toHexString(), j.dijawab_pada);
   }
   return Array.from({ length: hari }, (_, i) => {
     const d = new Date(batas.getTime() + i * HARI_MS + 12 * 3_600_000);
@@ -142,6 +162,7 @@ export async function penggunaanHarian(hari: number): Promise<TitikHarian[]> {
       tanggal,
       label: d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', timeZone: ZONA }),
       aktif: perHari.get(tanggal)?.size ?? 0,
+      ids: perHari.get(tanggal) ?? new Set<string>(),
     };
   });
 }

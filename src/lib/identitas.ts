@@ -58,7 +58,7 @@ export function buatIdPeserta(digit = 4): string {
   return `DS-${randomInt(min, 10 * min)}`;
 }
 
-// Kunci stabil untuk modul/materi/kuis/soal (dipertahankan saat versi diklon).
+// Kunci stabil untuk modul/materi (dipertahankan saat versi diklon).
 export function buatKunci(): string {
   const a = 'abcdefghijkmnpqrstuvwxyz23456789';
   let t = '';

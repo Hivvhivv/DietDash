@@ -5,23 +5,18 @@ import AkunMenu from './AkunMenu';
 import MenuResponden from './MenuResponden';
 import { aksiKeluar } from '@/app/aksi-responden';
 import { BATASAN_EDUKASI, NAMA_SITUS, SLOGAN } from '@/data/situs';
-import { kuisResponden } from '@/lib/beranda-responden';
 import { labelVersiAktif, strukturAktif } from '@/lib/konten';
 import { statusResponden } from '@/lib/progres';
 import { respondenSaatIni } from '@/lib/responden';
 
-// Kerangka area responden: navbar di atas (merek, menu, pemberitahuan kuis, menu akun) + isi + kaki halaman.
+// Kerangka area responden: navbar di atas (merek, menu, pemberitahuan materi berikutnya, menu akun) + isi + kaki halaman.
 // Pemeriksaan akses tetap di setiap halaman (wajibResponden); kerangka ini hanya menampilkan.
 export default async function KerangkaResponden({ children }: { children: React.ReactNode }) {
   const a = await respondenSaatIni();
   const struktur = a?.r.token_disimpan_pada ? await strukturAktif() : null;
-  let kuisBelum = 0;
-  let kuisSiap = 0;
-  if (a && struktur) {
-    const daftar = await kuisResponden(a.r._id, await statusResponden(a, struktur));
-    kuisBelum = daftar.filter((k) => k.status !== 'selesai').length;
-    kuisSiap = daftar.filter((k) => k.status === 'siap' || k.status === 'berjalan').length;
-  }
+  // Pemberitahuan: materi berikutnya yang sudah terbuka tetapi belum dibaca.
+  const r = a && struktur ? await statusResponden(a, struktur) : null;
+  const berikut = r?.daftar.find((d) => d.status === 'tersedia')?.materi ?? null;
   const nama = a?.r.nama ?? '';
   const keluar = (
     <form action={aksiKeluar}>
@@ -46,7 +41,7 @@ export default async function KerangkaResponden({ children }: { children: React.
               <span className="panel-merek-peran">{SLOGAN}</span>
             </span>
           </Link>
-          <MenuResponden kuisBelum={kuisBelum}>
+          <MenuResponden>
             <Link href="/profil/" className="navbar-akun-tautan">
               <Ikon nama="orang" ukuran={20} />
               Profil
@@ -56,13 +51,13 @@ export default async function KerangkaResponden({ children }: { children: React.
           <div className="navbar-kanan">
             <Link
               className="panel-lonceng"
-              href="/belajar/kuis/"
-              aria-label={kuisSiap ? `${kuisSiap} kuis siap dikerjakan` : 'Tidak ada kuis yang menunggu'}
+              href={berikut ? `/belajar/materi/${berikut.kunci}/` : '/belajar/modul/'}
+              aria-label={berikut ? `Materi ${berikut.nomor} siap dibaca` : 'Tidak ada materi baru'}
             >
               <Ikon nama="lonceng" />
-              {kuisSiap > 0 && (
+              {berikut && (
                 <span className="panel-lonceng-angka" aria-hidden="true">
-                  {kuisSiap}
+                  1
                 </span>
               )}
             </Link>

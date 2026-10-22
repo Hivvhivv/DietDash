@@ -21,22 +21,6 @@ poin_penting:
   - Yang diubah biasanya cara memasak, jumlah garam, dan perbandingan isi piring.
 rangkuman: Menerapkan DASH tidak berarti meninggalkan masakan Indonesia. Banyak masakan kita sudah sesuai, dan yang perlu diubah biasanya cara memasak, jumlah garam, dan isi piring. Contoh menu sehari dapat berisi nasi merah, lauk yang dikukus atau dibakar, sayur, dan buah.
 sumber: [nhlbi-dash, pgs-2014]
-kuis:
-  - k06
-  - teks: Manakah susunan isi piring yang sesuai anjuran?
-    pilihan:
-      - Separuh piring sayur dan buah, sisanya makanan pokok dan lauk
-      - Seluruh piring berisi nasi
-      - Separuh piring berisi gorengan
-    benar: 0
-    penjelasan: Usahakan separuh piring berisi sayur dan buah. Sisanya dibagi untuk makanan pokok dan lauk.
-  - teks: Sarapan mana yang lebih sesuai dengan DASH?
-    pilihan:
-      - Nasi uduk dengan bawang goreng dan kerupuk
-      - Nasi merah, telur rebus, tumis buncis, dan pisang
-      - Mi instan dengan bumbu penuh
-    benar: 1
-    penjelasan: Nasi merah, telur rebus, sayur, dan buah memberi serat, protein, dan kalium dengan sedikit garam.
 ```
 
 Menerapkan DASH tidak berarti meninggalkan masakan Indonesia. Yang perlu diubah biasanya hanya **cara memasak**, **jumlah garam**, dan **perbandingan isi piring**.
@@ -114,22 +98,6 @@ poin_penting:
   - Kecap asin, penyedap, kaldu bubuk, terasi, dan saus botolan tinggi natrium.
 rangkuman: Garam dapat dikurangi secara bertahap sehingga lidah sempat menyesuaikan. Bumbu rempah memberi rasa kuat tanpa banyak garam, dan garam yang ditambahkan di akhir memasak lebih terasa. Bumbu tinggi natrium dan makanan yang diawetkan dengan garam juga perlu dibatasi.
 sumber: [nhlbi-dash, permenkes-ggl]
-kuis:
-  - k07
-  - teks: Mengapa garam sebaiknya dikurangi sedikit demi sedikit?
-    pilihan:
-      - Agar lidah sempat terbiasa dengan rasa yang kurang asin
-      - Karena garam tidak berpengaruh pada tekanan darah
-      - Agar masakan cepat basi
-    benar: 0
-    penjelasan: Lidah perlu waktu untuk terbiasa. Pengurangan bertahap biasanya membuat lidah menyesuaikan dalam beberapa minggu.
-  - teks: Kapan sebaiknya garam ditambahkan agar jumlahnya bisa lebih sedikit?
-    pilihan:
-      - Di awal, sebelum bahan dimasukkan
-      - Menjelang masakan matang
-      - Garam ditambahkan dua kali
-    benar: 1
-    penjelasan: Garam yang ditambahkan menjelang masakan matang lebih terasa, sehingga jumlahnya bisa lebih sedikit.
 ```
 
 Lidah perlu waktu untuk terbiasa dengan rasa yang kurang asin. Kurangi garam **sedikit demi sedikit**.
@@ -159,22 +127,6 @@ poin_penting:
   - Bandingkan dua produk sejenis dan pilih yang natriumnya lebih rendah.
 rangkuman: Label Informasi Nilai Gizi membantu kita mengetahui kandungan natrium makanan kemasan. Perhatikan takaran saji, jumlah sajian per kemasan, dan angka natrium per sajian. Kalikan dengan jumlah sajian yang dimakan, lalu bandingkan dengan produk lain.
 sumber: [bpom-label, permenkes-ggl]
-kuis:
-  - k08
-  - teks: Pada label pangan, di baris mana Anda melihat kandungan garam?
-    pilihan:
-      - Baris "Natrium"
-      - Baris "Tanggal kedaluwarsa"
-      - Baris "Komposisi warna"
-    benar: 0
-    penjelasan: Kandungan garam ditunjukkan oleh baris "Natrium" pada Informasi Nilai Gizi, biasanya dalam miligram (mg) per sajian.
-  - teks: Ada dua merek kecap. Merek A berisi natrium 900 mg per sajian, merek B 600 mg per sajian dengan takaran saji yang sama. Mana yang lebih sesuai DASH?
-    pilihan:
-      - Merek A
-      - Merek B
-      - Sama saja
-    benar: 1
-    penjelasan: Dengan takaran saji yang sama, merek B mengandung natrium lebih rendah, jadi lebih sesuai. Tetap gunakan dalam jumlah sedikit.
 ```
 
 Makanan kemasan mencantumkan **Informasi Nilai Gizi** di labelnya. Bagian ini membantu kita membandingkan produk.
@@ -202,22 +154,6 @@ poin_penting:
   - Pilih air putih atau teh tawar daripada minuman manis.
 rangkuman: Makan di luar rumah tetap bisa disesuaikan dengan prinsip DASH. Pilih lauk yang tidak digoreng atau bersantan kental, tambahkan sayur, minta kuah dan sambal dipisah, serta kurangi kerupuk dan minuman manis. Di acara keluarga, ambil porsi kecil untuk makanan yang asin.
 sumber: [nhlbi-dash, pgs-2014]
-kuis:
-  - k09
-  - teks: Saat memesan soto, cara mana yang membantu mengurangi garam?
-    pilihan:
-      - Menambah kecap asin dan kerupuk
-      - Tidak menghabiskan kuahnya dan tidak menambah kecap
-      - Memesan dua mangkuk
-    benar: 1
-    penjelasan: Kuah biasanya mengandung banyak garam. Tidak menghabiskan kuah dan tidak menambah kecap membantu mengurangi natrium.
-  - teks: Minuman apa yang lebih baik dipilih saat makan di luar?
-    pilihan:
-      - Air putih atau teh tawar
-      - Es teh manis
-      - Minuman bersoda
-    benar: 0
-    penjelasan: Air putih dan teh tawar tidak mengandung gula tambahan, berbeda dengan minuman manis dan bersoda.
 ```
 
 Makan di warung, kantin, atau acara keluarga tetap bisa disesuaikan:

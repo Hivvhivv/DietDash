@@ -77,3 +77,39 @@ export function periksaBlokKhusus(isi: string): string | null {
   }
   return null;
 }
+
+// Memecah isi materi menjadi bagian per subjudul (di luar blok kode) agar tiap bagian tampil sebagai kartu.
+// Dipakai tingkat subjudul tertinggi yang ada: "##" (tombol editor) atau "###" (naskah benih).
+// Teks sebelum subjudul pertama menjadi bagian pembuka tanpa judul.
+export function bagiPerSubjudul(isi: string): string[] {
+  const semua = isi.split(/\r?\n/);
+  let dalamBlok = false;
+  let tingkat = 0;
+  for (const baris of semua) {
+    if (/^```/.test(baris)) dalamBlok = !dalamBlok;
+    const m = !dalamBlok && /^(#{2,3})\s/.exec(baris);
+    if (m && (!tingkat || m[1].length < tingkat)) tingkat = m[1].length;
+  }
+  if (!tingkat) return isi.trim() ? [isi] : [];
+  const pola = new RegExp(`^#{${tingkat}}\\s`);
+  const bagian: string[] = [];
+  let kini: string[] = [];
+  dalamBlok = false;
+  for (const baris of semua) {
+    if (/^```/.test(baris)) dalamBlok = !dalamBlok;
+    if (!dalamBlok && pola.test(baris) && kini.some((b) => b.trim())) {
+      bagian.push(kini.join('\n'));
+      kini = [];
+    }
+    kini.push(baris);
+  }
+  if (kini.some((b) => b.trim())) bagian.push(kini.join('\n'));
+  return bagian;
+}
+
+// Blok ```catatan: baris pertama "# Judul" (opsional) menjadi judul kotak; bawaannya "Catatan".
+export function parseCatatan(teks: string): { judul: string; isi: string } {
+  const [pertama, ...sisa] = teks.replace(/\s+$/, '').split(/\r?\n/);
+  const m = /^#\s+(.+)$/.exec(pertama ?? '');
+  return m ? { judul: m[1].trim(), isi: sisa.join('\n') } : { judul: 'Catatan', isi: teks };
+}

@@ -17,7 +17,7 @@ export default async function Undangan({ params }: { params: Promise<{ token: st
         judul="Undangan Admin"
         ringkasan={
           u
-            ? `Anda diundang sebagai ${u.peran === 'super_admin' ? 'super admin' : 'admin'}. Buat kata sandi, lalu atur autentikasi dua faktor.`
+            ? `Anda diundang sebagai ${u.peran === 'super_admin' ? 'super admin' : 'admin'}. Buat kata sandi untuk akun Anda.`
             : 'Undangan ini tidak dapat dipakai.'
         }
       >

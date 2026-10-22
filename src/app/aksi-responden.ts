@@ -4,7 +4,7 @@
 import { redirect } from 'next/navigation';
 import { formatToken } from '@/lib/identitas';
 import { strukturAktif } from '@/lib/konten';
-import { jawabSoal, mulaiAtauLanjutPercobaan, tandaiDibuka, type HasilJawab } from '@/lib/progres';
+import { tandaiDibuka } from '@/lib/progres';
 import {
   buatUlangTokenBelumDisimpan,
   daftar,
@@ -19,7 +19,6 @@ import {
   respondenSaatIni,
   wajibResponden,
 } from '@/lib/responden';
-import { keObjectId } from '@/lib/db';
 
 export interface StatusForm {
   pesan?: string;
@@ -105,31 +104,10 @@ export async function aksiStatusResponden(): Promise<{ masuk: boolean }> {
 
 // ---------- Belajar ----------
 
-export async function aksiBukaMateri(materiKunci: string): Promise<{ ok: boolean }> {
+// Membuka materi = materi selesai (tanpa kuis). `baru` memberi tahu halaman agar memuat ulang daftar & navigasi.
+export async function aksiBukaMateri(materiKunci: string): Promise<{ ok: boolean; baru: boolean }> {
   const a = await respondenSaatIni();
   const s = await strukturAktif();
-  if (!a || !a.r.token_disimpan_pada || !s) return { ok: false };
-  return { ok: await tandaiDibuka(a, s, String(materiKunci)) };
-}
-
-export async function aksiMulaiKuis(fd: FormData): Promise<void> {
-  const a = await wajibResponden();
-  const s = await strukturAktif();
-  const kunci = teks(fd, 'materi');
-  if (!s) redirect('/belajar/');
-  const p = await mulaiAtauLanjutPercobaan(a, s, kunci);
-  if (!p) redirect(`/belajar/materi/${encodeURIComponent(kunci)}/`);
-  redirect(`/belajar/materi/${encodeURIComponent(kunci)}/kuis/`);
-}
-
-export async function aksiJawab(
-  percobaanId: string,
-  soalKunci: string,
-  pilihanKunci: string,
-): Promise<{ ok: true; hasil: HasilJawab; selesai: boolean } | { ok: false; pesan: string }> {
-  const a = await respondenSaatIni();
-  if (!a) return { ok: false, pesan: 'Sesi Anda berakhir. Silakan masuk lagi; jawaban yang sudah dikirim tetap tersimpan.' };
-  const id = keObjectId(String(percobaanId));
-  if (!id) return { ok: false, pesan: 'Percobaan tidak valid.' };
-  return jawabSoal(a, id, String(soalKunci), String(pilihanKunci));
+  if (!a || !a.r.token_disimpan_pada || !s) return { ok: false, baru: false };
+  return tandaiDibuka(a, s, String(materiKunci));
 }

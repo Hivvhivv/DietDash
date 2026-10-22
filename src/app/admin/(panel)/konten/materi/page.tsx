@@ -47,7 +47,6 @@ export default async function KelolaMateri() {
                   <th scope="col">No.</th>
                   <th scope="col">Judul materi</th>
                   <th scope="col">Waktu baca</th>
-                  <th scope="col">Soal kuis</th>
                   <th scope="col">Tindakan</th>
                 </tr>
               </thead>
@@ -58,13 +57,8 @@ export default async function KelolaMateri() {
                     <th scope="row">{m.judul}</th>
                     <td>±{m.menit} mnt</td>
                     <td>
-                      {m.kuis?.jumlah_soal ?? 0}
-                      {(m.kuis?.jumlah_soal ?? 0) < 3 && <span className="lencana lencana-peringatan">⚠ min. 3</span>}
-                    </td>
-                    <td>
                       <span className="grup-tautan">
                         {bolehUbah && <Link href={`/admin/konten/materi/${m.kunci}/`}>Edit</Link>}
-                        {bolehUbah && <Link href={`/admin/konten/materi/${m.kunci}/kuis/`}>Kuis</Link>}
                         <Link href={`/admin/konten/pratinjau/${m.kunci}/`}>Pratinjau</Link>
                       </span>
                     </td>
@@ -72,7 +66,7 @@ export default async function KelolaMateri() {
                 ))}
                 {md.materi.length === 0 && (
                   <tr>
-                    <td colSpan={5}>Belum ada materi.</td>
+                    <td colSpan={4}>Belum ada materi.</td>
                   </tr>
                 )}
               </tbody>

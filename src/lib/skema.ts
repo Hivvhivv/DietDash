@@ -29,21 +29,4 @@ export const skemaMateri = z.object({
   sumber: z.array(z.string().trim().min(1)).max(20),
 });
 
-export const skemaKuis = z.object({
-  judul: teks('Judul kuis', 160),
-  petunjuk: teks('Petunjuk', 1000),
-  mode: z.enum(['A', 'B']),
-  batas_lulus: z.number().int().min(1).max(100),
-});
-
-export const skemaSoal = z.object({
-  teks: teks('Teks pertanyaan', 1000),
-  penjelasan: teks('Penjelasan jawaban', 1500),
-  pilihan: z
-    .array(z.object({ teks: teks('Pilihan jawaban', 400), benar: z.boolean() }))
-    .min(3, 'Isi 3–4 pilihan jawaban.')
-    .max(4, 'Isi 3–4 pilihan jawaban.')
-    .refine((p) => p.filter((x) => x.benar).length === 1, 'Tandai tepat satu jawaban yang benar.'),
-});
-
 export const PERAN_ADMIN = ['admin', 'super_admin'] as const;

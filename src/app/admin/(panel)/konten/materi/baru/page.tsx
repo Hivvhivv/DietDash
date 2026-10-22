@@ -19,8 +19,7 @@ export default async function MateriBaru({ searchParams }: { searchParams: Promi
       <h1>Materi baru{md ? ` di ${md.judul}` : ''}</h1>
       {md ? (
         <>
-          <p className="label-kecil">Setelah materi disimpan, kuisnya dibuat otomatis. Tambahkan minimal 3 soal.</p>
-          <FormMateri awal={{ kunci: '', modul_kunci: md.kunci, judul: '', tujuan: [], isi: '', poin_penting: [], rangkuman: '', estimasi_menit: null, sumber: [] }} />
+          <FormMateri awal={{ kunci: '', modul_kunci: md.kunci, judul: '', tujuan: [], isi: '', poin_penting: [], rangkuman: '', estimasi_menit: null, sumber: [], gambar_id: '', gambar_alt: '' }} />
         </>
       ) : (
         <p>Pilih modul dari halaman <Link href="/admin/konten/">Konten</Link>.</p>

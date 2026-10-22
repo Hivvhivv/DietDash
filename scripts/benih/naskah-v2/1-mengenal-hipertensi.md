@@ -21,22 +21,6 @@ poin_penting:
   - Hipertensi sering tidak menimbulkan keluhan, jadi ukur tekanan darah secara rutin.
 rangkuman: Tekanan darah adalah kekuatan dorongan darah pada dinding pembuluh darah. Hipertensi adalah keadaan ketika tekanan darah terus-menerus tinggi, umumnya 140/90 mmHg atau lebih pada beberapa kali pemeriksaan. Karena sering tidak terasa, cara paling pasti untuk mengetahuinya adalah dengan mengukur tekanan darah secara rutin.
 sumber: [perhi-2021, who-hipertensi, riskesdas-2018]
-kuis:
-  - k01
-  - teks: Pada hasil pemeriksaan 130/85 mmHg, angka 130 menunjukkan…
-    pilihan:
-      - Tekanan saat jantung memompa darah
-      - Tekanan saat jantung beristirahat di antara denyutan
-      - Jumlah denyut jantung per menit
-    benar: 0
-    penjelasan: Angka pertama (atas) adalah tekanan saat jantung memompa. Angka kedua (bawah) adalah tekanan saat jantung beristirahat di antara dua denyutan.
-  - teks: Pak Amir merasa sehat dan tidak pernah pusing. Apa cara paling tepat untuk mengetahui tekanan darahnya?
-    pilihan:
-      - Menunggu sampai ada keluhan
-      - Mengukur tekanan darah secara rutin
-      - Menebak dari perasaan badan
-    benar: 1
-    penjelasan: Hipertensi sering tidak terasa. Perasaan "baik-baik saja" bukan patokan; tekanan darah hanya bisa diketahui dengan diukur.
 ```
 
 ### Apa itu tekanan darah?
@@ -84,22 +68,6 @@ poin_penting:
   - Pola makan adalah faktor risiko yang paling dekat dengan keseharian kita.
 rangkuman: Faktor risiko adalah hal-hal yang membuat seseorang lebih mudah mengalami hipertensi. Usia dan keturunan tidak bisa diubah. Namun, sebagian besar faktor risiko bisa diubah, seperti kebiasaan makan asin, kurang makan sayur dan buah, berat badan berlebih, kurang bergerak, merokok, dan stres berkepanjangan.
 sumber: [perhi-2021, who-hipertensi]
-kuis:
-  - k02
-  - teks: Manakah yang termasuk faktor risiko hipertensi yang TIDAK bisa diubah?
-    pilihan:
-      - Kurang bergerak
-      - Riwayat hipertensi dalam keluarga
-      - Merokok
-    benar: 1
-    penjelasan: Riwayat keluarga tidak bisa diubah. Kurang bergerak dan merokok termasuk faktor risiko yang bisa diubah.
-  - teks: Kebiasaan mana yang membantu mengurangi faktor risiko hipertensi?
-    pilihan:
-      - Menambah sayur dan buah setiap hari
-      - Sering makan kerupuk dan ikan asin
-      - Duduk seharian tanpa bergerak
-    benar: 0
-    penjelasan: Kurang makan sayur dan buah adalah faktor risiko yang bisa diubah. Menambah sayur dan buah membantu memperbaiki pola makan.
 ```
 
 Faktor risiko adalah hal-hal yang membuat seseorang lebih mudah mengalami hipertensi.
@@ -136,22 +104,6 @@ poin_penting:
   - Pola makan sehat melengkapi pengobatan, bukan menggantikannya.
 rangkuman: Tekanan darah yang tinggi dalam waktu lama dapat merusak jantung, otak, ginjal, dan pembuluh darah. Risiko ini dapat dikurangi dengan mengendalikan tekanan darah. Pengendalian dilakukan dengan beberapa langkah sekaligus, termasuk minum obat sesuai anjuran, memeriksa tekanan darah rutin, dan memperbaiki pola makan.
 sumber: [perhi-2021, who-hipertensi]
-kuis:
-  - k11
-  - teks: Manakah langkah yang termasuk pengendalian tekanan darah?
-    pilihan:
-      - Memeriksa tekanan darah secara rutin dan minum obat sesuai anjuran dokter
-      - Memeriksa tekanan darah hanya saat merasa pusing
-      - Mengurangi obat sendiri bila merasa sehat
-    benar: 0
-    penjelasan: Pengendalian tekanan darah meliputi pemeriksaan rutin, minum obat sesuai anjuran dokter, dan memperbaiki pola makan serta gaya hidup. Perubahan obat selalu dibicarakan dengan dokter.
-  - teks: Apa peran pola makan sehat dalam pengendalian hipertensi?
-    pilihan:
-      - Menggantikan semua obat dari dokter
-      - Melengkapi pengobatan dari tenaga kesehatan
-      - Tidak berpengaruh sama sekali
-    benar: 1
-    penjelasan: Pola makan sehat membantu mengendalikan tekanan darah dan melengkapi pengobatan. Pola makan tidak menggantikan obat dari dokter.
 ```
 
 ### Akibat bila tidak dikendalikan

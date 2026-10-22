@@ -75,14 +75,13 @@ export default async function EditModul({ params, searchParams }: { params: Prom
                 </span>
                 <span className="grup-tombol">
                   <Link href={`/admin/konten/materi/${m.kunci}/`}>Edit</Link>
-                  <Link href={`/admin/konten/materi/${m.kunci}/kuis/`}>Kuis</Link>
                   {!m.diarsipkan && (
                     <FormAksi
                       aksi={aksiHapusMateri}
                       data={{ kunci: m.kunci }}
                       label="Hapus"
                       bahaya
-                      konfirmasi={`Hapus materi "${m.judul}" beserta kuisnya? Bila sudah dipakai responden, materi akan diarsipkan.`}
+                      konfirmasi={`Hapus materi "${m.judul}"? Bila sudah dipakai responden, materi akan diarsipkan.`}
                     />
                   )}
                 </span>
@@ -95,7 +94,7 @@ export default async function EditModul({ params, searchParams }: { params: Prom
       <details className="tanya bahaya">
         <summary>Hapus modul</summary>
         <div className="tanya-isi">
-          <p>Semua materi dan kuis di dalamnya ikut terhapus. Bila sudah ada responden yang memakainya, modul diarsipkan agar data tetap utuh.</p>
+          <p>Semua materi di dalamnya ikut terhapus. Bila sudah ada responden yang memakainya, modul diarsipkan agar data tetap utuh.</p>
           <FormAksi aksi={aksiHapusModul} data={{ kunci: md.kunci }} label="Hapus modul" bahaya konfirmasi={`Hapus modul "${md.judul}"?`} />
         </div>
       </details>

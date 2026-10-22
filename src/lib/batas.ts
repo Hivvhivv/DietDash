@@ -1,4 +1,4 @@
-// Pembatasan jumlah percobaan (masuk, daftar, 2FA) per kunci dan per alamat IP.
+// Pembatasan jumlah percobaan (masuk, daftar) per kunci dan per alamat IP.
 import { ObjectId } from 'mongodb';
 import { headers } from 'next/headers';
 import { koleksi } from './db';

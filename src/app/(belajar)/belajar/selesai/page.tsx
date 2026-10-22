@@ -17,7 +17,7 @@ export default async function Selesai() {
 
   return (
     <>
-      <KepalaHalaman label="Semua materi selesai" judul={`Selamat, ${a.r.nama}!`} ringkasan="Anda sudah menyelesaikan seluruh materi dan kuis DASH Sehat." gambar={{ src: '/gambar/ilustrasi/kuis.png', width: 140, height: 110 }} />
+      <KepalaHalaman label="Semua materi selesai" judul={`Selamat, ${a.r.nama}!`} ringkasan="Anda sudah membaca seluruh materi DASH Sehat." gambar={{ src: '/gambar/ilustrasi/kuis.png', width: 140, height: 110 }} />
       <div className="wadah-baca bagian-isi">
         <section className="kartu bagian-kartu" aria-labelledby="judul-prinsip">
           <h2 id="judul-prinsip">Rangkuman prinsip DASH</h2>

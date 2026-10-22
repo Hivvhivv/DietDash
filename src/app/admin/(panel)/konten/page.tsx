@@ -61,7 +61,7 @@ export default async function Konten({ searchParams }: { searchParams: Promise<{
     <>
       <div className="dasbor-kepala">
         <h1>Kelola Modul</h1>
-        <p>Versi konten, modul, dan materi di dalamnya. Materi dan kuis juga bisa dikelola dari menu Kelola Materi dan Kelola Kuis.</p>
+        <p>Versi konten, modul, dan materi di dalamnya. Materi juga bisa dikelola dari menu Kelola Materi.</p>
       </div>
       {pesan && PESAN[pesan] && (
         <p className="pesan-sukses" role="status">
@@ -71,8 +71,8 @@ export default async function Konten({ searchParams }: { searchParams: Promise<{
 
       {aktif?.contoh && (
         <p className="kotak kotak-peringatan">
-          🧪 Konten yang terbit sekarang adalah <strong>konten contoh</strong>. Anda boleh mengedit atau menghapus modul, materi, dan
-          kuisnya lewat versi kerja di bawah.{' '}
+          🧪 Konten yang terbit sekarang adalah <strong>konten contoh</strong>. Anda boleh mengedit atau menghapus modul dan materinya
+          lewat versi kerja di bawah.{' '}
           {admin.peran === 'super_admin' ? (
             <>
               Untuk menghapus semuanya sekaligus: <Link href="/admin/versi/">Versi Konten → Hapus Konten Contoh</Link>.
@@ -150,15 +150,9 @@ export default async function Konten({ searchParams }: { searchParams: Promise<{
               ))}
             </ul>
           ) : (
-            <p>Semua modul punya materi, setiap materi punya kuis minimal 3 soal dengan kunci dan penjelasan.</p>
+            <p>Semua modul punya materi, dan setiap materi punya isi, tujuan, dan rangkuman.</p>
           )}
         </section>
-      )}
-
-      {kerja && bolehUbah && (
-        <p className="label-kecil">
-          Aturan selesai kuis (Mode A/B) diatur di <Link href="/admin/konten/kuis/">Kelola Kuis</Link>.
-        </p>
       )}
 
       {struktur && (
@@ -192,13 +186,12 @@ export default async function Konten({ searchParams }: { searchParams: Promise<{
                       <span>
                         <strong>{m.nomor}</strong> {m.judul}{' '}
                         <span className="label-kecil">
-                          · ±{m.menit} mnt · kuis {m.kuis?.jumlah_soal ?? 0} soal{(m.kuis?.jumlah_soal ?? 0) < 3 && ' ⚠'}
+                          · ±{m.menit} mnt
                         </span>
                       </span>
                       <span className="grup-tombol">
                         {bolehUbah && <TombolGeser aksi={aksiGeserMateri} data={{ kunci: m.kunci, modul: md.kunci }} />}
                         <Link href={`/admin/konten/materi/${m.kunci}/`}>Edit</Link>
-                        <Link href={`/admin/konten/materi/${m.kunci}/kuis/`}>Kuis</Link>
                         <Link href={`/admin/konten/pratinjau/${m.kunci}/`}>Pratinjau</Link>
                       </span>
                     </li>

@@ -12,24 +12,21 @@ interface ItemMenu {
   cocok: (path: string) => boolean;
 }
 
-const halamanKuis = (p: string) => p.startsWith('/belajar/kuis/') || /^\/belajar\/materi\/[^/]+\/kuis\//.test(p);
-
 const MENU: ItemMenu[] = [
   { href: '/belajar/', label: 'Beranda', ikon: 'rumah', cocok: (p) => p === '/belajar/' || p.startsWith('/belajar/selesai/') },
   {
     href: '/belajar/modul/',
     label: 'Modul Pembelajaran',
     ikon: 'buku',
-    cocok: (p) => p.startsWith('/belajar/modul/') || (p.startsWith('/belajar/materi/') && !halamanKuis(p)) || p.startsWith('/pengenalan/'),
+    cocok: (p) => p.startsWith('/belajar/modul/') || p.startsWith('/belajar/materi/') || p.startsWith('/pengenalan/'),
   },
   { href: '/belajar/menu-sehat/', label: 'Menu Sehat', ikon: 'piring', cocok: (p) => p.startsWith('/belajar/menu-sehat/') },
   { href: '/belajar/tips/', label: 'Tips Sehari-hari', ikon: 'lampu', cocok: (p) => p.startsWith('/belajar/tips/') },
-  { href: '/belajar/kuis/', label: 'Kuis', ikon: 'kuis', cocok: halamanKuis },
 ];
 
 // Navbar atas responden. Layar sempit: daftar menu terlipat di balik tombol "Menu".
 // children = tautan akun (Profil, Keluar) yang ikut tampil di daftar menu ponsel.
-export default function MenuResponden({ kuisBelum, children }: { kuisBelum: number; children?: React.ReactNode }) {
+export default function MenuResponden({ children }: { children?: React.ReactNode }) {
   const path = (usePathname() ?? '').replace(/\/?$/, '/');
   const [buka, setBuka] = useState(false);
   const [js, setJs] = useState(false);
@@ -51,11 +48,6 @@ export default function MenuResponden({ kuisBelum, children }: { kuisBelum: numb
               <Link href={m.href} aria-current={m.cocok(path) ? 'page' : undefined}>
                 <Ikon nama={m.ikon} ukuran={20} />
                 {m.label}
-                {m.href === '/belajar/kuis/' && kuisBelum > 0 && (
-                  <span className="navbar-angka" aria-label={`${kuisBelum} kuis belum selesai`}>
-                    {kuisBelum}
-                  </span>
-                )}
               </Link>
             </li>
           ))}

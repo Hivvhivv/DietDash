@@ -5,17 +5,17 @@ import CincinProgres from '@/components/belajar/CincinProgres';
 import { HatiSenyum, MangkukSehat } from '@/components/belajar/IlustrasiBeranda';
 import Ikon from '@/components/Ikon';
 import { srcGambarModul } from '@/data/gambar';
-import { tipsHariIni } from '@/data/tips';
 import { progresPerModul, type ProgresModul } from '@/lib/beranda-responden';
 import { strukturAktif } from '@/lib/konten';
 import { statusResponden } from '@/lib/progres';
 import { wajibResponden } from '@/lib/responden';
+import { tipsHariIni } from '@/lib/tips';
 
 export const metadata: Metadata = { title: 'Beranda' };
 export const dynamic = 'force-dynamic'; // "Tips hari ini" berganti setiap hari
 
 const PESAN: Record<string, string> = {
-  terkunci: 'Materi itu masih terkunci. Selesaikan dulu kuis materi sebelumnya. Anda diarahkan ke materi yang sedang aktif.',
+  terkunci: 'Materi itu masih terkunci. Baca dulu materi sebelumnya secara berurutan.',
 };
 
 function TombolModul({ m }: { m: ProgresModul }) {
@@ -61,8 +61,7 @@ function TombolModul({ m }: { m: ProgresModul }) {
 // Tidak ada grafik kesehatan atau peringkat; progres bukan keberhasilan klinis.
 export default async function Beranda({ searchParams }: { searchParams: Promise<{ pesan?: string }> }) {
   const a = await wajibResponden();
-  const [struktur, sp] = await Promise.all([strukturAktif(), searchParams]);
-  const tips = tipsHariIni();
+  const [struktur, sp, tips] = await Promise.all([strukturAktif(), searchParams, tipsHariIni()]);
   const r = struktur ? await statusResponden(a, struktur) : null;
   const modul = struktur && r ? progresPerModul(struktur, r) : [];
   const modulSelesai = modul.filter((m) => m.status === 'selesai').length;
@@ -183,7 +182,13 @@ export default async function Beranda({ searchParams }: { searchParams: Promise<
           <span className="beranda-kartu-teks">
             <span className="beranda-kartu-judul">Tips Hari Ini</span>
             <span>
-              <strong>{tips.judul}.</strong> {tips.teks}
+              {tips ? (
+                <>
+                  <strong>{tips.judul}.</strong> {tips.catatan || tips.solusi}
+                </>
+              ) : (
+                'Langkah kecil setiap hari untuk pola makan yang lebih sehat.'
+              )}
             </span>
           </span>
           <span className="beranda-kartu-panah" aria-hidden="true">

@@ -60,7 +60,7 @@ export default async function Versi() {
               tidak bisa dikunci.
             </p>
             <p className="label-kecil">
-              Yang dihapus: semua modul, materi, kuis, dan soal di versi ini. Akun dan progres responden uji coba tidak dihapus; tandai
+              Yang dihapus: semua modul dan materi di versi ini. Akun dan progres responden uji coba tidak dihapus; tandai
               akun uji coba sebagai “bukan sampel” di Manajemen Pengguna.
             </p>
             <FormAksi
@@ -68,7 +68,7 @@ export default async function Versi() {
               data={{ id: v._id.toHexString() }}
               label="Hapus Konten Contoh"
               bahaya
-              konfirmasi="Hapus semua modul, materi, dan kuis contoh? Tindakan ini tidak bisa dibatalkan."
+              konfirmasi="Hapus semua modul dan materi contoh? Tindakan ini tidak bisa dibatalkan."
             >
               <div className="bidang">
                 <label htmlFor={`alasan-contoh-${v._id.toHexString()}`}>Alasan</label>

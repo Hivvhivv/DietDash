@@ -66,8 +66,8 @@ export default async function Pengenalan() {
             <Link href="/daftar/">Daftar</Link> dengan nama dan nomor HP. Simpan kode akses 6 angka yang muncul.
           </li>
           <li>Ikuti pretest sesuai jadwal dari peneliti.</li>
-          <li>Pelajari materi secara berurutan. Setiap materi ditutup kuis kecil.</li>
-          <li>Setelah kuis selesai, materi berikutnya terbuka. Progres tersimpan otomatis.</li>
+          <li>Pelajari materi secara berurutan. Setiap materi hanya butuh beberapa menit.</li>
+          <li>Setelah sebuah materi dibuka, materi berikutnya terbuka. Progres tersimpan otomatis.</li>
         </ol>
 
         {struktur && struktur.modul.length > 0 && (

@@ -11,7 +11,6 @@ const menuDalam = [
   { href: '/belajar/modul/', label: 'Modul' },
   { href: '/belajar/menu-sehat/', label: 'Menu Sehat' },
   { href: '/belajar/tips/', label: 'Tips' },
-  { href: '/belajar/kuis/', label: 'Kuis' },
 ];
 
 export default function MenuUtama({ dalam = false }: { dalam?: boolean }) {

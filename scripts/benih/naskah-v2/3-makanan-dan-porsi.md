@@ -21,28 +21,6 @@ poin_penting:
   - Pilih buah utuh daripada jus kemasan yang sering diberi gula.
 rangkuman: Sayur dan buah adalah bagian penting diet DASH karena kaya serat, kalium, dan magnesium. Satu porsi sayur kira-kira setengah mangkuk sayur matang atau satu mangkuk sayur daun mentah, sedangkan satu porsi buah kira-kira satu buah ukuran sedang. Pilih sayur dan buah dengan warna yang beragam.
 sumber: [nhlbi-dash, pgs-2014]
-kuis:
-  - teks: Kira-kira berapa satu porsi sayur matang?
-    pilihan:
-      - ½ mangkuk
-      - 3 mangkuk
-      - 1 sendok teh
-    benar: 0
-    penjelasan: Satu porsi sayur kira-kira ½ mangkuk sayur matang atau 1 mangkuk sayur daun mentah.
-  - teks: Mana pilihan buah yang lebih sesuai dengan prinsip DASH?
-    pilihan:
-      - Jus buah kemasan dengan tambahan gula
-      - Satu buah pisang utuh
-      - Manisan buah
-    benar: 1
-    penjelasan: Buah utuh mengandung serat dan tidak diberi tambahan gula. Jus kemasan dan manisan sering mengandung banyak gula.
-  - teks: Mengapa sayur dan buah diperbanyak dalam diet DASH?
-    pilihan:
-      - Karena kaya serat dan kalium
-      - Karena tinggi garam
-      - Karena tinggi lemak jenuh
-    benar: 0
-    penjelasan: Sayur dan buah kaya serat, kalium, dan magnesium yang membantu menjaga tekanan darah.
 ```
 
 ### Sayuran
@@ -93,16 +71,6 @@ poin_penting:
   - Kurangi daging olahan seperti sosis, kornet, dan dendeng.
 rangkuman: Biji-bijian utuh seperti beras merah, jagung, dan oat menjadi sumber tenaga yang kaya serat. Protein dapat diperoleh dari ikan, ayam tanpa kulit, telur, serta tempe, tahu, dan kacang-kacangan. Daging olahan sebaiknya dikurangi karena biasanya tinggi garam dan lemak.
 sumber: [nhlbi-dash, pgs-2014]
-kuis:
-  - k13
-  - k15
-  - teks: Sumber protein nabati yang dianjurkan dalam DASH adalah…
-    pilihan:
-      - Kacang hijau dan kacang merah
-      - Sosis ayam
-      - Ikan asin
-    benar: 0
-    penjelasan: Kacang-kacangan seperti kacang hijau dan kacang merah adalah sumber protein nabati yang kaya serat dan magnesium.
 ```
 
 ### Biji-bijian dan makanan pokok
@@ -136,28 +104,6 @@ poin_penting:
   - Kalsium juga bisa didapat dari tahu, tempe, ikan teri tawar, dan sayuran hijau.
 rangkuman: Susu dan olahannya adalah sumber kalsium. Diet DASH menganjurkan susu rendah lemak atau tanpa lemak serta yogurt tanpa tambahan gula. Bila tidak terbiasa minum susu, kalsium bisa didapat dari tahu, tempe, ikan teri tawar, dan sayuran hijau.
 sumber: [nhlbi-dash, pgs-2014]
-kuis:
-  - teks: Jenis susu yang dianjurkan dalam diet DASH adalah…
-    pilihan:
-      - Susu kental manis
-      - Susu rendah lemak atau tanpa lemak
-      - Susu dengan tambahan krim
-    benar: 1
-    penjelasan: Diet DASH menganjurkan susu rendah lemak atau tanpa lemak. Susu kental manis tinggi gula.
-  - teks: Bila Anda tidak terbiasa minum susu, sumber kalsium lain yang bisa dipilih adalah…
-    pilihan:
-      - Tahu, tempe, dan ikan teri tawar
-      - Kerupuk dan keripik
-      - Minuman bersoda
-    benar: 0
-    penjelasan: Tahu, tempe, ikan teri tawar, dan sayuran hijau mengandung kalsium sehingga bisa menjadi pilihan bila tidak minum susu.
-  - teks: Kira-kira berapa satu porsi susu?
-    pilihan:
-      - 1 sendok makan
-      - 1 gelas (±240 ml)
-      - 1 liter
-    benar: 1
-    penjelasan: Satu porsi susu kira-kira 1 gelas (±240 ml) atau 1 gelas yogurt tawar.
 ```
 
 Susu dan olahannya adalah sumber kalsium. Diet DASH menganjurkan susu **rendah lemak** atau **tanpa lemak** dan yogurt tanpa tambahan gula. Satu porsi kira-kira **1 gelas susu (±240 ml)** atau **1 gelas yogurt tawar**.
@@ -183,22 +129,6 @@ poin_penting:
   - Pilih cara memasak dengan sedikit minyak, seperti merebus, mengukus, memanggang, atau membuat pepes.
 rangkuman: Natrium banyak terdapat dalam garam dapur dan bumbu serta makanan olahan. Kementerian Kesehatan menganjurkan garam paling banyak satu sendok teh per orang per hari, termasuk dari makanan olahan. Lemak jenuh dari santan kental, gorengan, dan jeroan juga perlu dibatasi dengan memilih cara memasak yang memakai sedikit minyak.
 sumber: [permenkes-ggl, who-natrium, nhlbi-dash]
-kuis:
-  - k05
-  - teks: Manakah makanan yang tinggi lemak jenuh?
-    pilihan:
-      - Sayur bening bayam
-      - Gorengan dan santan kental
-      - Pepaya
-    benar: 1
-    penjelasan: Lemak jenuh banyak terdapat dalam gorengan, santan kental, kulit ayam, jeroan, dan mentega.
-  - teks: Cara memasak mana yang memakai lebih sedikit minyak?
-    pilihan:
-      - Menggoreng dengan minyak banyak
-      - Mengukus atau membuat pepes
-      - Menggoreng berulang kali
-    benar: 1
-    penjelasan: Mengukus, merebus, memanggang, dan membuat pepes memakai sedikit atau tanpa minyak sehingga lebih rendah lemak.
 ```
 
 ### Natrium
@@ -231,28 +161,6 @@ poin_penting:
   - Yang terpenting adalah arahnya; ahli gizi dapat membantu menentukan porsi yang tepat.
 rangkuman: Pedoman DASH memberi contoh jumlah porsi tiap kelompok makanan untuk kebutuhan energi yang berbeda. Angka ini hanya contoh, bukan anjuran pribadi. Ukuran rumah tangga seperti gelas, mangkuk, dan sendok membantu memperkirakan porsi tanpa harus menimbang.
 sumber: [nhlbi-dash, nhlbi-panduan]
-kuis:
-  - teks: Pada kebutuhan 2.000 kalori, berapa contoh porsi sayur per hari?
-    pilihan:
-      - 1 porsi
-      - 4–5 porsi
-      - 10–12 porsi
-    benar: 1
-    penjelasan: Pada contoh kebutuhan 2.000 kalori, pedoman DASH menyebut sekitar 4–5 porsi sayur per hari.
-  - teks: Mengapa tabel porsi DASH disebut "contoh"?
-    pilihan:
-      - Karena kebutuhan setiap orang berbeda
-      - Karena tabel itu tidak penting
-      - Karena semua orang harus makan sama banyak
-    benar: 0
-    penjelasan: Kebutuhan energi tiap orang berbeda menurut usia, jenis kelamin, berat badan, dan aktivitas. Ahli gizi dapat membantu menentukan porsi yang tepat.
-  - teks: Bu Ani makan ½ mangkuk tumis kangkung dan 1 mangkuk sayur asem. Kira-kira berapa porsi sayur yang ia makan?
-    pilihan:
-      - 1 porsi
-      - 3 porsi
-      - 6 porsi
-    benar: 1
-    penjelasan: ½ mangkuk sayur matang = 1 porsi, dan 1 mangkuk sayur matang = 2 porsi. Jadi totalnya sekitar 3 porsi.
 ```
 
 Kebutuhan energi tiap orang berbeda. Tabel berikut hanya **contoh** dari pedoman DASH, bukan anjuran pribadi. Pada layar ponsel, geser tabel ke samping untuk melihat semua kolom.

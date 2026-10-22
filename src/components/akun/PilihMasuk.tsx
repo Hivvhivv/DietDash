@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Ikon from '../Ikon';
 
-// Pengalih halaman masuk: responden (nomor HP + kode akses) atau admin (email + kata sandi + 2FA).
+// Pengalih halaman masuk: responden (nomor HP + kode akses) atau admin (email + kata sandi).
 export default function PilihMasuk({ aktif }: { aktif: 'responden' | 'admin' }) {
   const pilihan = [
     { kunci: 'responden', href: '/masuk/', label: 'Responden', ikon: 'orang' },

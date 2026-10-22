@@ -52,12 +52,9 @@ for (const folder of ['app', 'components', 'data']) {
   }
 }
 
-// Pada kuis, pilihan jawaban yang salah memang sengaja berisi klaim keliru,
-// jadi yang diperiksa hanya pertanyaan dan umpan balik.
-const { daftarSoal } = await import('./benih/kuis-v1.ts');
-for (const s of daftarSoal) {
-  periksaTeks(`${s.pertanyaan}\n${s.umpan_balik}`, `scripts/benih/kuis-v1.ts [${s.id}]`);
-}
+// Tips contoh (diimpor ke database dengan benih-tips; tips buatan admin diperiksa saat disimpan).
+periksaTeks(readFileSync(join(akar, 'scripts', 'benih', 'tips-contoh.ts'), 'utf8'), 'scripts/benih/tips-contoh.ts');
+
 
 if (todo.length) {
   console.log(`\n⚠ ${todo.length} penanda TODO (harus diselesaikan sebelum versi dibekukan):`);

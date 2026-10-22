@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import { aksiMasukAdmin, aksiTerimaUndangan, aksiUndangAdmin, aksiVerifikasi2fa } from '@/app/admin/aksi-akun';
+import { aksiMasukAdmin, aksiTerimaUndangan, aksiUndangAdmin } from '@/app/admin/aksi-akun';
 import Bidang, { Pesan } from '../belajar/Bidang';
 
 export interface StatusUmum {
@@ -73,29 +73,6 @@ export function FormMasukAdmin() {
       <Bidang id="sandi" label="Kata sandi" type="password" autoComplete="current-password" required />
       <button type="submit" className="tombol" disabled={menunggu}>
         {menunggu ? 'Memeriksa…' : 'Lanjut'}
-      </button>
-    </form>
-  );
-}
-
-export function FormKode2fa({ label = 'Masuk' }: { label?: string }) {
-  const [status, aksi, menunggu] = useActionState(aksiVerifikasi2fa, undefined);
-  return (
-    <form action={aksi} className="form-admin" noValidate>
-      <Pesan pesan={status?.pesan} />
-      <Bidang
-        id="kode"
-        label="Kode 6 digit"
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        pattern="[0-9]*"
-        maxLength={7}
-        required
-        className="input-token"
-        petunjuk="Buka aplikasi autentikator di HP, lalu ketik kode yang sedang tampil."
-      />
-      <button type="submit" className="tombol" disabled={menunggu}>
-        {menunggu ? 'Memeriksa…' : label}
       </button>
     </form>
   );

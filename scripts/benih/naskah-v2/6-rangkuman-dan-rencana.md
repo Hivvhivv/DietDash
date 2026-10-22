@@ -21,28 +21,6 @@ poin_penting:
   - Diet DASH melengkapi pengobatan; tetap ikuti anjuran tenaga kesehatan.
 rangkuman: Diet DASH adalah pola makan jangka panjang yang membantu mengendalikan tekanan darah dengan memperbanyak sayur, buah, biji-bijian utuh, kacang-kacangan, ikan, dan susu rendah lemak, serta membatasi garam, lemak jenuh, dan gula. Pola ini dapat diterapkan pada masakan Indonesia dan berjalan bersama pengobatan dari tenaga kesehatan.
 sumber: [nhlbi-dash, pgs-2014, perhi-2021]
-kuis:
-  - teks: Manakah ringkasan diet DASH yang paling tepat?
-    pilihan:
-      - Pola makan kaya sayur, buah, dan biji-bijian utuh serta rendah garam
-      - Diet tanpa nasi selama seminggu
-      - Pola makan tinggi daging olahan
-    benar: 0
-    penjelasan: Diet DASH memperbanyak sayur, buah, biji-bijian utuh, kacang-kacangan, ikan, dan susu rendah lemak, serta membatasi garam, lemak jenuh, dan gula.
-  - teks: Garam yang dibatasi paling banyak 1 sendok teh per hari itu berasal dari…
-    pilihan:
-      - Hanya garam yang ditabur saat memasak
-      - Semua sumber, termasuk kecap, penyedap, dan makanan kemasan
-      - Hanya garam di meja makan
-    benar: 1
-    penjelasan: Batas 1 sendok teh (±5 gram) berlaku untuk semua sumber, termasuk kecap, penyedap, dan makanan olahan.
-  - teks: Apa yang tetap perlu dilakukan selain menjalani diet DASH?
-    pilihan:
-      - Memeriksa tekanan darah rutin dan mengikuti anjuran tenaga kesehatan
-      - Mengurangi obat sendiri
-      - Berhenti memeriksa tekanan darah
-    benar: 0
-    penjelasan: Diet DASH melengkapi pengobatan. Pemeriksaan rutin dan anjuran tenaga kesehatan tetap penting.
 ```
 
 Selamat, Anda sudah sampai di modul terakhir. Berikut ringkasan hal-hal terpenting.
@@ -71,28 +49,6 @@ poin_penting:
   - Lihat kembali rencana setiap minggu dan sesuaikan bila perlu.
 rangkuman: Rencana makan sehat pribadi membantu Anda mulai menerapkan DASH. Pilih satu sampai tiga perubahan kecil, tuliskan dengan jelas kapan dan seberapa sering, lalu tinjau setiap minggu. Bila ada pertanyaan tentang kondisi kesehatan Anda, bicarakan dengan dokter, perawat, atau ahli gizi.
 sumber: [nhlbi-panduan, pgs-2014]
-kuis:
-  - teks: Rencana mana yang paling jelas dan bisa dicapai?
-    pilihan:
-      - Saya akan makan sehat mulai sekarang
-      - Setiap makan siang saya menambah semangkuk sayur, minimal lima hari seminggu
-      - Saya tidak akan makan apa pun yang asin selamanya
-    benar: 1
-    penjelasan: Rencana yang baik menyebut apa, kapan, dan seberapa sering, serta cukup kecil untuk dijalankan.
-  - teks: Berapa banyak perubahan yang sebaiknya dipilih untuk memulai?
-    pilihan:
-      - Satu sampai tiga perubahan kecil
-      - Sepuluh perubahan sekaligus
-      - Tidak perlu memilih
-    benar: 0
-    penjelasan: Memulai dengan satu sampai tiga perubahan kecil lebih mudah dijalankan dan dipertahankan.
-  - teks: Apa yang sebaiknya dilakukan di akhir setiap minggu?
-    pilihan:
-      - Melihat kembali rencana dan menyesuaikannya bila perlu
-      - Menghapus rencana
-      - Menambah sepuluh target baru
-    benar: 0
-    penjelasan: Meninjau rencana setiap minggu membantu Anda melihat kemajuan dan menyesuaikan target yang terlalu berat.
 ```
 
 Pilih **satu sampai tiga** hal yang ingin Anda mulai minggu ini. Tulis dengan jelas **apa**, **kapan**, dan **seberapa sering**.

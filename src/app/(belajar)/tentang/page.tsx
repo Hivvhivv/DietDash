@@ -27,7 +27,7 @@ export default async function Tentang() {
           <h2 id="tujuan">Tujuan edukasi</h2>
           <p>
             DASH Sehat dikembangkan sebagai media edukasi dalam sebuah penelitian. Materinya disusun
-            berurutan dalam enam modul, dilengkapi contoh menu Indonesia dan kuis latihan.
+            berurutan dalam enam modul, dilengkapi contoh menu Indonesia dan tips sehari-hari.
           </p>
           <h3>Tim pengembang</h3>
           {/* TODO: isi identitas institusi/tim peneliti setelah disetujui. */}
@@ -62,7 +62,7 @@ export default async function Tentang() {
           <h2 id="privasi">Privasi dan penggunaan data</h2>
           <ul>
             <li>Untuk belajar, responden mendaftar dengan nama dan nomor HP. Kode akses 6 angka dibuat oleh sistem.</li>
-            <li>Yang disimpan: nama, nomor HP, kode peserta internal, progres belajar, dan jawaban kuis.</li>
+            <li>Yang disimpan: nama, nomor HP, kode peserta internal, dan progres belajar (materi yang sudah dibaca dan lama membaca).</li>
             <li>Kami tidak meminta email, NIK, alamat, tanggal lahir, atau data tekanan darah.</li>
             <li>Website ini tidak memakai alat pelacak atau iklan dari pihak ketiga.</li>
           </ul>

@@ -16,16 +16,16 @@ export default async function MasukAdmin({ searchParams }: { searchParams: Promi
       <HalamanAkun
         ilustrasi="admin"
         judul="Masuk Admin"
-        ringkasan="Khusus tim peneliti. Setelah kata sandi, Anda diminta kode dari aplikasi autentikator."
+        ringkasan="Khusus tim peneliti. Masuk dengan email dan kata sandi admin."
       >
         <PilihMasuk aktif="admin" />
         {pesan === 'akun-dibuat' && (
           <p className="pesan-sukses" role="status">
-            Akun admin dibuat. Masuk, lalu atur autentikasi dua faktor.
+            Akun admin dibuat. Silakan masuk.
           </p>
         )}
         <FormMasukAdmin />
-        <p className="akun-tautan-kecil">Lupa kata sandi atau HP hilang? Hubungi super admin untuk mereset akun Anda.</p>
+        <p className="akun-tautan-kecil">Lupa kata sandi? Hubungi super admin.</p>
       </HalamanAkun>
     </KerangkaAkun>
   );

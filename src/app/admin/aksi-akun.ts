@@ -1,6 +1,6 @@
 'use server';
 
-// Masuk admin (kata sandi + 2FA), undangan, dan pengelolaan akun admin.
+// Masuk admin (email + kata sandi), undangan, dan pengelolaan akun admin.
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import {
@@ -9,7 +9,6 @@ import {
   masukAdmin,
   terimaUndangan,
   ubahAdmin,
-  verifikasi2fa,
   wajibAdmin,
 } from '@/lib/admin-auth';
 import { keObjectId, type PeranAdmin } from '@/lib/db';
@@ -28,12 +27,6 @@ export async function aksiMasukAdmin(_: StatusAdmin | undefined, fd: FormData): 
   const email = teks(fd, 'email');
   const h = await masukAdmin(email, teks(fd, 'sandi'));
   if (!h.ok) return { pesan: h.pesan, nilai: { email } };
-  redirect(h.perluAtur2fa ? '/admin/masuk/atur-2fa/' : '/admin/masuk/verifikasi/');
-}
-
-export async function aksiVerifikasi2fa(_: StatusAdmin | undefined, fd: FormData): Promise<StatusAdmin> {
-  const h = await verifikasi2fa(teks(fd, 'kode'));
-  if (!h.ok) return { pesan: h.pesan };
   redirect('/admin/dashboard/');
 }
 
@@ -64,8 +57,8 @@ export async function aksiUbahAdmin(_: StatusAdmin | undefined, fd: FormData): P
   const admin = await wajibAdmin('super_admin');
   const id = keObjectId(teks(fd, 'id'));
   const t = teks(fd, 'tindakan');
-  if (!id || !['nonaktifkan', 'aktifkan', 'reset_2fa'].includes(t)) return { pesan: 'Permintaan tidak valid.' };
-  const h = await ubahAdmin(id, t as 'nonaktifkan' | 'aktifkan' | 'reset_2fa', admin);
+  if (!id || !['nonaktifkan', 'aktifkan'].includes(t)) return { pesan: 'Permintaan tidak valid.' };
+  const h = await ubahAdmin(id, t as 'nonaktifkan' | 'aktifkan', admin);
   if (!h.ok) return { pesan: h.pesan };
   return { sukses: 'Tersimpan.' };
 }

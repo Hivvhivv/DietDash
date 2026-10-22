@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { wajibAdmin } from '@/lib/admin-auth';
 import { keObjectId, type GambarModul } from '@/lib/db';
 import * as K from '@/lib/konten-admin';
-import { NAMA_ILUSTRASI, skemaKuis, skemaMateri, skemaModul, skemaSoal, type NamaIlustrasi } from '@/lib/skema';
+import { NAMA_ILUSTRASI, skemaMateri, skemaModul, type NamaIlustrasi } from '@/lib/skema';
 
 export interface StatusKonten {
   pesan?: string;
@@ -103,15 +103,6 @@ export async function aksiKunciVersi(_: StatusKonten | undefined, fd: FormData):
   return { sukses: 'Versi dikunci untuk penelitian. Konten ini tidak dapat diedit lagi.' };
 }
 
-export async function aksiTerapkanMode(_: StatusKonten | undefined, fd: FormData): Promise<StatusKonten> {
-  const admin = await wajibAdmin();
-  const mode = teks(fd, 'mode') === 'B' ? 'B' : 'A';
-  const batas = Math.max(1, Math.min(100, Number(teks(fd, 'batas_lulus')) || 70));
-  const h = await K.terapkanModeSemuaKuis(admin, mode, batas);
-  if (!h.ok) return { pesan: h.pesan };
-  return { sukses: `Mode ${mode} diterapkan ke ${h.jumlah} kuis.` };
-}
-
 // ---------- Modul ----------
 
 export async function aksiSimpanModul(_: StatusKonten | undefined, fd: FormData): Promise<StatusKonten> {
@@ -176,6 +167,8 @@ export async function aksiSimpanMateri(_: StatusKonten | undefined, fd: FormData
     rangkuman: teks(fd, 'rangkuman'),
     estimasi_menit: teks(fd, 'estimasi_menit'),
     sumber: teks(fd, 'sumber'),
+    gambar_id: teks(fd, 'gambar_id'),
+    gambar_alt: teks(fd, 'gambar_alt'),
   };
   const estimasi = nilai.estimasi_menit.trim() ? Number(nilai.estimasi_menit) : null;
   const v = skemaMateri.safeParse({
@@ -189,9 +182,15 @@ export async function aksiSimpanMateri(_: StatusKonten | undefined, fd: FormData
   });
   const galat = v.success ? {} : galatZod(v.error.issues);
   if (/!\[\s*\]\(/.test(nilai.isi)) galat.isi = 'Ada gambar tanpa teks alternatif. Tulis keterangan di dalam ![…].';
+  let gambar: K.MasukanMateri['gambar'] = null;
+  if (nilai.gambar_id) {
+    if (!/^[a-f0-9]{24}$/.test(nilai.gambar_id)) galat.gambar_id = 'Gambar tidak valid. Unggah ulang.';
+    if (!nilai.gambar_alt.trim()) galat.gambar_alt = 'Teks alternatif gambar sampul wajib diisi.';
+    gambar = { id: nilai.gambar_id, alt: nilai.gambar_alt.trim() };
+  }
   if (!v.success || Object.keys(galat).length) return { pesan: 'Ada isian yang perlu diperbaiki.', galat, nilai, percobaan: Date.now() };
   const kunci = teks(fd, 'kunci') || null;
-  const h = await K.simpanMateri(admin, kunci, teks(fd, 'modul_kunci'), v.data);
+  const h = await K.simpanMateri(admin, kunci, teks(fd, 'modul_kunci'), { ...v.data, gambar });
   if (!h.ok) return { pesan: h.pesan, nilai, percobaan: Date.now() };
   redirect(`/admin/konten/materi/${h.kunci}/?pesan=tersimpan`);
 }
@@ -207,47 +206,4 @@ export async function aksiHapusMateri(_: StatusKonten | undefined, fd: FormData)
   const h = await K.hapusAtauArsipMateri(admin, teks(fd, 'kunci'));
   if (!h.ok) return { pesan: h.pesan };
   redirect(`/admin/konten/modul/${h.modul_kunci}/?pesan=${h.diarsipkan ? 'materi-diarsipkan' : 'materi-dihapus'}`);
-}
-
-// ---------- Kuis & soal ----------
-
-export async function aksiSimpanKuis(_: StatusKonten | undefined, fd: FormData): Promise<StatusKonten> {
-  const admin = await wajibAdmin();
-  const v = skemaKuis.safeParse({
-    judul: teks(fd, 'judul'),
-    petunjuk: teks(fd, 'petunjuk'),
-    mode: teks(fd, 'mode') === 'B' ? 'B' : 'A',
-    batas_lulus: Number(teks(fd, 'batas_lulus')) || 70,
-  });
-  if (!v.success) return { pesan: 'Ada isian kuis yang perlu diperbaiki.', galat: galatZod(v.error.issues) };
-  const h = await K.simpanKuis(admin, teks(fd, 'kuis_kunci'), v.data);
-  if (!h.ok) return { pesan: h.pesan };
-  return { sukses: 'Pengaturan kuis tersimpan.' };
-}
-
-export async function aksiSimpanSoal(_: StatusKonten | undefined, fd: FormData): Promise<StatusKonten> {
-  const admin = await wajibAdmin();
-  const jumlah = Math.min(4, Math.max(3, Number(teks(fd, 'jumlah_pilihan')) || 4));
-  const benar = teks(fd, 'benar');
-  const pilihanTeks = Array.from({ length: jumlah }, (_, i) => teks(fd, `pilihan_${i}`));
-  const nilai = { teks: teks(fd, 'teks'), penjelasan: teks(fd, 'penjelasan'), pilihan: pilihanTeks, benar, gambar_id: teks(fd, 'gambar_id'), gambar_alt: teks(fd, 'gambar_alt') };
-  const isian = pilihanTeks.map((t, i) => ({ teks: t, benar: String(i) === benar })).filter((p) => p.teks.trim());
-  const v = skemaSoal.safeParse({ teks: nilai.teks, penjelasan: nilai.penjelasan, pilihan: isian });
-  const galat = v.success ? {} : galatZod(v.error.issues);
-  const gambar = /^[a-f0-9]{24}$/.test(nilai.gambar_id) ? { id: nilai.gambar_id, alt: nilai.gambar_alt.trim() } : null;
-  if (gambar && !gambar.alt) galat.gambar_alt = 'Teks alternatif gambar wajib diisi.';
-  if (!v.success || Object.keys(galat).length) return { pesan: 'Ada isian soal yang perlu diperbaiki.', galat, nilai, percobaan: Date.now() };
-  const h = await K.simpanSoal(admin, teks(fd, 'kuis_kunci'), teks(fd, 'soal_kunci') || null, { ...v.data, gambar });
-  if (!h.ok) return { pesan: h.pesan, nilai, percobaan: Date.now() };
-  redirect(`/admin/konten/materi/${encodeURIComponent(teks(fd, 'materi_kunci'))}/kuis/?pesan=soal-tersimpan`);
-}
-
-export async function aksiOperasiSoal(fd: FormData): Promise<void> {
-  const admin = await wajibAdmin();
-  const kunci = teks(fd, 'soal_kunci');
-  const op = teks(fd, 'op');
-  if (op === 'naik' || op === 'turun') await K.geserSoal(admin, kunci, op === 'naik' ? -1 : 1);
-  else if (op === 'duplikat') await K.duplikatSoal(admin, kunci);
-  else if (op === 'hapus') await K.hapusSoal(admin, kunci);
-  redirect(`/admin/konten/materi/${encodeURIComponent(teks(fd, 'materi_kunci'))}/kuis/`);
 }

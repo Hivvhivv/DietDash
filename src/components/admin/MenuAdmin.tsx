@@ -13,7 +13,6 @@ interface ItemMenu {
 }
 
 const KONTEN = '/admin/konten/';
-const kuisMateri = (p: string) => /^\/admin\/konten\/materi\/[^/]+\/kuis\//.test(p);
 
 const MENU: ItemMenu[] = [
   { href: '/admin/dashboard/', label: 'Dashboard', ikon: 'dasbor', cocok: (p) => p.startsWith('/admin/dashboard/') },
@@ -22,9 +21,9 @@ const MENU: ItemMenu[] = [
     href: '/admin/konten/materi/',
     label: 'Kelola Materi',
     ikon: 'dokumen',
-    cocok: (p) => (p.startsWith('/admin/konten/materi/') && !kuisMateri(p)) || p.startsWith('/admin/konten/pratinjau/'),
+    cocok: (p) => p.startsWith('/admin/konten/materi/') || p.startsWith('/admin/konten/pratinjau/'),
   },
-  { href: '/admin/konten/kuis/', label: 'Kelola Kuis', ikon: 'kuis', cocok: (p) => p.startsWith('/admin/konten/kuis/') || kuisMateri(p) },
+  { href: '/admin/tips/', label: 'Kelola Tips', ikon: 'lampu', cocok: (p) => p.startsWith('/admin/tips/') },
   { href: '/admin/responden/', label: 'Manajemen Pengguna', ikon: 'pengguna', cocok: (p) => p.startsWith('/admin/responden/') },
   { href: '/admin/laporan/', label: 'Laporan & Statistik', ikon: 'grafik', cocok: (p) => p.startsWith('/admin/laporan/') || p.startsWith('/admin/ekspor/') },
   { href: '/admin/pengaturan/', label: 'Pengaturan', ikon: 'gerigi', cocok: (p) => p.startsWith('/admin/pengaturan/') },

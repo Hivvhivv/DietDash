@@ -24,7 +24,7 @@ export default async function Masuk({ searchParams }: { searchParams: Promise<{ 
       ilustrasi="masuk"
       sorotan={{
         judul: 'Pola Makan Sehat untuk Hidup Lebih Baik',
-        teks: 'Pelajari diet DASH dengan materi yang mudah dipahami, contoh nyata, dan latihan soal.',
+        teks: 'Pelajari diet DASH dengan materi yang mudah dipahami, contoh nyata, dan tips sehari-hari.',
       }}
       kutipan="Langkah kecil untuk tekanan darah lebih terkontrol"
       judul="Masuk ke DASH Sehat"

@@ -55,18 +55,17 @@ export default async function HalamanModul({ params }: { params: Promise<{ kunci
                     </strong>
                     <span className="label-kecil">±{m.menit} menit</span>
                     <LencanaStatusMateri status={d.status} />
-                    {d.status === 'sedang' && <span className="label-kecil">Kuis belum selesai</span>}
                     {d.status === 'terkunci' && (
                       <span className="label-kecil">
                         {d.alasan_kunci === 'pretest'
                           ? 'Terbuka setelah pretest Anda dicatat peneliti.'
-                          : `Selesaikan kuis Materi ${sebelum?.nomor ?? ''} dulu.`}
+                          : `Baca dulu Materi ${sebelum?.nomor ?? ''}.`}
                       </span>
                     )}
                   </div>
                   {d.status !== 'terkunci' && (
-                    <Link className={d.status === 'selesai' ? 'tombol tombol-sekunder' : 'tombol'} href={d.percobaan_aktif ? `/belajar/materi/${m.kunci}/kuis/` : `/belajar/materi/${m.kunci}/`}>
-                      {d.status === 'selesai' ? 'Baca Lagi' : d.status === 'sedang' ? 'Lanjutkan' : 'Mulai Materi'}
+                    <Link className={d.status === 'selesai' ? 'tombol tombol-sekunder' : 'tombol'} href={`/belajar/materi/${m.kunci}/`}>
+                      {d.status === 'selesai' ? 'Baca Lagi' : 'Mulai Materi'}
                       <span className="sr-only"> {m.nomor}</span>
                     </Link>
                   )}

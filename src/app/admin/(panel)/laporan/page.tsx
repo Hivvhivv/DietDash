@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { wajibAdmin } from '@/lib/admin-auth';
 import { ringkasanDashboard } from '@/lib/monitor';
 
@@ -7,32 +6,28 @@ export const metadata: Metadata = { title: 'Laporan & Statistik' };
 export const dynamic = 'force-dynamic';
 
 const JENIS_EKSPOR = [
-  { nilai: 'ringkasan', judul: 'Ringkasan per responden', ket: 'Satu baris per responden: status, progres, waktu baca total, rata-rata skor percobaan pertama.' },
-  { nilai: 'progres', judul: 'Progres per materi', ket: 'Satu baris per responden per materi: waktu dibuka/selesai, waktu baca, jumlah percobaan, skor.' },
-  { nilai: 'jawaban', judul: 'Jawaban kuis', ket: 'Satu baris per jawaban: soal, pilihan, benar/salah, percobaan ke-berapa, versi konten.' },
+  { nilai: 'ringkasan', judul: 'Ringkasan per responden', ket: 'Satu baris per responden: status, materi selesai, waktu baca total, tanda pretest.' },
+  { nilai: 'progres', judul: 'Progres per materi', ket: 'Satu baris per responden per materi: status, waktu dibuka, waktu baca, versi konten.' },
 ];
 
-// PRD 11.1 (analisis kuis) dan 11.3 (ekspor data).
+// PRD 11.1 (keterlaksanaan per materi) dan 11.3 (ekspor data). Kuis tidak dipakai sejak 2026-10-22.
 export default async function Laporan() {
   await wajibAdmin();
-  const { analisis, perMateri } = await ringkasanDashboard();
+  const { perMateri, kartu } = await ringkasanDashboard();
   const terendah = [...perMateri].sort((a, b) => a.persen - b.persen)[0];
 
   return (
     <>
       <div className="dasbor-kepala">
         <h1>Laporan & Statistik</h1>
-        <p>Analisis kuis per materi dan ekspor data penelitian. Angka memakai responden penelitian saja.</p>
+        <p>Keterlaksanaan per materi dan ekspor data penelitian. Angka memakai responden penelitian saja.</p>
       </div>
 
-      <section className="kartu-panel" aria-labelledby="judul-analisis">
-        <div className="kartu-panel-kepala">
-          <h2 id="judul-analisis">Analisis Kuis (Percobaan Pertama)</h2>
-          <Link href="/admin/konten/kuis/">Kelola kuis →</Link>
-        </div>
+      <section className="kartu-panel" aria-labelledby="judul-keterlaksanaan">
+        <h2 id="judul-keterlaksanaan">Keterlaksanaan per Materi</h2>
         <p className="label-kecil">
-          Soal dengan jawaban benar di bawah 50% (minimal 3 jawaban) ditandai “Tinjau”, kemungkinan soalnya ambigu atau materinya
-          kurang jelas. Kuis latihan ini bukan pretest/posttest.
+          Materi dihitung selesai saat dibuka responden. Ini ukuran keterlaksanaan intervensi (fidelity), bukan efektivitas
+          edukasi. Responden penelitian: {kartu.sampel}.
           {terendah && ` Penyelesaian terendah saat ini: Materi ${terendah.nomor} (${terendah.persen}%).`}
         </p>
         <div className="tabel-gulir">
@@ -40,63 +35,25 @@ export default async function Laporan() {
             <thead>
               <tr>
                 <th scope="col">Materi</th>
-                <th scope="col">Percobaan pertama</th>
-                <th scope="col">Rata-rata skor pertama</th>
-                <th scope="col">Rata-rata percobaan</th>
-                <th scope="col">Soal perlu ditinjau</th>
+                <th scope="col">Sudah membaca</th>
+                <th scope="col">Persentase</th>
+                <th scope="col">Rata-rata lama baca</th>
               </tr>
             </thead>
             <tbody>
-              {analisis.map((a) => {
-                const tinjau = a.soal.filter((s) => s.tinjau).length;
-                return (
-                  <tr key={a.nomor}>
-                    <th scope="row">
-                      {a.nomor} {a.judul}
-                    </th>
-                    <td>{a.jumlah_pertama}</td>
-                    <td>{a.rata_skor_pertama === null ? '—' : `${a.rata_skor_pertama}%`}</td>
-                    <td>{a.rata_percobaan ?? '—'}</td>
-                    <td>{tinjau ? <span className="lencana lencana-peringatan">⚠ {tinjau}</span> : '—'}</td>
-                  </tr>
-                );
-              })}
+              {perMateri.map((m) => (
+                <tr key={m.kunci}>
+                  <th scope="row">
+                    {m.nomor} {m.judul}
+                  </th>
+                  <td>{m.selesai}</td>
+                  <td>{m.persen}%</td>
+                  <td>{m.rata_menit_baca === null ? '—' : `${m.rata_menit_baca} menit`}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-        <h3>Rincian per soal</h3>
-        {analisis.map((a) => (
-          <details key={a.nomor} className="tanya">
-            <summary>
-              Materi {a.nomor} {a.judul}
-              {a.soal.some((s) => s.tinjau) && ' · ⚠ ada soal perlu ditinjau'}
-            </summary>
-            <div className="tanya-isi tabel-gulir">
-              <table className="tabel-admin">
-                <thead>
-                  <tr>
-                    <th scope="col">No.</th>
-                    <th scope="col">Soal</th>
-                    <th scope="col">Dijawab</th>
-                    <th scope="col">Benar</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {a.soal.map((s) => (
-                    <tr key={s.nomor}>
-                      <td>{s.nomor}</td>
-                      <td>{s.teks}</td>
-                      <td>{s.dijawab}</td>
-                      <td>
-                        {s.persen === null ? '—' : `${s.persen}%`} {s.tinjau && <span className="lencana lencana-peringatan">⚠ Tinjau</span>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </details>
-        ))}
       </section>
 
       <section className="kartu-panel" id="ekspor" aria-labelledby="judul-ekspor">

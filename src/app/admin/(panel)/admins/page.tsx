@@ -12,7 +12,7 @@ export default async function KelolaAdmin() {
   const saya = await wajibAdmin('super_admin');
   const { admin, undangan } = await koleksi();
   const [daftar, menunggu] = await Promise.all([
-    admin.find({}, { projection: { password_hash: 0, totp_rahasia: 0 } }).sort({ dibuat_pada: 1 }).toArray(),
+    admin.find({}, { projection: { password_hash: 0 } }).sort({ dibuat_pada: 1 }).toArray(),
     undangan.find({ dipakai_pada: null, kedaluwarsa_pada: { $gt: new Date() } }).sort({ kedaluwarsa_pada: 1 }).toArray(),
   ]);
 
@@ -65,7 +65,6 @@ export default async function KelolaAdmin() {
                     <td>{a.peran === 'super_admin' ? 'Super admin' : 'Admin'}</td>
                     <td>
                       {a.aktif ? 'Aktif' : '⛔ Nonaktif'}
-                      <div className="label-kecil">{a.totp_aktif ? '✓ 2FA aktif' : '⚠ 2FA belum diatur'}</div>
                     </td>
                     <td className="sel-aksi">
                       {diriSendiri ? (
@@ -79,15 +78,6 @@ export default async function KelolaAdmin() {
                             bahaya={a.aktif}
                             konfirmasi={a.aktif ? `Nonaktifkan ${a.email}? Semua sesinya akan keluar.` : undefined}
                           />
-                          {a.totp_aktif && (
-                            <FormAksi
-                              aksi={aksiUbahAdmin}
-                              data={{ id, tindakan: 'reset_2fa' }}
-                              label="Reset 2FA"
-                              sekunder
-                              konfirmasi={`Reset 2FA ${a.email}? Admin ini harus mengatur ulang aplikasi autentikator saat masuk berikutnya.`}
-                            />
-                          )}
                         </>
                       )}
                     </td>

@@ -11,7 +11,7 @@ const DATA = [
   { data: 'Nomor HP', tujuan: 'Masuk, mencegah akun ganda, menghubungi Anda saat membuat kode akses baru', akses: 'Sistem; peneliti hanya melihat versi tersamarkan, kecuali dibuka dan tercatat di log', lama: 'Dihapus paling lambat 6 bulan setelah penelitian selesai (usulan)' },
   { data: 'Nama', tujuan: 'Menyapa Anda dan mencocokkan identitas saat membuat kode akses baru', akses: 'Anda dan peneliti', lama: 'Sama dengan nomor HP (usulan)' },
   { data: 'Kode peserta internal (mis. DS-4827)', tujuan: 'Menyamarkan identitas dalam data belajar dan menghubungkannya dengan data pretest/posttest; tidak ditampilkan kepada Anda', akses: 'Peneliti', lama: 'Sesuai protokol etik' },
-  { data: 'Progres dan jawaban kuis', tujuan: 'Memantau keterlaksanaan intervensi edukasi', akses: 'Peneliti', lama: 'Sesuai protokol etik, dalam bentuk ID peserta' },
+  { data: 'Progres belajar (materi yang dibuka dan lama membaca)', tujuan: 'Memantau keterlaksanaan intervensi edukasi', akses: 'Peneliti', lama: 'Sesuai protokol etik, dalam bentuk ID peserta' },
   { data: 'Waktu akses dan lama membaca', tujuan: 'Melihat keterlibatan belajar', akses: 'Peneliti', lama: 'Sesuai protokol etik' },
 ];
 
@@ -53,6 +53,10 @@ export default function Privasi() {
             Kami <strong>tidak</strong> meminta email, NIK, alamat, tanggal lahir, nomor rekam medis, angka tekanan darah, atau
             data kesehatan lain. Kode akses disimpan dalam bentuk acak (hash) sehingga tidak bisa dilihat siapa pun,
             termasuk peneliti.
+          </p>
+          <p>
+            Centang pada “Checklist Harian” di menu Tips hanya tersimpan di perangkat Anda sendiri, tidak dikirim ke server
+            atau tim peneliti, dan kembali kosong setiap hari.
           </p>
           <p>
             Perlu Anda ketahui: terdaftar sebagai responden berarti Anda memiliki hipertensi. Karena itu, daftar nomor HP

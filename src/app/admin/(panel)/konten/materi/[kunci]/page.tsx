@@ -21,7 +21,7 @@ export default async function EditMateri({ params, searchParams }: { params: Pro
       </>
     );
   }
-  const { materi: m, soal } = d;
+  const { materi: m } = d;
   const v = await versiKerja();
   const { modul } = await koleksi();
   const md = await modul.findOne({ version_id: v!._id, kunci: m.modul_kunci });
@@ -38,9 +38,6 @@ export default async function EditMateri({ params, searchParams }: { params: Pro
         </p>
       )}
       <p className="grup-tombol">
-        <Link className="tombol tombol-sekunder" href={`/admin/konten/materi/${m.kunci}/kuis/`}>
-          Kuis materi ({soal.length} soal{soal.length < 3 ? ' — minimal 3 ⚠' : ''})
-        </Link>
         <Link className="tombol tombol-sekunder" href={`/admin/konten/pratinjau/${m.kunci}/`}>
           Pratinjau seperti responden
         </Link>
@@ -56,6 +53,8 @@ export default async function EditMateri({ params, searchParams }: { params: Pro
           rangkuman: m.rangkuman,
           estimasi_menit: m.estimasi_menit,
           sumber: m.sumber,
+          gambar_id: m.gambar?.id ?? '',
+          gambar_alt: m.gambar?.alt ?? '',
         }}
       />
     </>

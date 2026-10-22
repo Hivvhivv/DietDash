@@ -11,6 +11,27 @@ Setelah versi dibekukan untuk penelitian, perubahan konten inti hanya boleh dila
 - Naskah benih v2 (6 modul, 20 materi, 60 soal) diterbitkan sebagai **konten contoh** (`npm run benih-konten -- --contoh`) agar website dapat dicoba. Versi bertanda `contoh`, tidak dapat dikunci.
 - Wajib dihapus atau diganti konten tervalidasi sebelum responden penelitian mulai (Versi Konten → Hapus Konten Contoh).
 
+## Kuis per materi dihapus (2026-10-22, keputusan peneliti)
+
+- Fitur kuis dihapus seluruhnya: halaman kuis responden, menu Kuis, Kelola Kuis admin, aturan Mode A/B, analisis kuis, dan ekspor jawaban kuis.
+- Materi kini dianggap **selesai saat dibuka**. Penguncian berurutan tetap ada: materi berikutnya terbuka setelah materi sebelumnya dibuka. Progres = materi yang dibuka + lama membaca.
+- Naskah benih v2: daftar `kuis:` dibuang dari 20 blok meta; bank soal `scripts/benih/kuis-v1.ts` dihapus. `npm run benih-konten` kini mengimpor modul dan materi saja.
+- Koleksi `quizzes` (20) dan `questions` (60 soal contoh) dihapus dari database utama. `quiz_attempts` (2 percobaan lama) dibiarkan menunggu keputusan peneliti.
+
+## Tips Sehari-hari pindah ke database (2026-10-22, draf, PERLU VALIDASI AHLI)
+
+- Tips sekarang disimpan di koleksi `tips` dan dikelola admin di **Kelola Tips** (`/admin/tips/`); perubahan tercatat otomatis di log aktivitas. Tips tidak termasuk versi konten penelitian.
+- Format tiap tips: judul, kategori, **Masalah**, **Solusi Praktis**, tips singkat, gambar opsional. 22 tips lama (`src/data/tips.ts` 0.1.0) dirangkum ulang menjadi 9 tips contoh (`scripts/benih/tips-contoh.ts`, `npm run benih-tips`) yang bisa dihapus sekaligus.
+- `src/data/tips.ts` 0.2.0 kini hanya berisi 3 prinsip dan 5 butir Checklist Harian. Checklist tersimpan di perangkat responden saja.
+- Belum selesai: TODO verifikasi isi tips contoh bersama ahli gizi.
+
+## Katalog Resep Menu Sehat 0.1.0 (2026-10-22, draf, PERLU VALIDASI AHLI)
+
+- Halaman Menu Sehat menjadi katalog resep Nusantara bergaya DASH (`src/data/resep-sehat.ts`): 11 resep untuk sarapan, makan siang, makan malam, dan selingan, masing-masing berisi bahan, cara memasak, "Rahasia Gurih" (rempah pengganti garam), waktu masak, dan halaman detail `/belajar/menu-sehat/<kunci>/`. Saringan menurut waktu makan dan bahan utama.
+- Natrium, kalium, dan serat ditampilkan sebagai **tingkat perkiraan** (rendah/sedang/tinggi) dari bahan. Angka mg/gram sengaja belum diisi; kolom `angka` hanya diisi dari perhitungan ahli gizi (TKPI). Ada pengingat bagi penderita penyakit ginjal tentang makanan tinggi kalium.
+- Isi panduan bahan makanan sebelumnya (isi piring, dianjurkan, dibatasi, cara memasak) tetap ada di bawah katalog.
+- Belum selesai: TODO verifikasi resep, takaran garam, dan tingkat gizi bersama ahli gizi.
+
 ## Menu Sehat 0.1.0 & Tips Sehari-hari 0.1.0 (2026-10-21, draf, PERLU VALIDASI AHLI)
 
 - Halaman bacaan pendukung baru untuk responden: **Menu Sehat** (`src/data/menu-sehat.ts`: isi piring, 6 kelompok makanan dianjurkan dengan contoh & porsi, 4 kelompok yang perlu dibatasi dengan pengganti, cara memasak) dan **Tips Sehari-hari** (`src/data/tips.ts`: 22 tips dalam 5 kategori, "tips hari ini" bergilir).

@@ -1,5 +1,5 @@
 // Isi halaman "Menu Sehat": pengetahuan makanan yang dianjurkan dan yang perlu dibatasi dalam pola makan DASH.
-// Bahan bacaan pendukung (bukan bagian modul/kuis). Disarikan dari naskah benih Modul 2–4.
+// Bahan bacaan pendukung (bukan bagian modul). Disarikan dari naskah benih Modul 2–4.
 // TODO: verifikasi sumber — validasi ahli gizi untuk ukuran porsi dan contoh makanan sebelum versi penelitian dikunci.
 // Catat perubahan isi di CHANGELOG-KONTEN.md.
 export const VERSI_MENU_SEHAT = '0.1.0';

@@ -2,7 +2,7 @@
 // Admin berikutnya diundang dari panel (/admin/kelola-admin/).
 // Jalankan di terminal: npm run buat-admin
 // Kata sandi diketik tersembunyi dan hanya disimpan sebagai hash Argon2id.
-// Autentikasi dua faktor (TOTP) diatur saat masuk pertama kali.
+// Admin masuk dengan email + kata sandi (tanpa 2FA, keputusan peneliti 2026-10-22).
 import { stdin, stdout } from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { hash } from '@node-rs/argon2';
@@ -103,8 +103,6 @@ try {
       email,
       nama,
       password_hash: await hash(sandi),
-      totp_rahasia: null,
-      totp_aktif: false,
       peran: 'super_admin',
       aktif: true,
       dibuat_pada: new Date(),
@@ -116,7 +114,7 @@ try {
       aksi: 'buat_super_admin',
       objek: email,
     });
-    console.log(`✓ Super admin ${email} dibuat. Masuk di /admin/masuk/ lalu atur aplikasi autentikator (2FA).`);
+    console.log(`✓ Super admin ${email} dibuat. Masuk di /admin/masuk/ dengan email dan kata sandi.`);
   }
 } finally {
   await klien.close();

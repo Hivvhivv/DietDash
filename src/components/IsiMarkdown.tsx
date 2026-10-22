@@ -2,7 +2,7 @@ import { Children, isValidElement, type ReactElement } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import TabMenu from './TabMenu';
-import { parseGaleri, parseMenu } from '@/lib/blok-khusus';
+import { bagiPerSubjudul, parseCatatan, parseGaleri, parseMenu } from '@/lib/blok-khusus';
 
 function Galeri({ teks }: { teks: string }) {
   const item = parseGaleri(teks);
@@ -28,6 +28,35 @@ function Kotak({ jenis, teks }: { jenis: 'contoh' | 'penting'; teks: string }) {
       <p className="kotak-judul">{jenis === 'contoh' ? '🍽️ Contoh penerapan sehari-hari' : '⭐ Poin penting'}</p>
       <IsiMarkdown isi={teks} />
     </aside>
+  );
+}
+
+// ```catatan: kotak biru untuk pengingat, mis. "Catatan Medis" (baris pertama "# Judul" opsional).
+function Catatan({ teks }: { teks: string }) {
+  const c = parseCatatan(teks);
+  return (
+    <aside className="kotak kotak-catatan" aria-label={c.judul}>
+      <span className="kotak-catatan-ikon" aria-hidden="true">
+        i
+      </span>
+      <div>
+        <p className="kotak-judul">{c.judul}</p>
+        <IsiMarkdown isi={c.isi} />
+      </div>
+    </aside>
+  );
+}
+
+// Isi materi dipecah per "## Subjudul" menjadi kartu bagian (tampilan baca responden & pratinjau editor).
+export function IsiMateriBagian({ isi }: { isi: string }) {
+  return (
+    <>
+      {bagiPerSubjudul(isi).map((b, i) => (
+        <section key={i} className="bagian-materi">
+          <IsiMarkdown isi={b} />
+        </section>
+      ))}
+    </>
   );
 }
 
@@ -57,6 +86,7 @@ const komponen = {
       const teks = String(p.children ?? '');
       if (bahasa === 'galeri') return <Galeri teks={teks} />;
       if (bahasa === 'contoh' || bahasa === 'penting') return <Kotak jenis={bahasa} teks={teks} />;
+      if (bahasa === 'catatan') return <Catatan teks={teks} />;
       if (bahasa === 'menu') {
         const r = parseMenu(teks);
         return r.ok ? <TabMenu menu={r.menu} /> : <p className="galat-umum">{r.pesan}</p>;

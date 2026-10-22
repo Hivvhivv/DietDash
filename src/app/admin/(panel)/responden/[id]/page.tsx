@@ -32,7 +32,6 @@ function KolomAlasan({ id, wajib = true }: { id: string; wajib?: boolean }) {
   );
 }
 
-const persen = (n: number | null) => (n === null ? '—' : `${n}%`);
 
 export default async function DetailResponden({ params }: { params: Promise<{ id: string }> }) {
   await wajibAdmin();
@@ -101,8 +100,6 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
                 <th scope="col">Dibuka</th>
                 <th scope="col">Selesai</th>
                 <th scope="col">Waktu baca</th>
-                <th scope="col">Percobaan</th>
-                <th scope="col">Skor pertama / terbaik</th>
                 <th scope="col">Versi konten</th>
               </tr>
             </thead>
@@ -119,48 +116,12 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
                   <td>{formatWaktu(g.dibuka_pada)}</td>
                   <td>{formatWaktu(g.selesai_pada)}</td>
                   <td>{formatDurasi(g.detik_baca)}</td>
-                  <td>{g.jumlah_percobaan}</td>
-                  <td>
-                    {persen(g.skor_pertama)} / {persen(g.skor_terbaik)}
-                  </td>
                   <td>{g.versi}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        {garisWaktu.some((g) => g.percobaan.length) && (
-          <>
-            <h3>Rincian jawaban kuis</h3>
-            {garisWaktu
-              .filter((g) => g.percobaan.length)
-              .map((g) => (
-                <details key={g.materi.kunci} className="tanya">
-                  <summary>
-                    Materi {g.materi.nomor} — {g.percobaan.length} percobaan
-                  </summary>
-                  <div className="tanya-isi">
-                    {g.percobaan.map((x) => (
-                      <div key={x._id.toHexString()} className="rincian-percobaan">
-                        <p>
-                          <strong>Percobaan ke-{x.percobaan_ke}</strong>
-                          {x.pertama && ' (pertama)'} · Mode {x.mode} · {x.selesai_pada ? `skor ${x.skor}%` : 'belum selesai'} · versi {x.versi_label} · mulai{' '}
-                          {formatWaktu(x.mulai_pada)}
-                        </p>
-                        <ol>
-                          {x.rincian.map((j, i) => (
-                            <li key={i}>
-                              {j.soal} — <em>{j.dipilih}</em> {j.benar ? '✓ benar' : '✗ salah'}
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              ))}
-          </>
-        )}
       </section>
 
       <section className="bagian-kartu" aria-labelledby="judul-tindakan">

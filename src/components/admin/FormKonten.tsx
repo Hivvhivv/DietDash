@@ -1,10 +1,10 @@
 'use client';
 
 import { useActionState, useRef, useState } from 'react';
-import { aksiSimpanKuis, aksiSimpanMateri, aksiSimpanModul, aksiSimpanSoal, type StatusKonten } from '@/app/admin/aksi-konten';
+import { aksiSimpanMateri, aksiSimpanModul, type StatusKonten } from '@/app/admin/aksi-konten';
 import { LABEL_ILUSTRASI } from '@/data/gambar';
 import { NAMA_ILUSTRASI } from '@/lib/skema';
-import IsiMarkdown from '../IsiMarkdown';
+import { IsiMateriBagian } from '../IsiMarkdown';
 import { Pesan } from '../belajar/Bidang';
 import UnggahGambar from './UnggahGambar';
 
@@ -142,6 +142,8 @@ export interface AwalMateri {
   rangkuman: string;
   estimasi_menit: number | null;
   sumber: string[];
+  gambar_id: string;
+  gambar_alt: string;
 }
 
 const SISIPAN: { label: string; teks: string; bungkus?: [string, string] }[] = [
@@ -151,6 +153,7 @@ const SISIPAN: { label: string; teks: string; bungkus?: [string, string] }[] = [
   { label: 'Tips', teks: '\n> **Tips:** tulis tips singkat di sini.\n' },
   { label: 'Contoh penerapan', teks: '\n```contoh\nTulis contoh penerapan sehari-hari di sini.\n```\n' },
   { label: 'Poin penting', teks: '\n```penting\nTulis poin penting di sini.\n```\n' },
+  { label: 'Catatan', teks: '\n```catatan\n# Catatan Medis\nTulis catatan atau pengingat di sini.\n```\n' },
   { label: 'Galeri makanan', teks: '\n```galeri\n🥦 | Brokoli | keterangan singkat\n🍌 | Pisang\n```\n' },
   { label: 'Tabel', teks: '\n| Kolom 1 | Kolom 2 |\n| --- | --- |\n| isi | isi |\n' },
 ];
@@ -160,6 +163,8 @@ export function FormMateri({ awal }: { awal: AwalMateri }) {
   const { nilai, attr, Galat } = useKolom(status, awal as unknown as Record<string, unknown>);
   const [isi, setIsi] = useState(nilai('isi'));
   const [lihat, setLihat] = useState(false);
+  const [sampulId, setSampulId] = useState(nilai('gambar_id'));
+  const [sampulAlt, setSampulAlt] = useState(nilai('gambar_alt'));
   const area = useRef<HTMLTextAreaElement>(null);
 
   function sisipkan(teks: string, bungkus?: [string, string]) {
@@ -198,6 +203,35 @@ export function FormMateri({ awal }: { awal: AwalMateri }) {
       </fieldset>
 
       <fieldset>
+        <legend>Gambar sampul (opsional)</legend>
+        <p className="petunjuk">Tampil di kepala halaman materi. Bila kosong, memakai ilustrasi sampul modul.</p>
+        <input type="hidden" name="gambar_id" value={sampulId} />
+        {sampulId && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="pratinjau-gambar" src={`/gambar-konten/${sampulId}/`} alt={sampulAlt} width={180} height={120} />
+            <button type="button" className="tombol tombol-sekunder tombol-kecil" onClick={() => setSampulId('')}>
+              Hapus gambar sampul
+            </button>
+          </>
+        )}
+        <UnggahGambar
+          label="Pilih berkas sampul"
+          onSelesai={(h) => {
+            setSampulId(h.id);
+            setSampulAlt(h.alt);
+          }}
+        />
+        <Galat k="gambar_id" />
+        {sampulId && (
+          <Kolom id="gambar_alt" label="Teks alternatif gambar sampul">
+            <input id="gambar_alt" name="gambar_alt" value={sampulAlt} onChange={(e) => setSampulAlt(e.target.value)} {...attr('gambar_alt')} />
+            <Galat k="gambar_alt" />
+          </Kolom>
+        )}
+      </fieldset>
+
+      <fieldset>
         <legend>Isi materi</legend>
         <div className="editor-bilah" role="toolbar" aria-label="Sisipkan format">
           {SISIPAN.map((s) => (
@@ -211,13 +245,14 @@ export function FormMateri({ awal }: { awal: AwalMateri }) {
         </div>
         {lihat ? (
           <div className="editor-pratinjau materi" aria-label="Pratinjau isi">
-            <IsiMarkdown isi={isi} />
+            <IsiMateriBagian isi={isi} />
           </div>
         ) : null}
         <div className="bidang" hidden={lihat}>
           <label htmlFor="isi">Isi (Markdown)</label>
           <p className="petunjuk">
-            Gunakan kalimat pendek dan bahasa sehari-hari. Tandai angka yang belum dicek sumbernya dengan
+            Gunakan kalimat pendek dan bahasa sehari-hari. Setiap “## Subjudul” tampil sebagai kartu bagian tersendiri;
+            gambar di dalam bagian tampil di samping teks pada layar lebar. Tandai angka yang belum dicek sumbernya dengan
             &lt;!-- TODO: verifikasi sumber --&gt;.
           </p>
           <textarea ref={area} id="isi" name="isi" rows={22} className="kode" value={isi} onChange={(e) => setIsi(e.target.value)} {...attr('isi')} />
@@ -249,157 +284,6 @@ export function FormMateri({ awal }: { awal: AwalMateri }) {
 
       <button type="submit" className="tombol" disabled={menunggu}>
         {menunggu ? 'Menyimpan…' : 'Simpan materi'}
-      </button>
-    </form>
-  );
-}
-
-// ---------- Kuis ----------
-
-export function FormKuis({ awal }: { awal: { kuis_kunci: string; judul: string; petunjuk: string; mode: 'A' | 'B'; batas_lulus: number } }) {
-  const [status, kirim, menunggu] = useActionState(aksiSimpanKuis, undefined);
-  const g = status?.galat ?? {};
-  const [mode, setMode] = useState(awal.mode);
-  return (
-    <form action={kirim} className="form-admin" noValidate>
-      <Pesan pesan={status?.pesan} sukses={status?.sukses} />
-      <input type="hidden" name="kuis_kunci" value={awal.kuis_kunci} />
-      <Kolom id="judul-kuis" label="Judul kuis">
-        <input id="judul-kuis" name="judul" defaultValue={awal.judul} aria-invalid={g.judul ? true : undefined} />
-        {g.judul && <p className="galat">{g.judul}</p>}
-      </Kolom>
-      <Kolom id="petunjuk-kuis" label="Petunjuk untuk responden">
-        <textarea id="petunjuk-kuis" name="petunjuk" rows={2} defaultValue={awal.petunjuk} aria-invalid={g.petunjuk ? true : undefined} />
-        {g.petunjuk && <p className="galat">{g.petunjuk}</p>}
-      </Kolom>
-      <div className="bidang-baris">
-        <Kolom id="mode-kuis" label="Aturan selesai">
-          <select id="mode-kuis" name="mode" value={mode} onChange={(e) => setMode(e.target.value as 'A' | 'B')}>
-            <option value="A">Mode A: selesai setelah semua soal dijawab</option>
-            <option value="B">Mode B: harus mencapai skor minimal</option>
-          </select>
-        </Kolom>
-        <Kolom id="batas-kuis" label="Skor minimal (%)" petunjuk="Hanya dipakai pada Mode B.">
-          <input id="batas-kuis" name="batas_lulus" type="number" min={1} max={100} defaultValue={awal.batas_lulus} disabled={mode === 'A'} />
-          {mode === 'A' && <input type="hidden" name="batas_lulus" value={awal.batas_lulus} />}
-        </Kolom>
-      </div>
-      <p className="petunjuk">Mode sebaiknya sama untuk semua kuis selama penelitian. Gunakan “Terapkan ke semua kuis” di halaman Konten.</p>
-      <button type="submit" className="tombol tombol-sekunder" disabled={menunggu}>
-        {menunggu ? 'Menyimpan…' : 'Simpan pengaturan kuis'}
-      </button>
-    </form>
-  );
-}
-
-// ---------- Soal ----------
-
-export interface AwalSoal {
-  soal_kunci: string;
-  teks: string;
-  penjelasan: string;
-  pilihan: string[];
-  benar: string; // indeks pilihan benar
-  gambar_id: string;
-  gambar_alt: string;
-}
-
-export function FormSoal({ awal, kuisKunci, materiKunci }: { awal: AwalSoal; kuisKunci: string; materiKunci: string }) {
-  const [status, kirim, menunggu] = useActionState(aksiSimpanSoal, undefined);
-  const n = status?.nilai as Partial<AwalSoal> | undefined;
-  const g = status?.galat ?? {};
-  const [pilihan, setPilihan] = useState<string[]>(() => {
-    const p = n?.pilihan ?? awal.pilihan;
-    return p.length >= 3 ? p : [...p, ...Array(3 - p.length).fill('')];
-  });
-  const [benar, setBenar] = useState(n?.benar ?? awal.benar);
-  const [gambar, setGambar] = useState({ id: n?.gambar_id ?? awal.gambar_id, alt: n?.gambar_alt ?? awal.gambar_alt });
-
-  return (
-    <form key={status?.percobaan ?? 0} action={kirim} className="form-admin" noValidate>
-      <Pesan pesan={status?.pesan} />
-      <input type="hidden" name="kuis_kunci" value={kuisKunci} />
-      <input type="hidden" name="materi_kunci" value={materiKunci} />
-      <input type="hidden" name="soal_kunci" value={awal.soal_kunci} />
-      <input type="hidden" name="jumlah_pilihan" value={pilihan.length} />
-      <Kolom id="teks" label="Pertanyaan">
-        <textarea id="teks" name="teks" rows={3} defaultValue={n?.teks ?? awal.teks} aria-invalid={g.teks ? true : undefined} />
-        {g.teks && <p className="galat">{g.teks}</p>}
-      </Kolom>
-
-      <fieldset>
-        <legend>Pilihan jawaban (3–4) — tandai satu yang benar</legend>
-        {pilihan.map((p, i) => (
-          <div key={i} className="baris-pilihan">
-            <label className="centang">
-              <input type="radio" name="benar" value={i} checked={benar === String(i)} onChange={() => setBenar(String(i))} />
-              <span>{benar === String(i) ? '✓ Benar' : 'Benar?'}</span>
-            </label>
-            <div className="bidang">
-              <label htmlFor={`pilihan_${i}`} className="sr-only">
-                Pilihan {String.fromCharCode(65 + i)}
-              </label>
-              <input
-                id={`pilihan_${i}`}
-                name={`pilihan_${i}`}
-                value={p}
-                placeholder={`Pilihan ${String.fromCharCode(65 + i)}`}
-                onChange={(e) => setPilihan((xs) => xs.map((x, j) => (j === i ? e.target.value : x)))}
-              />
-            </div>
-          </div>
-        ))}
-        {g.pilihan && <p className="galat">{g.pilihan}</p>}
-        <p className="grup-tombol">
-          {pilihan.length < 4 && (
-            <button type="button" className="tombol tombol-sekunder tombol-kecil" onClick={() => setPilihan((xs) => [...xs, ''])}>
-              + Tambah pilihan D
-            </button>
-          )}
-          {pilihan.length > 3 && (
-            <button
-              type="button"
-              className="tombol tombol-sekunder tombol-kecil"
-              onClick={() => {
-                setPilihan((xs) => xs.slice(0, 3));
-                if (benar === '3') setBenar('');
-              }}
-            >
-              Hapus pilihan D
-            </button>
-          )}
-        </p>
-      </fieldset>
-
-      <Kolom id="penjelasan" label="Penjelasan jawaban" petunjuk="Wajib. Ditampilkan setelah responden menjawab, baik benar maupun salah.">
-        <textarea id="penjelasan" name="penjelasan" rows={3} defaultValue={n?.penjelasan ?? awal.penjelasan} aria-invalid={g.penjelasan ? true : undefined} />
-        {g.penjelasan && <p className="galat">{g.penjelasan}</p>}
-      </Kolom>
-
-      <details className="tanya" open={!!gambar.id}>
-        <summary>Gambar soal (opsional)</summary>
-        <div className="tanya-isi">
-          <input type="hidden" name="gambar_id" value={gambar.id} />
-          {gambar.id && (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="pratinjau-gambar" src={`/gambar-konten/${gambar.id}/`} alt={gambar.alt} />
-              <div className="bidang">
-                <label htmlFor="gambar_alt">Teks alternatif</label>
-                <input id="gambar_alt" name="gambar_alt" value={gambar.alt} onChange={(e) => setGambar((x) => ({ ...x, alt: e.target.value }))} aria-invalid={g.gambar_alt ? true : undefined} />
-                {g.gambar_alt && <p className="galat">{g.gambar_alt}</p>}
-              </div>
-              <button type="button" className="tombol tombol-sekunder tombol-kecil" onClick={() => setGambar({ id: '', alt: '' })}>
-                Hapus gambar
-              </button>
-            </>
-          )}
-          <UnggahGambar label={gambar.id ? 'Ganti gambar' : 'Pilih gambar'} onSelesai={(h) => setGambar({ id: h.id, alt: h.alt })} />
-        </div>
-      </details>
-
-      <button type="submit" className="tombol" disabled={menunggu}>
-        {menunggu ? 'Menyimpan…' : awal.soal_kunci ? 'Simpan perubahan soal' : 'Tambah soal'}
       </button>
     </form>
   );

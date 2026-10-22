@@ -62,7 +62,6 @@ export default async function Pengaturan() {
           </div>
         </fieldset>
       </FormAksi>
-      <p className="label-kecil">Aturan selesai kuis (Mode A/B) diatur di Kelola Kuis karena berlaku per versi konten.</p>
     </>
   );
 }

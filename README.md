@@ -10,14 +10,15 @@ Dibangun dengan Next.js 16 (App Router), React 19, TypeScript, dan MongoDB Atlas
 npm install
 cp .env.example .env.local   # lalu isi MONGODB_URI dan MONGODB_DB
 npm run cek-db               # memastikan koneksi database
-npm run benih-konten         # memasukkan konten awal (6 modul, 20 materi, 60 soal) sebagai versi kerja DRAF
+npm run benih-konten         # memasukkan konten awal (6 modul, 20 materi) sebagai versi kerja DRAF
 #   atau: npm run benih-konten -- --contoh   → langsung TERBIT sebagai konten contoh untuk uji coba
+npm run benih-tips           # memasukkan 9 tips contoh (bisa dihapus di Kelola Tips)
 npm run buat-admin           # membuat akun super admin pertama (kata sandi diketik tersembunyi)
 ```
 
-Lalu buka `/admin/masuk/`, masuk dengan email dan kata sandi, dan atur aplikasi autentikator (Google Authenticator, Microsoft Authenticator, Aegis, dsb.) dengan memindai kode QR.
+Lalu buka `/admin/masuk/` dan masuk dengan email dan kata sandi (tanpa 2FA, keputusan peneliti 2026-10-22).
 
-**Konten contoh.** Database utama saat ini berisi konten contoh yang sudah terbit (label "Contoh (belum divalidasi)") supaya website bisa dicoba. Sebelum responden penelitian mulai: super admin membuka **Versi Konten → Hapus Konten Contoh** (menghapus semua modul, materi, kuis, dan soal contoh sekaligus), lalu membuat dan menerbitkan konten tervalidasi. Admin juga bisa menghapus atau mengedit per modul/materi/soal lewat Kelola Modul. Konten contoh tidak bisa dikunci untuk penelitian. Akun responden uji coba tidak ikut terhapus; tandai sebagai "bukan sampel".
+**Konten contoh.** Database utama saat ini berisi konten contoh yang sudah terbit (label "Contoh (belum divalidasi)") supaya website bisa dicoba. Sebelum responden penelitian mulai: super admin membuka **Versi Konten → Hapus Konten Contoh** (menghapus semua modul dan materi contoh sekaligus), lalu membuat dan menerbitkan konten tervalidasi. Admin juga bisa menghapus atau mengedit per modul/materi lewat Kelola Modul. Konten contoh tidak bisa dikunci untuk penelitian. Akun responden uji coba tidak ikut terhapus; tandai sebagai "bukan sampel".
 
 Konten benih **belum divalidasi ahli**. Tinjau dan sunting di `/admin/konten/`, tandai "siap ditinjau", lalu super admin menerbitkannya di `/admin/versi/`. Sebelum responden pertama mendaftar, kunci versinya (mis. `v1.0`).
 
@@ -40,7 +41,7 @@ Next.js mengirim telemetri anonim saat build. Untuk mematikannya: `npx next tele
 
 1. **Daftar** (`/daftar/`): nama + nomor HP, centang kelayakan dan persetujuan. Sistem menampilkan konfirmasi nomor, lalu membuat **kode akses 6 angka** (mis. `482 917`) yang hanya tampil sekali bersama nama responden. Responden menyimpan kode (Salin / Simpan sebagai Gambar) dan mencentang "Saya sudah menyimpan kode akses saya". ID peserta (DS-xxxx) dibuat di sistem untuk admin dan ekspor, tetapi tidak ditampilkan kepada responden.
 2. **Sambutan** (3 layar) → **dashboard belajar** (`/belajar/`) dengan tombol "Lanjutkan Belajar".
-3. **Materi → kuis → materi berikutnya.** Materi berikutnya terkunci sampai kuis materi sebelumnya selesai (dicek di server). Mode A: selesai saat semua soal dijawab; Mode B: harus mencapai skor minimal.
+3. **Materi berurutan, tanpa kuis.** Materi dianggap selesai saat dibuka; materi berikutnya terbuka setelah materi sebelumnya dibuka (dicek di server). Keputusan peneliti 2026-10-22.
 4. **Masuk lagi** (`/masuk/`) dengan nomor HP + kode akses (keyboard angka; spasi/tanda hubung diabaikan); "Ingat saya" menjaga sesi 30 hari. **Lupa kode akses** → hubungi peneliti lewat WhatsApp; admin membuat kode baru.
 5. **Profil** (`/profil/`): ubah nama, buat kode akses baru, ganti nomor HP, mengundurkan diri.
 
@@ -48,11 +49,10 @@ Setelah masuk, responden memakai navbar di atas (di HP: tombol **Menu**):
 
 | Menu | Isi |
 |---|---|
-| Beranda | Sapaan, Lanjutkan Belajar, kartu modul/materi/kuis selesai & progres keseluruhan, aktivitas terbaru, progres per modul |
+| Beranda | Sapaan, Lanjutkan Belajar, progres keseluruhan, kartu modul, tips hari ini |
 | Modul Pembelajaran | Progres keseluruhan + kartu tiap modul dengan % materi selesai |
-| Menu Sehat | Isi piring sehat, makanan yang dianjurkan & perlu dibatasi, cara memasak |
-| Tips Sehari-hari | Tips hari ini + tips per kategori (garam, belanja, memasak, makan di luar, kebiasaan) |
-| Kuis | Jumlah kuis belum selesai, status & skor setiap kuis per modul |
+| Menu Sehat | Katalog resep Nusantara bergaya DASH (saring waktu makan & bahan, halaman detail resep) + panduan memilih bahan |
+| Tips Sehari-hari | Tips hari ini, 3 prinsip, katalog tips per kategori (Masalah → Solusi Praktis) dari database, checklist harian (hanya di perangkat) |
 
 Halaman awal (`/`) langsung ke **Masuk**; responden yang sudah masuk langsung ke dashboard. Masuk, Daftar, Lupa Token, dan Masuk Admin bergaya aplikasi (ilustrasi besar, judul tebal, tombol bulat; dua kolom di layar lebar). Di halaman Masuk ada pengalih **Responden | Admin** untuk berpindah antara `/masuk/` dan `/admin/masuk/`. Tanpa akun hanya bisa membuka Masuk, Daftar, Lupa Token, Privasi, dan Ketentuan Penggunaan. Pengenalan, Tentang, Sumber, dan Pertanyaan Umum ada di menu setelah masuk (keputusan peneliti 2026-10-21, menyimpang dari PRD 3–4).
 
@@ -61,16 +61,17 @@ Halaman awal (`/`) langsung ke **Masuk**; responden yang sudah masuk langsung ke
 | Menu | Isi | Peran |
 |---|---|---|
 | Dashboard | Kartu modul/materi/pertanyaan/pengguna, aktivitas terbaru, grafik responden aktif per hari, status belajar, perlu perhatian, penyelesaian per materi | Admin, super admin |
-| Kelola Materi / Kelola Kuis | Daftar seluruh materi dan kuis per modul; aturan selesai kuis (Mode A/B) | Admin, super admin |
-| Laporan & Statistik | Analisis kuis per soal dan ekspor data | Admin, super admin |
+| Kelola Materi | Daftar seluruh materi per modul | Admin, super admin |
+| Kelola Tips | Tambah, edit, tampilkan/sembunyikan, urutkan, dan hapus Tips Sehari-hari; hapus tips contoh | Admin, super admin |
+| Laporan & Statistik | Keterlaksanaan per materi (sudah membaca, lama baca) dan ekspor data | Admin, super admin |
 | Responden | Tabel dengan pencarian, saringan, urutan; detail per responden (garis waktu, jawaban, buka nomor lengkap, reset token, buka kunci manual, status sampel, nonaktifkan) | Admin, super admin |
-| Konten | Versi kerja: modul, materi (editor Markdown + unggah gambar), kuis & soal, pratinjau, validasi, mode kuis untuk semua kuis | Admin, super admin (versi perbaikan: super admin) |
+| Konten | Versi kerja: modul, materi (editor Markdown, gambar sampul, blok Catatan, unggah gambar), pratinjau, validasi | Admin, super admin (versi perbaikan: super admin) |
 | Pengaturan | Buka/tutup pendaftaran, pernyataan kelayakan, gerbang pretest, batas tidak aktif & intervensi, WhatsApp peneliti | Admin, super admin |
 | Versi | Terbitkan, kunci (v1.0), buat versi perbaikan | Super admin |
-| Admin | Undang admin (tautan 48 jam, dikirim manual), nonaktifkan, reset 2FA | Super admin |
+| Admin | Undang admin (tautan 48 jam, dikirim manual), nonaktifkan/aktifkan | Super admin |
 | Log | Log aktivitas (cari, unduh CSV); tidak dapat dihapus | Super admin |
 
-Siklus konten: **Draf → Siap ditinjau → Terbit → Dikunci**. Hanya ada satu versi kerja pada satu waktu; versi baru disalin dari versi aktif, dan setiap modul/materi/kuis/soal mempertahankan `kunci` yang sama sehingga progres responden tetap tersambung.
+Siklus konten: **Draf → Siap ditinjau → Terbit → Dikunci**. Hanya ada satu versi kerja pada satu waktu; versi baru disalin dari versi aktif, dan setiap modul/materi mempertahankan `kunci` yang sama sehingga progres responden tetap tersambung.
 
 ## Blok khusus di isi materi
 
@@ -87,13 +88,13 @@ Siklus konten: **Draf → Siap ditinjau → Terbit → Dikunci**. Hanya ada satu
 | `src/app/(awal)/` | Halaman awal: hanya mengalihkan ke Masuk atau dashboard |
 | `src/app/(akun)/` | Masuk, Daftar, Lupa Token (kerangka bergaya aplikasi, `components/akun/`) |
 | `src/app/(publik)/` | Privasi dan Ketentuan Penggunaan (tanpa login) |
-| `src/app/(belajar)/` | Wajib masuk: dashboard belajar, modul, materi, kuis, selesai, profil, simpan token, sambutan, pengenalan, tentang, sumber, pertanyaan umum |
-| `src/app/admin/` | Panel admin, masuk + 2FA, undangan, Server Actions (`aksi-*.ts`), unggah gambar |
+| `src/app/(belajar)/` | Wajib masuk: dashboard belajar, modul, materi, menu sehat, tips, selesai, profil, simpan token, sambutan, pengenalan, tentang, sumber, pertanyaan umum |
+| `src/app/admin/` | Panel admin, masuk, undangan, Server Actions (`aksi-*.ts`), unggah gambar |
 | `src/app/aksi-responden.ts` | Server Actions responden |
-| `src/lib/` | `db` (model), `indeks`, `skema`, `identitas` (token, nomor, ID peserta), `sesi`, `batas`, `responden`, `admin-auth`, `totp`, `konten`, `konten-admin`, `progres`, `monitor`, `pengaturan`, `gambar`, `xlsx`, `cek-klaim` |
+| `src/lib/` | `db` (model), `indeks`, `skema`, `identitas` (token, nomor, ID peserta), `sesi`, `batas`, `responden`, `admin-auth`, `konten`, `konten-admin`, `progres`, `monitor`, `pengaturan`, `gambar`, `xlsx`, `cek-klaim` |
 | `src/proxy.ts` | Memperpanjang cookie "ingat saya" (bukan pengaman) |
-| `scripts/benih/` | Naskah benih v2 (`naskah-v2/*.md`), soal & sumber v1 yang dipakai ulang, naskah v1 (arsip) |
-| `scripts/` | `benih-konten`, `buat-admin`, `cek-db`, `cek-klaim` |
+| `scripts/benih/` | Naskah benih v2 (`naskah-v2/*.md`), sumber v1 yang dipakai ulang, tips contoh, naskah v1 (arsip) |
+| `scripts/` | `benih-konten`, `benih-tips`, `buat-admin`, `cek-db`, `cek-klaim` |
 | `docs/` | PRD v2.0 (Markdown + PDF) dan PRD v1 (arsip) |
 
 ## Koleksi MongoDB
@@ -103,11 +104,11 @@ Siklus konten: **Draf → Siap ditinjau → Terbit → Dikunci**. Hanya ada satu
 | `respondents` | Identitas responden: nama, nomor HP (+62…), hash token, persetujuan, status |
 | `participants` | ID peserta, status sampel, tanda pretest |
 | `token_events` | Riwayat akun (token dibuat/diganti/direset, nomor/nama diganti, nonaktif, mundur) |
-| `admins`, `admin_invites` | Akun admin (hash kata sandi, rahasia TOTP, peran) dan undangan (hash, 48 jam) |
+| `admins`, `admin_invites` | Akun admin (hash kata sandi, peran) dan undangan (hash, 48 jam) |
 | `sessions` | Sesi responden & admin (hash token, kedaluwarsa bergeser) |
 | `app_settings` | Pengaturan penelitian & versi aktif |
 | `content_versions`, `modules`, `materials`, `quizzes`, `questions` | Konten per versi |
-| `material_progress`, `quiz_attempts` | Progres per materi dan percobaan kuis (jawaban per soal) |
+| `material_progress` | Progres per materi (dibuka = selesai, lama membaca, versi konten) |
 | `percobaan_login` | Percobaan masuk/daftar (terhapus otomatis) |
 | `log_audit` | Log aktivitas admin (hanya tambah) |
 | `gambar.files`, `gambar.chunks` | Gambar unggahan (WebP, GridFS) |

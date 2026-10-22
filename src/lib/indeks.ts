@@ -12,12 +12,10 @@ export const KOLEKSI = {
   versi: 'content_versions',
   modul: 'modules',
   materi: 'materials',
-  kuis: 'quizzes',
-  soal: 'questions',
   progres: 'material_progress',
-  percobaan: 'quiz_attempts',
   percobaanLogin: 'percobaan_login',
   logAudit: 'log_audit',
+  tips: 'tips',
 } as const;
 
 export async function pastikanIndeks(db: Db): Promise<void> {
@@ -45,25 +43,14 @@ export async function pastikanIndeks(db: Db): Promise<void> {
       { key: { version_id: 1, kunci: 1 }, name: 'kunci_per_versi', unique: true },
       { key: { version_id: 1, modul_kunci: 1, urutan: 1 }, name: 'urutan' },
     ]),
-    k(KOLEKSI.kuis).createIndexes([
-      { key: { version_id: 1, kunci: 1 }, name: 'kunci_per_versi', unique: true },
-      { key: { version_id: 1, materi_kunci: 1 }, name: 'satu_kuis_per_materi', unique: true },
-    ]),
-    k(KOLEKSI.soal).createIndexes([
-      { key: { version_id: 1, kunci: 1 }, name: 'kunci_per_versi', unique: true },
-      { key: { version_id: 1, kuis_kunci: 1, urutan: 1 }, name: 'urutan' },
-    ]),
     k(KOLEKSI.progres).createIndex(
       { respondent_id: 1, materi_kunci: 1 },
       { unique: true, name: 'satu_per_materi' },
     ),
-    k(KOLEKSI.percobaan).createIndexes([
-      { key: { respondent_id: 1, kuis_kunci: 1, percobaan_ke: 1 }, name: 'urutan_percobaan', unique: true },
-      { key: { kuis_kunci: 1 }, name: 'per_kuis' },
-    ]),
     k(KOLEKSI.percobaanLogin).createIndex({ kunci: 1, waktu: -1 }, { name: 'kunci_waktu' }),
     indeksTtl(db, KOLEKSI.percobaanLogin, 'hapus_percobaan_lama', 60 * 60),
     k(KOLEKSI.logAudit).createIndex({ waktu: -1 }, { name: 'waktu_terbaru' }),
+    k(KOLEKSI.tips).createIndex({ terbit: 1, urutan: 1 }, { name: 'terbit_urutan' }),
   ]);
 }
 

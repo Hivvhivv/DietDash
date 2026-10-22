@@ -9,7 +9,7 @@ Rujukan lengkap: `docs/PRD.md` bagian 15, 17, 18, dan 19.
 
 Laporkan setiap butir sebagai **Lulus / Gagal / Belum bisa diuji** beserta bukti singkat (URL, lebar layar, data uji). Jangan menandai Lulus tanpa benar-benar memeriksanya. Uji yang menulis data hanya di database `_uji` dan server terpisah (mis. `MONGODB_DB=dash_sehat_uji npx next start -p 3100`), lalu bersihkan dan build ulang dari database asli.
 
-Persiapan data uji: `npm run benih-konten -- --terbit` (hanya DB `_uji`) dan `buat-admin` mode otomatis (`BUAT_ADMIN_EMAIL`, `BUAT_ADMIN_SANDI`, hanya DB `_uji`). Formulir dapat diuji tanpa peramban lewat jalur tanpa JavaScript (POST multipart dengan field `$ACTION_*` dari HTML); aksi yang dipanggil JavaScript (mis. `aksiJawab`) lewat header `Next-Action` dengan ID dari `.next/server/server-reference-manifest.json`. Kode TOTP dihitung dari kunci rahasia di halaman atur 2FA.
+Persiapan data uji: `npm run benih-konten -- --terbit` (hanya DB `_uji`) dan `buat-admin` mode otomatis (`BUAT_ADMIN_EMAIL`, `BUAT_ADMIN_SANDI`, hanya DB `_uji`). Formulir dapat diuji tanpa peramban lewat jalur tanpa JavaScript (POST multipart dengan field `$ACTION_*` dari HTML); aksi yang dipanggil JavaScript (mis. `aksiBukaMateri`) lewat header `Next-Action` dengan ID dari `.next/server/server-reference-manifest.json`.
 
 ## A. Akun
 
@@ -21,23 +21,23 @@ Persiapan data uji: `npm run benih-konten -- --terbit` (hanya DB `_uji`) dan `bu
 4. Tidak bisa belajar sebelum mencentang "Saya sudah menyimpan kode akses saya".
 5. Masuk ditunda setelah 5 gagal dalam 15 menit.
 6. Reset token oleh admin: token lama & semua sesi tidak berlaku, progres tetap, tercatat di log.
-7. Admin tidak bisa masuk tanpa 2FA; non-admin di `/admin` → 404; admin biasa di Versi/Admin/Log → 403.
+7. Admin masuk dengan email + kata sandi (tanpa 2FA, keputusan peneliti 2026-10-22); percobaan salah dibatasi; non-admin di `/admin` → 404; admin biasa di Versi/Admin/Log → 403.
 
 ## B. Belajar dan penguncian
 
-8. Materi berikutnya terkunci sampai kuis sebelumnya selesai, termasuk lewat URL langsung (dialihkan dengan pesan ramah); berlaku lintas modul.
-9. Kuis: satu soal per layar, umpan balik + penjelasan per soal, ringkasan akhir; Mode A selesai saat dikirim, Mode B butuh skor minimal.
-10. Jawaban tersimpan per soal; percobaan pertama tersimpan terpisah; ulang kuis tidak menimpa; lanjut setelah halaman ditutup/koneksi putus/ganti perangkat.
-11. "Lanjutkan Belajar" membuka posisi terakhir (materi atau soal yang belum dijawab).
+8. Materi berikutnya terkunci sampai materi sebelumnya dibuka, termasuk lewat URL langsung (dialihkan dengan pesan ramah); berlaku lintas modul. (Kuis dihapus, keputusan peneliti 2026-10-22.)
+9. Membuka materi langsung mencatat materi selesai di server (juga tanpa JavaScript); prefetch tautan tidak ikut menandai.
+10. Progres tersimpan dan tetap ada setelah halaman ditutup, koneksi putus, atau ganti perangkat.
+11. "Lanjutkan Belajar" membuka materi berikutnya yang belum dibaca.
 12. Halaman selesai mengingatkan posttest di luar website.
 
 ## C. Admin dan data
 
-13. Admin dapat membuat, mengurutkan, mempratinjau modul/materi/kuis; super admin menerbitkan & mengunci tanpa pengembang.
-14. Versi tidak bisa ditandai siap/diterbitkan bila ada materi tanpa kuis valid (≥3 soal, satu kunci, penjelasan, alt gambar) atau ada klaim berlebihan.
+13. Admin dapat membuat, mengurutkan, mempratinjau modul/materi; super admin menerbitkan & mengunci tanpa pengembang.
+14. Versi tidak bisa ditandai siap/diterbitkan bila ada materi tanpa isi, tujuan, atau rangkuman, gambar tanpa teks alternatif, atau klaim berlebihan.
 15. Versi dikunci tidak bisa diedit admin biasa; perbaikan = versi perbaikan super admin dengan alasan.
 16. Angka dashboard cocok dengan perhitungan manual dari ekspor.
-17. Detail responden menampilkan seluruh materi, percobaan, dan jawaban dengan benar.
+17. Detail responden menampilkan seluruh materi dengan waktu dibuka dan lama membaca yang benar.
 18. Ekspor CSV/Excel terbuka, memakai ID peserta tanpa nama/HP, bawaan hanya sampel, nama berkas memuat versi & tanggal.
 19. Semua tindakan admin yang ditentukan PRD 10.7 tercatat di log; log tidak bisa dihapus.
 
