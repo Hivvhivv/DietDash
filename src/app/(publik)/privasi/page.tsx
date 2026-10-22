@@ -51,8 +51,9 @@ export default function Privasi() {
           </div>
           <p>
             Kami <strong>tidak</strong> meminta email, NIK, alamat, tanggal lahir, nomor rekam medis, angka tekanan darah, atau
-            data kesehatan lain. Kode akses disimpan dalam bentuk acak (hash) sehingga tidak bisa dilihat siapa pun,
-            termasuk peneliti.
+            data kesehatan lain. Kode akses disimpan dalam bentuk acak (hash) untuk proses masuk. Agar dapat membantu bila Anda
+            lupa, salinan kode juga disimpan terenkripsi dan hanya dapat dibuka oleh super admin (ketua tim peneliti); setiap
+            pembukaan tercatat di log aktivitas.
           </p>
           <p>
             Centang pada “Checklist Harian” di menu Tips hanya tersimpan di perangkat Anda sendiri, tidak dikirim ke server

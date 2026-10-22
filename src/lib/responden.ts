@@ -5,6 +5,7 @@ import { MongoServerError, ObjectId } from 'mongodb';
 import { redirect } from 'next/navigation';
 import { alamatIp, catatPercobaan, hapusPercobaan, kunciBatas, sudahDibatasi } from './batas';
 import { catatAudit, koleksi, type DokPeserta, type DokResponden, type JenisRiwayatAkun } from './db';
+import { dekripsiKode, enkripsiAktif, enkripsiKode } from './kode-akses';
 import { buatIdPeserta, buatToken, normalkanNomorHp, normalkanToken, PANJANG_KODE } from './identitas';
 import { ambilPengaturan } from './pengaturan';
 import { bacaSesi, buatSesi, hapusSemuaSesi, hapusSesiIni } from './sesi';
@@ -40,6 +41,22 @@ export function periksaNama(nama: string): string | null {
   if (n.length < 2) return PESAN.namaKosong;
   if (n.length > 50) return PESAN.namaPanjang;
   return null;
+}
+
+// Hash untuk masuk + salinan terenkripsi untuk dilihat super admin.
+async function kolomKode(token: string, id: ObjectId) {
+  return { token_hash: await hash(token), kode_terenkripsi: enkripsiKode(token, id) };
+}
+
+// Super admin melihat kode akses responden (membantu yang lupa). Selalu tercatat di log.
+export async function lihatKodeAkses(respondentId: ObjectId, adminEmail: string, idPeserta: string): Promise<Hasil<{ kode: string }>> {
+  if (!enkripsiAktif()) return { ok: false, pesan: 'Fitur lihat kode belum aktif: atur KUNCI_KODE_AKSES di server.' };
+  const { responden } = await koleksi();
+  const akun = await responden.findOne({ _id: respondentId }, { projection: { kode_terenkripsi: 1 } });
+  const kode = dekripsiKode(akun?.kode_terenkripsi, respondentId);
+  if (!kode) return { ok: false, pesan: 'Kode akun ini tidak tersedia (dibuat sebelum fitur ini aktif). Buat kode akses baru dari halaman detail responden.' };
+  await catatAudit({ admin: adminEmail, aksi: 'lihat_kode_akses', objek: idPeserta });
+  return { ok: true, kode };
 }
 
 // ---------- Daftar ----------
@@ -99,6 +116,7 @@ async function buatAkun(m: {
       nama: m.nama.trim(),
       nomor_hp: nomor,
       token_hash: await hash(token),
+      kode_terenkripsi: enkripsiKode(token, id),
       token_disimpan_pada: m.tokenDisimpan ? sekarang : null,
       nomor_terverifikasi_pada: null,
       aktif: true,
@@ -217,7 +235,7 @@ export async function buatUlangTokenBelumDisimpan(a: RespondenAktif): Promise<Ha
   if (a.r.token_disimpan_pada) return { ok: false, pesan: 'Kode akses Anda sudah tersimpan. Ganti kode dari halaman Profil.' };
   const token = buatToken();
   const { responden } = await koleksi();
-  await responden.updateOne({ _id: a.r._id }, { $set: { token_hash: await hash(token) } });
+  await responden.updateOne({ _id: a.r._id }, { $set: await kolomKode(token, a.r._id) });
   await catatRiwayat(a.r._id, 'token_dibuat', 'responden', 'Dibuat ulang sebelum disimpan');
   return { ok: true, token };
 }
@@ -230,7 +248,7 @@ export async function gantiToken(a: RespondenAktif, tokenLama: string): Promise<
   const { responden } = await koleksi();
   await responden.updateOne(
     { _id: a.r._id },
-    { $set: { token_hash: await hash(token), token_disimpan_pada: null } },
+    { $set: { ...(await kolomKode(token, a.r._id)), token_disimpan_pada: null } },
   );
   await hapusSemuaSesi(a.r._id);
   await buatSesi({ pemilik_id: a.r._id, jenis: 'responden', ingat: true });
@@ -279,7 +297,7 @@ export async function resetTokenOlehAdmin(respondentId: ObjectId, adminEmail: st
   const akun = await responden.findOne({ _id: respondentId });
   if (!akun) return { ok: false, pesan: 'Responden tidak ditemukan.' };
   const token = buatToken();
-  await responden.updateOne({ _id: respondentId }, { $set: { token_hash: await hash(token) } });
+  await responden.updateOne({ _id: respondentId }, { $set: await kolomKode(token, respondentId) });
   await hapusSemuaSesi(respondentId);
   await catatRiwayat(respondentId, 'token_direset_admin', adminEmail, alasan.trim());
   const p = await peserta.findOne({ respondent_id: respondentId });

@@ -81,7 +81,7 @@ const KALIMAT: Record<string, (e: DokLogAudit) => [string, JenisAktivitas]> = {
 };
 
 // Aksi rutin yang tidak perlu tampil di ringkasan (tetap ada di Log Aktivitas).
-const ABAIKAN = new Set(['masuk', 'keluar', 'gagal_masuk', 'aktifkan_2fa', 'lihat_nomor_lengkap', 'unggah_gambar', 'unduh_log', 'urutkan_modul', 'urutkan_materi', 'urutkan_tips']);
+const ABAIKAN = new Set(['masuk', 'keluar', 'gagal_masuk', 'aktifkan_2fa', 'lihat_nomor_lengkap', 'lihat_kode_akses', 'unggah_gambar', 'unduh_log', 'urutkan_modul', 'urutkan_materi', 'urutkan_tips']);
 
 export async function aktivitasTerbaru(jumlah = 5): Promise<Aktivitas[]> {
   const k = await koleksi();

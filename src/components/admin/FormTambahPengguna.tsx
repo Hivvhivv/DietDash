@@ -57,7 +57,7 @@ function FormResponden() {
             Tambah pengguna lain
           </a>
         </div>
-        <p className="label-kecil">Responden tidak perlu tahu ID peserta. Kode akses disimpan acak (hash) sehingga tidak bisa dilihat lagi; bila hilang, buat kode baru dari halaman detail responden.</p>
+        <p className="label-kecil">Responden tidak perlu tahu ID peserta. Bila responden lupa, super admin dapat melihat kode lewat tombol “Lihat kode” di Manajemen Pengguna (tercatat di log).</p>
       </div>
     );
   }

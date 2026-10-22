@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { aksiBukaKunci, aksiLihatNomor, aksiPretest, aksiResetToken, aksiStatusAkun, aksiStatusSampel } from '../../../aksi-responden';
 import { FormAksi } from '@/components/admin/FormAdmin';
 import LencanaStatusMateri from '@/components/belajar/StatusMateri';
+import LihatKodeAkses from '@/components/admin/LihatKodeAkses';
 import { wajibAdmin } from '@/lib/admin-auth';
 import { samarkanNomorHp } from '@/lib/identitas';
 import { detailResponden } from '@/lib/monitor';
@@ -35,7 +36,7 @@ function KolomAlasan({ id, wajib = true }: { id: string; wajib?: boolean }) {
 
 
 export default async function DetailResponden({ params }: { params: Promise<{ id: string }> }) {
-  await wajibAdmin();
+  const admin = await wajibAdmin();
   const { id } = await params;
   const d = await detailResponden(id);
   if (!d) notFound();
@@ -62,6 +63,15 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
             <FormAksi aksi={aksiLihatNomor} data={data} label="Lihat nomor lengkap" sekunder konfirmasi="Membuka nomor lengkap akan tercatat di log audit. Lanjutkan?" />
           </dd>
         </div>
+        {admin.peran === 'super_admin' && (
+          <div>
+            <dt>Kode akses</dt>
+            <dd>
+              <LihatKodeAkses idPeserta={p.id_peserta} />
+              <span className="label-kecil">Hanya super admin; setiap pembukaan tercatat di log.</span>
+            </dd>
+          </div>
+        )}
         <div>
           <dt>Status akun</dt>
           <dd>{statusAkun}</dd>

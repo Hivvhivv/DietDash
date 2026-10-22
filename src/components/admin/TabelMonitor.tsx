@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import LihatKodeAkses from './LihatKodeAkses';
 
 export type PeranPengguna = 'responden' | 'admin' | 'super_admin';
 
@@ -65,7 +66,7 @@ function daftarHalaman(kini: number, akhir: number): (number | '…')[] {
 
 // Tabel pengguna untuk Dashboard (ringkas) dan Manajemen Pengguna (lengkap).
 // Pencarian nama/ID/nomor dilakukan di peramban, sehingga kata kunci tidak masuk URL atau log server.
-export default function TabelMonitor({ baris, lengkap = false }: { baris: BarisMonitor[]; lengkap?: boolean }) {
+export default function TabelMonitor({ baris, lengkap = false, lihatKode = false }: { baris: BarisMonitor[]; lengkap?: boolean; lihatKode?: boolean }) {
   const perHalaman = lengkap ? 10 : 8;
   const adaAdmin = baris.some((b) => b.peran !== 'responden');
   const [cari, setCari] = useState('');
@@ -188,6 +189,7 @@ export default function TabelMonitor({ baris, lengkap = false }: { baris: BarisM
               <th scope="col">Materi Berikutnya</th>
               <th scope="col">Terakhir Aktif</th>
               {!lengkap && <th scope="col">Lama Baca</th>}
+              {lihatKode && <th scope="col">Kode Akses</th>}
               <th scope="col">Pretest</th>
               <th scope="col">
                 <span className="sr-only">Aksi</span>
@@ -250,6 +252,7 @@ export default function TabelMonitor({ baris, lengkap = false }: { baris: BarisM
                     )}
                   </td>
                   {!lengkap && <td>{b.menit_baca} mnt</td>}
+                  {lihatKode && <td>{admin ? '—' : <LihatKodeAkses idPeserta={b.id_peserta} ringkas />}</td>}
                   <td>{admin ? '—' : b.pretest ? '✓ Tercatat' : '—'}</td>
                   <td>
                     {b.href && (
@@ -263,7 +266,7 @@ export default function TabelMonitor({ baris, lengkap = false }: { baris: BarisM
             })}
             {tampil.length === 0 && (
               <tr>
-                <td colSpan={9}>Tidak ada pengguna yang cocok dengan pencarian atau saringan.</td>
+                <td colSpan={10}>Tidak ada pengguna yang cocok dengan pencarian atau saringan.</td>
               </tr>
             )}
           </tbody>

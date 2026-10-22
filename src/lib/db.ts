@@ -12,6 +12,7 @@ export interface DokResponden {
   nama: string;
   nomor_hp: string; // format seragam +628…
   token_hash: string;
+  kode_terenkripsi?: string | null; // salinan AES-GCM untuk dilihat super admin (lib/kode-akses); null = tidak tersedia
   token_disimpan_pada: Date | null; // null = belum mencentang "Saya sudah menyimpan token"
   nomor_terverifikasi_pada: Date | null; // disiapkan untuk fase OTP
   aktif: boolean;

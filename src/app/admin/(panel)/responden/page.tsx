@@ -135,7 +135,7 @@ export default async function ManajemenPengguna() {
       </ul>
 
       <section className="kartu-panel" aria-label="Daftar pengguna">
-        <TabelMonitor baris={barisTabel} lengkap />
+        <TabelMonitor baris={barisTabel} lengkap lihatKode={superAdmin} />
       </section>
     </>
   );

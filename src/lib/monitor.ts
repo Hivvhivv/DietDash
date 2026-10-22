@@ -46,7 +46,7 @@ async function muatData(): Promise<DataMentah> {
   const k = await koleksi();
   const [struktur, responden, peserta, progres] = await Promise.all([
     strukturAktif(),
-    k.responden.find({}, { projection: { token_hash: 0 } }).sort({ dibuat_pada: 1 }).toArray(),
+    k.responden.find({}, { projection: { token_hash: 0, kode_terenkripsi: 0 } }).sort({ dibuat_pada: 1 }).toArray(),
     k.peserta.find({}).toArray(),
     k.progres.find({}).toArray(),
   ]);
@@ -152,7 +152,7 @@ export async function detailResponden(idPeserta: string) {
   const k = await koleksi();
   const p = await k.peserta.findOne({ id_peserta: idPeserta });
   if (!p) return null;
-  const r = await k.responden.findOne({ _id: p.respondent_id }, { projection: { token_hash: 0 } });
+  const r = await k.responden.findOne({ _id: p.respondent_id }, { projection: { token_hash: 0, kode_terenkripsi: 0 } });
   if (!r) return null;
   const atur = await ambilPengaturan();
   const struktur = await strukturAktif();

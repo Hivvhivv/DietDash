@@ -8,7 +8,7 @@ import { formatNomorHp, formatToken } from '@/lib/identitas';
 import { strukturAktif } from '@/lib/konten';
 import { simpanPengaturan } from '@/lib/pengaturan';
 import { bukaKunciManual } from '@/lib/progres';
-import { resetTokenOlehAdmin, tambahRespondenOlehAdmin, ubahStatusAkun } from '@/lib/responden';
+import { lihatKodeAkses, resetTokenOlehAdmin, tambahRespondenOlehAdmin, ubahStatusAkun } from '@/lib/responden';
 
 export interface StatusAksiAdmin {
   pesan?: string;
@@ -26,6 +26,15 @@ const teks = (fd: FormData, k: string) => String(fd.get(k) ?? '');
 async function cariResponden(idPeserta: string) {
   const { peserta } = await koleksi();
   return peserta.findOne({ id_peserta: idPeserta });
+}
+
+// Lihat kode akses responden (khusus super admin, tercatat di log). Dipanggil dari tombol "Lihat kode".
+export async function aksiLihatKodeAkses(idPeserta: string): Promise<{ kode?: string; pesan?: string }> {
+  const admin = await wajibAdmin('super_admin');
+  const p = await cariResponden(String(idPeserta));
+  if (!p) return { pesan: 'Responden tidak ditemukan.' };
+  const h = await lihatKodeAkses(p.respondent_id, admin.email, p.id_peserta);
+  return h.ok ? { kode: formatToken(h.kode) } : { pesan: h.pesan };
 }
 
 // Tambah Pengguna Baru (role Responden), khusus super admin. Kode akses tampil sekali.

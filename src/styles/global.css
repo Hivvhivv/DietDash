@@ -6146,6 +6146,30 @@ a.beranda-kartu:hover .beranda-kartu-panah {
   }
 }
 
+/* ===== Lihat kode akses (super admin) ===== */
+.lihat-kode {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+}
+
+.lihat-kode-angka {
+  padding: 0.2rem 0.6rem;
+  border: 1px dashed var(--warna-utama);
+  border-radius: 10px;
+  background: #f6fbf8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.lihat-kode-tombol {
+  white-space: nowrap;
+}
+
 /* ===== Tambah Pengguna Baru ===== */
 .pilih-peran {
   margin: 0 0 1.25rem;
