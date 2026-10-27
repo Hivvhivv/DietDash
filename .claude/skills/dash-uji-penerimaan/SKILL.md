@@ -29,7 +29,7 @@ Persiapan data uji: `npm run benih-konten -- --terbit` (hanya DB `_uji`) dan `bu
 9. Membuka materi langsung mencatat materi selesai di server (juga tanpa JavaScript); prefetch tautan tidak ikut menandai.
 10. Progres tersimpan dan tetap ada setelah halaman ditutup, koneksi putus, atau ganti perangkat.
 11. "Lanjutkan Belajar" membuka materi berikutnya yang belum dibaca.
-12. Halaman selesai mengingatkan posttest di luar website.
+12. Pretest aktif muncul sebelum website bisa dipakai; posttest muncul setelah dibuka admin; responden tidak melihat skor/kunci; halaman selesai mengingatkan posttest.
 
 ## C. Admin dan data
 

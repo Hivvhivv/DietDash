@@ -65,7 +65,7 @@ export default async function Pengenalan() {
           <li>
             <Link href="/daftar/">Daftar</Link> dengan nama dan nomor HP. Simpan kode akses 6 angka yang muncul.
           </li>
-          <li>Ikuti pretest sesuai jadwal dari peneliti.</li>
+          <li>Isi pretest yang muncul saat pertama kali masuk.</li>
           <li>Pelajari materi secara berurutan. Setiap materi hanya butuh beberapa menit.</li>
           <li>Setelah sebuah materi dibuka, materi berikutnya terbuka. Progres tersimpan otomatis.</li>
         </ol>

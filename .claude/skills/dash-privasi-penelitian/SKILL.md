@@ -12,7 +12,9 @@ Rujukan lengkap: `docs/PRD.md` bagian 3, 7, 10.5–10.7, 11, 12, 15 (Keamanan), 
 | Data | Koleksi | Catatan |
 |---|---|---|
 | Nama, nomor HP (+62…), hash token, waktu persetujuan/kelayakan, aktif, mundur | `respondents` | Identitas; terpisah dari data belajar |
-| ID peserta (DS-xxxx), status sampel, tanda pretest | `participants` | Dipakai untuk analisis & ekspor |
+| ID peserta (DS-xxxx), status sampel, pretest/posttest selesai, posttest dibuka | `participants` | Dipakai untuk analisis & ekspor |
+| Soal pretest/posttest (dengan kunci) | `instrumen_tes` | Kunci tidak pernah dikirim ke responden |
+| Jawaban & skor pretest/posttest | `jawaban_tes` (per `respondent_id`, unik per jenis) | Skor hanya admin; ekspor memakai ID peserta |
 | Riwayat akun (token dibuat/diganti/direset, nomor/nama diganti, nonaktif, mundur) | `token_events` | Siapa & alasan |
 | Progres per materi (dibuka, selesai, detik baca, versi, buka manual) | `material_progress` | Kunci materi stabil lintas versi |
 | Admin (email, hash sandi, peran), undangan, sesi, percobaan masuk | `admins`, `admin_invites`, `sessions`, `percobaan_login` | Undangan & sesi disimpan sebagai hash |
@@ -54,7 +56,7 @@ Terdaftarnya seseorang sudah mengungkap bahwa ia memiliki hipertensi → daftar 
 - Versi dikunci sebelum responden pertama mendaftar. Perbaikan setelah dikunci = versi perbaikan (super admin, alasan wajib). Mengganti versi terkunci dengan versi biasa wajib beralasan (penyimpangan protokol).
 - Buka kunci manual wajib alasan dan tercatat. Pembukaan manual, perbaikan konten, dan ekspor adalah bahan laporan penyimpangan protokol.
 - Progres = keterlaksanaan intervensi (fidelity). Jangan menampilkannya sebagai efektivitas atau keberhasilan klinis.
-- Pretest/posttest tidak ada di website. Gerbang pretest (opsional) hanya berupa tanda dari admin.
+- Pretest/posttest online (2026-10-27): pretest wajib sebelum memakai website, posttest setelah dibuka admin. Responden tidak melihat skor maupun kunci. Jawaban sekali kirim, tidak bisa diubah; soal terkunci setelah ada jawaban. Jangan membuat soal yang meminta identitas, tekanan darah, atau data kesehatan lain. Tanda manual (pretest/posttest kertas) tetap ada di detail responden.
 
 ## Pengaturan penelitian (`app_settings`)
 

@@ -32,7 +32,7 @@ export default async function Selesai() {
         </section>
         <div className="kotak kotak-peringatan">
           <p>
-            <strong>Langkah berikutnya:</strong> ikuti <strong>posttest</strong> sesuai jadwal dari peneliti. Posttest tidak dikerjakan di website ini.
+            <strong>Langkah berikutnya:</strong> peneliti akan membuka <strong>posttest</strong> sesuai jadwal. Setelah dibuka, posttest muncul otomatis saat Anda masuk dan di menu Tes.
           </p>
         </div>
         <p>Anda tetap bisa membaca ulang materi kapan saja.</p>

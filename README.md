@@ -102,7 +102,9 @@ Siklus konten: **Draf → Siap ditinjau → Terbit → Dikunci**. Hanya ada satu
 | Koleksi | Isi |
 |---|---|
 | `respondents` | Identitas responden: nama, nomor HP (+62…), hash token, persetujuan, status |
-| `participants` | ID peserta, status sampel, tanda pretest |
+| `participants` | ID peserta, status sampel, pretest/posttest selesai, posttest dibuka |
+| `instrumen_tes` | Soal pretest & posttest (pilihan ganda, skala, isian) |
+| `jawaban_tes` | Jawaban & skor pretest/posttest per responden |
 | `token_events` | Riwayat akun (token dibuat/diganti/direset, nomor/nama diganti, nonaktif, mundur) |
 | `admins`, `admin_invites` | Akun admin (hash kata sandi, peran) dan undangan (hash, 48 jam) |
 | `sessions` | Sesi responden & admin (hash token, kedaluwarsa bergeser) |

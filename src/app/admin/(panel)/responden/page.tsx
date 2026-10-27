@@ -6,6 +6,7 @@ import { wajibAdmin } from '@/lib/admin-auth';
 import { waktuRelatif } from '@/lib/dashboard-admin';
 import { koleksi } from '@/lib/db';
 import { sha256 } from '@/lib/identitas';
+import { statusKunci } from '@/lib/kode-akses';
 import { daftarResponden } from '@/lib/monitor';
 import { ambilPengaturan } from '@/lib/pengaturan';
 import { formatWaktu } from '@/lib/waktu';
@@ -85,6 +86,8 @@ export default async function ManajemenPengguna() {
     mendekati_batas: b.mendekati_batas,
     punya_kode: punyaKode.has(b.id.toHexString()),
   }));
+  const kunci = superAdmin ? statusKunci() : 'aktif';
+  const tanpaKode = baris.length - punyaKode.size;
 
   return (
     <>
@@ -122,6 +125,29 @@ export default async function ManajemenPengguna() {
           </a>
         </div>
       </div>
+
+      {kunci !== 'aktif' && (
+        <div className="kotak kotak-peringatan" role="status">
+          <p>
+            <strong>Kode akses belum bisa ditampilkan.</strong>{' '}
+            {kunci === 'kosong'
+              ? 'Variabel KUNCI_KODE_AKSES belum diatur di server.'
+              : 'Variabel KUNCI_KODE_AKSES sudah diisi, tetapi formatnya tidak valid (harus 32 byte dalam base64).'}{' '}
+            Selama itu, akun baru tetap bisa masuk, tetapi salinan kodenya tidak disimpan sehingga tidak bisa dilihat di sini.
+          </p>
+          <p>
+            Cara memperbaiki: buat kunci dengan perintah <code>node -e &quot;console.log(require(&apos;crypto&apos;).randomBytes(32).toString(&apos;base64&apos;))&quot;</code>,
+            isi ke <code>.env.local</code> dan Environment Variables di Vercel, lalu jalankan ulang server/deploy ulang. Akun yang
+            sudah terdaftar perlu <strong>Reset Kode</strong> agar kodenya bisa dilihat.
+          </p>
+        </div>
+      )}
+      {kunci === 'aktif' && superAdmin && tanpaKode > 0 && (
+        <p className="kotak-info">
+          {tanpaKode} akun belum punya salinan kode (dibuat sebelum fitur lihat kode aktif). Gunakan <strong>Reset Kode</strong> pada akun
+          tersebut bila kodenya perlu bisa dilihat.
+        </p>
+      )}
 
       <ul className="kisi-kartu-pengguna">
         <KartuRingkas

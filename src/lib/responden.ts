@@ -9,6 +9,7 @@ import { dekripsiKode, enkripsiAktif, enkripsiKode } from './kode-akses';
 import { buatIdPeserta, buatToken, normalkanNomorHp, normalkanToken, PANJANG_KODE, samarkanNomorHp } from './identitas';
 import { ambilPengaturan } from './pengaturan';
 import { bacaSesi, buatSesi, hapusSemuaSesi, hapusSesiIni } from './sesi';
+import { tesWajib } from './tes';
 
 export const PESAN = {
   namaKosong: 'Silakan isi nama Anda. Nama panggilan juga boleh.',
@@ -211,11 +212,16 @@ export async function respondenSaatIni(): Promise<RespondenAktif | null> {
   return { r, p };
 }
 
-// Dipakai di setiap halaman belajar. Responden yang belum mengonfirmasi token diarahkan menyimpannya dulu.
-export async function wajibResponden(opsi: { izinkanBelumSimpan?: boolean } = {}): Promise<RespondenAktif> {
+// Dipakai di setiap halaman belajar. Responden yang belum mengonfirmasi token diarahkan menyimpannya dulu;
+// lalu pretest (dan posttest yang sudah dibuka admin) wajib diisi sebelum website dapat dipakai.
+export async function wajibResponden(opsi: { izinkanBelumSimpan?: boolean; izinkanTes?: boolean } = {}): Promise<RespondenAktif> {
   const a = await respondenSaatIni();
   if (!a) redirect('/masuk/');
   if (!opsi.izinkanBelumSimpan && !a.r.token_disimpan_pada) redirect('/simpan-token/');
+  if (!opsi.izinkanTes && a.r.token_disimpan_pada) {
+    const tes = await tesWajib(a.p);
+    if (tes) redirect(`/tes/${tes}/`);
+  }
   return a;
 }
 

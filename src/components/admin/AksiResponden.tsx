@@ -72,7 +72,7 @@ function FormEdit({ b, tutup }: { b: BarisResponden; tutup: () => void }) {
         </select>
       </div>
       <fieldset className="daftar-centang">
-        <legend>Tanda pretest / posttest (dikerjakan di luar website)</legend>
+        <legend>Tanda manual pretest / posttest (bila dikerjakan di kertas; tes online tercatat otomatis)</legend>
         <label className="centang">
           <input type="checkbox" name="pretest" value="ya" defaultChecked={b.pretest} />
           <span>Pretest sudah dikerjakan</span>

@@ -16,6 +16,8 @@ export const KOLEKSI = {
   percobaanLogin: 'percobaan_login',
   logAudit: 'log_audit',
   tips: 'tips',
+  instrumen: 'instrumen_tes',
+  jawabanTes: 'jawaban_tes',
 } as const;
 
 export async function pastikanIndeks(db: Db): Promise<void> {
@@ -51,6 +53,7 @@ export async function pastikanIndeks(db: Db): Promise<void> {
     indeksTtl(db, KOLEKSI.percobaanLogin, 'hapus_percobaan_lama', 60 * 60),
     k(KOLEKSI.logAudit).createIndex({ waktu: -1 }, { name: 'waktu_terbaru' }),
     k(KOLEKSI.tips).createIndex({ terbit: 1, urutan: 1 }, { name: 'terbit_urutan' }),
+    k(KOLEKSI.jawabanTes).createIndex({ respondent_id: 1, jenis: 1 }, { unique: true, name: 'satu_per_responden' }),
   ]);
 }
 

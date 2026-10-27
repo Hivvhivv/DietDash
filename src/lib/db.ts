@@ -31,7 +31,8 @@ export interface DokPeserta {
   id_peserta: string; // mis. DS-4827
   status_sampel: StatusSampel;
   pretest_selesai_pada: Date | null; // dipakai bila gerbang pretest diaktifkan
-  posttest_selesai_pada?: Date | null; // tanda dari admin; posttest dikerjakan di luar website
+  posttest_selesai_pada?: Date | null; // otomatis saat posttest online dikirim, atau ditandai admin (posttest kertas)
+  posttest_dibuka_pada?: Date | null; // posttest muncul untuk responden setelah dibuka admin
 }
 
 export type JenisRiwayatAkun =
@@ -174,6 +175,42 @@ export interface DokProgresMateri {
   buka_manual: { oleh: string; alasan: string; waktu: Date } | null;
 }
 
+// ---------- Pretest & posttest (keputusan peneliti 2026-10-27) ----------
+
+export type JenisTes = 'pretest' | 'posttest';
+export type JenisSoalTes = 'pilihan' | 'skala' | 'isian';
+
+export interface SoalTes {
+  kunci: string;
+  jenis: JenisSoalTes;
+  teks: string;
+  wajib: boolean;
+  pilihan?: { kunci: string; teks: string; benar: boolean }[]; // pilihan ganda; benar tidak pernah dikirim ke responden
+  skala?: { min: number; maks: number; label_min: string; label_maks: string };
+  isian?: { panjang: 'pendek' | 'panjang' };
+}
+
+export interface DokInstrumen {
+  _id: JenisTes;
+  judul: string;
+  petunjuk: string;
+  aktif: boolean;
+  soal: SoalTes[];
+  diubah_pada: Date;
+  diubah_oleh: string;
+}
+
+export interface DokJawabanTes {
+  _id: ObjectId;
+  respondent_id: ObjectId;
+  jenis: JenisTes;
+  jawaban: { soal_kunci: string; nilai: string }[]; // pilihan: kunci pilihan; skala: angka; isian: teks
+  benar: number;
+  total_berkunci: number;
+  skor: number | null; // persen dari soal pilihan ganda yang punya kunci; hanya untuk peneliti
+  dikirim_pada: Date;
+}
+
 // ---------- Tips Sehari-hari (bacaan pendukung, dikelola admin di luar versi konten) ----------
 
 export const KATEGORI_TIPS = ['dapur', 'belanja', 'luar', 'keluarga', 'label', 'kebiasaan'] as const;
@@ -271,6 +308,8 @@ export async function koleksi() {
     percobaanLogin: db.collection<DokPercobaanLogin>(KOLEKSI.percobaanLogin),
     logAudit: db.collection<DokLogAudit>(KOLEKSI.logAudit),
     tips: db.collection<DokTips>(KOLEKSI.tips),
+    instrumen: db.collection<DokInstrumen>(KOLEKSI.instrumen),
+    jawabanTes: db.collection<DokJawabanTes>(KOLEKSI.jawabanTes),
   };
 }
 

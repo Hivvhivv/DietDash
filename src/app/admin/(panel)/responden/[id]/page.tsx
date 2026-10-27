@@ -2,12 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { aksiBukaKunci, aksiLihatNomor, aksiPosttest, aksiPretest, aksiResetToken, aksiStatusAkun, aksiStatusSampel } from '../../../aksi-responden';
+import { aksiPosttestResponden } from '../../../aksi-tes';
 import { FormAksi } from '@/components/admin/FormAdmin';
 import LencanaStatusMateri from '@/components/belajar/StatusMateri';
 import LihatKodeAkses from '@/components/admin/LihatKodeAkses';
 import { wajibAdmin } from '@/lib/admin-auth';
 import { samarkanNomorHp } from '@/lib/identitas';
 import { detailResponden } from '@/lib/monitor';
+import { skorResponden } from '@/lib/tes';
 import { formatDurasi, formatWaktu } from '@/lib/waktu';
 
 export const metadata: Metadata = { title: 'Detail responden' };
@@ -41,6 +43,9 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
   const d = await detailResponden(id);
   if (!d) notFound();
   const { r, p, ringkasan, garisWaktu, riwayat, atur } = d;
+  const skor = await skorResponden(r._id);
+  const teksSkor = (x: (typeof skor)['pretest']) =>
+    x ? `✓ Dikirim ${formatWaktu(x.dikirim_pada)}${x.skor === null ? '' : ` · skor ${x.skor}% (${x.benar}/${x.total_berkunci} benar)`}` : null;
   const data = { id_peserta: p.id_peserta };
   const terkunci = (ringkasan?.daftar ?? []).filter((x) => x.status === 'terkunci');
   const statusAkun = r.mundur_pada ? 'Mengundurkan diri' : r.aktif ? 'Aktif' : 'Nonaktif';
@@ -93,10 +98,18 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
           <dd>{ringkasan ? `${ringkasan.selesai}/${ringkasan.total} materi (${ringkasan.persen}%)` : '—'}</dd>
         </div>
         <div>
-          <dt>Pretest / Posttest</dt>
+          <dt>Pretest</dt>
+          <dd>{teksSkor(skor.pretest) ?? (p.pretest_selesai_pada ? `✓ Ditandai manual (${formatWaktu(p.pretest_selesai_pada)})` : 'Belum mengisi')}</dd>
+        </div>
+        <div>
+          <dt>Posttest</dt>
           <dd>
-            {p.pretest_selesai_pada ? `✓ Pretest (${formatWaktu(p.pretest_selesai_pada)})` : 'Pretest belum ditandai'} ·{' '}
-            {p.posttest_selesai_pada ? `✓ Posttest (${formatWaktu(p.posttest_selesai_pada)})` : 'Posttest belum ditandai'}
+            {teksSkor(skor.posttest) ??
+              (p.posttest_selesai_pada
+                ? `✓ Ditandai manual (${formatWaktu(p.posttest_selesai_pada)})`
+                : p.posttest_dibuka_pada
+                  ? `Dibuka ${formatWaktu(p.posttest_dibuka_pada)}, belum mengisi`
+                  : 'Belum dibuka')}
           </dd>
         </div>
       </dl>
@@ -189,10 +202,29 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
           </div>
         </details>
 
+        {!skor.posttest && (
+          <details className="tanya">
+            <summary>{p.posttest_dibuka_pada ? 'Tutup posttest' : 'Buka posttest'}</summary>
+            <div className="tanya-isi">
+              <p>
+                {p.posttest_dibuka_pada
+                  ? 'Posttest sudah dibuka. Menutupnya membuat posttest tidak lagi muncul untuk responden ini.'
+                  : 'Setelah dibuka, responden diminta mengisi posttest saat membuka website berikutnya.'}
+              </p>
+              <FormAksi
+                aksi={aksiPosttestResponden}
+                data={{ ...data, buka: p.posttest_dibuka_pada ? 'tidak' : 'ya' }}
+                label={p.posttest_dibuka_pada ? 'Tutup posttest' : 'Buka posttest'}
+                sekunder={!!p.posttest_dibuka_pada}
+              />
+            </div>
+          </details>
+        )}
+
         <details className="tanya">
-          <summary>Tanda posttest</summary>
+          <summary>Tanda posttest manual</summary>
           <div className="tanya-isi">
-            <p className="label-kecil">Posttest dikerjakan di luar website; tanda ini hanya untuk memantau kelengkapan data penelitian.</p>
+            <p className="label-kecil">Hanya bila posttest dikerjakan di kertas. Posttest online menandai selesai secara otomatis.</p>
             <FormAksi
               aksi={aksiPosttest}
               data={{ ...data, selesai: p.posttest_selesai_pada ? 'tidak' : 'ya' }}
@@ -204,7 +236,7 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
 
         {atur.gerbang_pretest && (
           <details className="tanya">
-            <summary>Tanda pretest</summary>
+            <summary>Tanda pretest manual</summary>
             <div className="tanya-isi">
               <FormAksi
                 aksi={aksiPretest}

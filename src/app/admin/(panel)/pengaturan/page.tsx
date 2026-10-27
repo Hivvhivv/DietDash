@@ -38,7 +38,7 @@ export default async function Pengaturan() {
           <legend>Pendaftaran</legend>
           <Centang id="pendaftaran_dibuka" label="Pendaftaran dibuka" ket="Bila ditutup, halaman Daftar menampilkan pemberitahuan dan akun baru tidak dapat dibuat. Responden lama tetap bisa masuk." aktif={a.pendaftaran_dibuka} />
           <Centang id="wajib_pernyataan_kelayakan" label="Wajib pernyataan kelayakan" ket="Calon responden mencentang bahwa dirinya dewasa dan memiliki hipertensi sesuai kriteria penelitian." aktif={a.wajib_pernyataan_kelayakan} />
-          <Centang id="gerbang_pretest" label="Materi 1.1 terbuka setelah pretest ditandai" ket="Bila aktif, admin menandai pretest selesai di halaman detail responden sebelum materi pertama terbuka." aktif={a.gerbang_pretest} />
+          <Centang id="gerbang_pretest" label="Materi 1.1 terbuka setelah pretest ditandai" ket="Bila aktif, materi pertama terbuka setelah pretest tercatat: otomatis saat pretest online dikirim, atau ditandai admin bila pretest di kertas." aktif={a.gerbang_pretest} />
         </fieldset>
         <fieldset>
           <legend>Pemantauan</legend>

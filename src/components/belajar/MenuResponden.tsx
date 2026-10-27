@@ -2,57 +2,61 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import Ikon, { type NamaIkon } from '../Ikon';
 
 interface ItemMenu {
   href: string;
   label: string;
+  pendek: string; // label di bilah bawah ponsel
   ikon: NamaIkon;
   cocok: (path: string) => boolean;
 }
 
 const MENU: ItemMenu[] = [
-  { href: '/belajar/', label: 'Beranda', ikon: 'rumah', cocok: (p) => p === '/belajar/' || p.startsWith('/belajar/selesai/') },
+  { href: '/belajar/', label: 'Beranda', pendek: 'Beranda', ikon: 'rumah', cocok: (p) => p === '/belajar/' || p.startsWith('/belajar/selesai/') },
   {
     href: '/belajar/modul/',
     label: 'Modul Pembelajaran',
+    pendek: 'Modul',
     ikon: 'buku',
     cocok: (p) => p.startsWith('/belajar/modul/') || p.startsWith('/belajar/materi/') || p.startsWith('/pengenalan/'),
   },
-  { href: '/belajar/menu-sehat/', label: 'Menu Sehat', ikon: 'piring', cocok: (p) => p.startsWith('/belajar/menu-sehat/') },
-  { href: '/belajar/tips/', label: 'Tips Sehari-hari', ikon: 'lampu', cocok: (p) => p.startsWith('/belajar/tips/') },
+  { href: '/belajar/menu-sehat/', label: 'Menu Sehat', pendek: 'Menu Sehat', ikon: 'piring', cocok: (p) => p.startsWith('/belajar/menu-sehat/') },
+  { href: '/belajar/tips/', label: 'Tips Sehari-hari', pendek: 'Tips', ikon: 'lampu', cocok: (p) => p.startsWith('/belajar/tips/') },
+  { href: '/belajar/tes/', label: 'Pretest & Posttest', pendek: 'Tes', ikon: 'kuis', cocok: (p) => p.startsWith('/belajar/tes/') },
 ];
 
-// Navbar atas responden. Layar sempit: daftar menu terlipat di balik tombol "Menu".
-// children = tautan akun (Profil, Keluar) yang ikut tampil di daftar menu ponsel.
-export default function MenuResponden({ children }: { children?: React.ReactNode }) {
+// Menu responden: bilah navigasi bawah ala aplikasi di ponsel/tablet, sebaris di navbar atas mulai 64rem (CSS, tanpa JS).
+export default function MenuResponden() {
   const path = (usePathname() ?? '').replace(/\/?$/, '/');
-  const [buka, setBuka] = useState(false);
-  const [js, setJs] = useState(false);
-  useEffect(() => setJs(true), []);
-  useEffect(() => setBuka(false), [path]);
-
   return (
     <>
-      {js && (
-        <button type="button" className="navbar-tombol" aria-expanded={buka} aria-controls="menu-responden" onClick={() => setBuka((b) => !b)}>
-          <Ikon nama={buka ? 'tutup' : 'menu'} />
-          <span className="navbar-tombol-teks">Menu</span>
-        </button>
-      )}
-      <nav id="menu-responden" className="navbar-menu" aria-label="Menu utama" data-js={js ? 'aktif' : undefined} data-buka={buka ? 'ya' : undefined}>
+      <nav className="navbar-menu" aria-label="Menu utama">
         <ul>
           {MENU.map((m) => (
             <li key={m.href}>
               <Link href={m.href} aria-current={m.cocok(path) ? 'page' : undefined}>
                 <Ikon nama={m.ikon} ukuran={20} />
-                {m.label}
+                <span className="navbar-menu-pendek">{m.pendek}</span>
+                <span className="navbar-menu-panjang">{m.label}</span>
               </Link>
             </li>
           ))}
         </ul>
-        <div className="navbar-akun-ponsel">{children}</div>
+      </nav>
+      <nav className="navbar-bawah" aria-label="Menu utama (bawah)">
+        <ul>
+          {MENU.map((m) => (
+            <li key={m.href}>
+              <Link href={m.href} aria-current={m.cocok(path) ? 'page' : undefined}>
+                <span className="navbar-bawah-ikon">
+                  <Ikon nama={m.ikon} ukuran={22} />
+                </span>
+                <span>{m.pendek}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </nav>
     </>
   );

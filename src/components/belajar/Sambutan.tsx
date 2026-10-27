@@ -17,8 +17,8 @@ export default function Sambutan({ nama }: { nama: string }) {
           <p>Akun Anda sudah siap. Setiap kali masuk, cukup ketik nomor HP dan kode akses 6 angka Anda.</p>
           <div className="kotak">
             <p>
-              <strong>Sebelum mulai belajar</strong>, ikuti <strong>pretest</strong> sesuai jadwal dari peneliti. Pretest tidak
-              dikerjakan di website ini.
+              Setelah materi selesai, peneliti akan membuka <strong>posttest</strong>. Posttest muncul otomatis saat Anda masuk,
+              dan juga bisa dilihat di menu <strong>Tes</strong>.
             </p>
           </div>
         </>

@@ -24,6 +24,7 @@ const MENU: ItemMenu[] = [
     cocok: (p) => p.startsWith('/admin/konten/materi/') || p.startsWith('/admin/konten/pratinjau/'),
   },
   { href: '/admin/tips/', label: 'Kelola Tips', ikon: 'lampu', cocok: (p) => p.startsWith('/admin/tips/') },
+  { href: '/admin/tes/', label: 'Pretest & Posttest', ikon: 'kuis', cocok: (p) => p.startsWith('/admin/tes/') },
   { href: '/admin/responden/', label: 'Manajemen Pengguna', ikon: 'pengguna', cocok: (p) => p.startsWith('/admin/responden/') },
   { href: '/admin/laporan/', label: 'Laporan & Statistik', ikon: 'grafik', cocok: (p) => p.startsWith('/admin/laporan/') || p.startsWith('/admin/ekspor/') },
   { href: '/admin/pengaturan/', label: 'Pengaturan', ikon: 'gerigi', cocok: (p) => p.startsWith('/admin/pengaturan/') },

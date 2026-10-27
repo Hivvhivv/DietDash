@@ -65,7 +65,7 @@ Usulan materi (PRD 13): 1.1–1.3 hipertensi; 2.1–2.3 diet DASH; 3.1–3.5 mak
 ## Tanpa kuis
 
 - Kuis per materi sudah dihapus (keputusan peneliti 2026-10-22). Jangan menulis soal latihan di materi atau naskah benih.
-- Pretest/posttest tetap di luar website. Jangan menyalin butir instrumen penelitian ke materi.
+- Pretest/posttest dikelola admin di `/admin/tes/` (keputusan 2026-10-27). Jangan menyalin butir tes ke materi, rangkuman, atau tips.
 
 ## Sumber
 

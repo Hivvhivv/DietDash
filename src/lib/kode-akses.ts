@@ -14,6 +14,12 @@ function kunci(): Buffer | null {
 
 export const enkripsiAktif = () => kunci() !== null;
 
+// Untuk peringatan di panel admin: membedakan kunci kosong dan kunci yang formatnya salah (isi kunci tidak pernah ditampilkan).
+export function statusKunci(): 'aktif' | 'kosong' | 'tidak_valid' {
+  if (!process.env.KUNCI_KODE_AKSES) return 'kosong';
+  return kunci() ? 'aktif' : 'tidak_valid';
+}
+
 // null bila kunci belum diatur: akun tetap berfungsi, hanya kodenya tidak dapat dilihat.
 export function enkripsiKode(kode: string, respondentId: ObjectId): string | null {
   const k = kunci();

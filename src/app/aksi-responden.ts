@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { formatToken } from '@/lib/identitas';
 import { strukturAktif } from '@/lib/konten';
 import { tandaiDibuka } from '@/lib/progres';
+import { kirimJawaban } from '@/lib/tes';
 import {
   buatUlangTokenBelumDisimpan,
   daftar,
@@ -110,4 +111,28 @@ export async function aksiBukaMateri(materiKunci: string): Promise<{ ok: boolean
   const s = await strukturAktif();
   if (!a || !a.r.token_disimpan_pada || !s) return { ok: false, baru: false };
   return tandaiDibuka(a, s, String(materiKunci));
+}
+
+// ---------- Pretest & posttest ----------
+
+export interface StatusTes {
+  pesan?: string;
+  soal?: string; // soal yang perlu diperbaiki
+  nilai?: Record<string, string>;
+  percobaan?: number;
+}
+
+export async function aksiKirimTes(_: StatusTes | undefined, fd: FormData): Promise<StatusTes> {
+  const a = await wajibResponden({ izinkanTes: true });
+  const jenis = teks(fd, 'jenis') === 'posttest' ? 'posttest' : 'pretest';
+  const nilai: Record<string, string> = {};
+  const isian: Record<string, string> = {};
+  for (const [k, v] of fd.entries()) {
+    if (!k.startsWith('s_') || typeof v !== 'string') continue;
+    nilai[k] = v;
+    isian[k.slice(2)] = v;
+  }
+  const h = await kirimJawaban(a.r._id, a.p, jenis, isian);
+  if (!h.ok) return { pesan: h.pesan, soal: h.soal, nilai, percobaan: Date.now() };
+  redirect(jenis === 'pretest' ? '/selamat-datang/' : '/belajar/tes/?pesan=terima-kasih');
 }

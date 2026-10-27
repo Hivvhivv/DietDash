@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 const RENTANG_MINGGU = [4, 8, 12] as const;
 
 // Dashboard admin & super admin (PRD 11.1). Semua angka = keterlaksanaan intervensi (materi dibuka, lama membaca),
-// bukan data klinis: website tidak menyimpan tekanan darah, dan pretest/posttest dikerjakan di luar website.
+// bukan data klinis: website tidak menyimpan tekanan darah, dan skor pretest/posttest ada di menu Pretest & Posttest.
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ minggu?: string }> }) {
   const admin = await wajibAdmin();
   const { minggu: mentah } = await searchParams;
@@ -186,7 +186,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </h2>
         <p className="label-kecil">
           Menggambarkan sejauh mana intervensi edukasi dijalankan responden (fidelity), bukan perubahan tekanan darah atau skor
-          pengetahuan. Pretest dan posttest dikerjakan di luar website.
+          pengetahuan. Skor pretest dan posttest ada di menu Pretest &amp; Posttest.
         </p>
         <div className="dasbor-dua">
           <section className="kartu-panel" aria-labelledby="judul-per-modul">

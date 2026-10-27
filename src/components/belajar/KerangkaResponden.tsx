@@ -41,13 +41,7 @@ export default async function KerangkaResponden({ children }: { children: React.
               <span className="panel-merek-peran">{SLOGAN}</span>
             </span>
           </Link>
-          <MenuResponden>
-            <Link href="/profil/" className="navbar-akun-tautan">
-              <Ikon nama="orang" ukuran={20} />
-              Profil
-            </Link>
-            {keluar}
-          </MenuResponden>
+          <MenuResponden />
           <div className="navbar-kanan">
             <Link
               className="panel-lonceng"

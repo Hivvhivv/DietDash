@@ -6,6 +6,11 @@ Setelah versi dibekukan untuk penelitian, perubahan konten inti hanya boleh dila
 
 > **Sejak PRD v2.0 (2026-10-21)** konten dikelola per versi di panel admin (`/admin/konten/`, `/admin/versi/`). Setiap perubahan lewat panel tercatat otomatis di log aktivitas (`/admin/log/`, bisa diunduh CSV). Berkas ini mencatat perubahan naskah benih (`scripts/benih/naskah-v2/`) dan keputusan penguncian versi.
 
+## 2026-10-27 — Pretest & posttest online
+
+- Keputusan peneliti: pretest dan posttest kini dikerjakan di website. Soal dibuat admin di Pretest & Posttest (bukan di naskah benih), jadi tidak termasuk versi konten.
+- Teks Sambutan, Pengenalan, dan halaman Selesai disesuaikan: pretest muncul saat pertama masuk; posttest muncul setelah dibuka peneliti.
+
 ## Konten contoh diterbitkan di database utama (2026-10-21)
 
 - Naskah benih v2 (6 modul, 20 materi, 60 soal) diterbitkan sebagai **konten contoh** (`npm run benih-konten -- --contoh`) agar website dapat dicoba. Versi bertanda `contoh`, tidak dapat dikunci.

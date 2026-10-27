@@ -11,6 +11,7 @@ const DATA = [
   { data: 'Nomor HP', tujuan: 'Masuk, mencegah akun ganda, menghubungi Anda saat membuat kode akses baru', akses: 'Sistem; peneliti hanya melihat versi tersamarkan, kecuali dibuka dan tercatat di log', lama: 'Dihapus paling lambat 6 bulan setelah penelitian selesai (usulan)' },
   { data: 'Nama', tujuan: 'Menyapa Anda dan mencocokkan identitas saat membuat kode akses baru', akses: 'Anda dan peneliti', lama: 'Sama dengan nomor HP (usulan)' },
   { data: 'Kode peserta internal (mis. DS-4827)', tujuan: 'Menyamarkan identitas dalam data belajar dan menghubungkannya dengan data pretest/posttest; tidak ditampilkan kepada Anda', akses: 'Peneliti', lama: 'Sesuai protokol etik' },
+  { data: 'Jawaban pretest dan posttest', tujuan: 'Mengukur pengetahuan sebelum dan sesudah mengikuti materi untuk penelitian; nilai tidak ditampilkan kepada Anda', akses: 'Peneliti', lama: 'Sesuai protokol etik, dalam bentuk ID peserta' },
   { data: 'Progres belajar (materi yang dibuka dan lama membaca)', tujuan: 'Memantau keterlaksanaan intervensi edukasi', akses: 'Peneliti', lama: 'Sesuai protokol etik, dalam bentuk ID peserta' },
   { data: 'Waktu akses dan lama membaca', tujuan: 'Melihat keterlibatan belajar', akses: 'Peneliti', lama: 'Sesuai protokol etik' },
 ];
