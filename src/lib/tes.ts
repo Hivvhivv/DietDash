@@ -210,6 +210,38 @@ export async function eksporTes(jenis: JenisTes, semua: boolean) {
   return { kepala, isi, soal: instrumen.soal };
 }
 
+// Jawaban satu responden per soal (detail & ekspor PDF responden; hanya admin). Hasil benar/belum tepat hanya untuk soal pilihan ganda berkunci.
+export async function jawabanResponden(respondentId: ObjectId) {
+  const { jawabanTes } = await koleksi();
+  const [d, pre, post] = await Promise.all([jawabanTes.find({ respondent_id: respondentId }).toArray(), ambilInstrumen('pretest'), ambilInstrumen('posttest')]);
+  const susun = (jenis: JenisTes, i: DokInstrumen) => {
+    const j = d.find((x) => x.jenis === jenis) ?? null;
+    const butir = j
+      ? i.soal.map((s, n) => {
+          const nilai = j.jawaban.find((x) => x.soal_kunci === s.kunci)?.nilai ?? '';
+          const kunci = s.jenis === 'pilihan' ? s.pilihan?.find((x) => x.benar) : undefined;
+          return {
+            nomor: n + 1,
+            teks: s.teks,
+            jenis: s.jenis,
+            jawaban: !nilai
+              ? '—'
+              : s.jenis === 'pilihan'
+                ? (s.pilihan?.find((x) => x.kunci === nilai)?.teks ?? nilai)
+                : s.jenis === 'skala' && s.skala
+                  ? `${nilai} (skala ${s.skala.min}–${s.skala.maks})`
+                  : nilai,
+            hasil: kunci ? (nilai === kunci.kunci ? ('benar' as const) : ('salah' as const)) : null,
+            kunci_teks: kunci?.teks ?? null,
+          };
+        })
+      : [];
+    return { jenis, instrumen: i, jawaban: j, butir };
+  };
+  return { pretest: susun('pretest', pre), posttest: susun('posttest', post) };
+}
+export type JawabanResponden = Awaited<ReturnType<typeof jawabanResponden>>;
+
 export async function skorResponden(respondentId: ObjectId) {
   const { jawabanTes } = await koleksi();
   const d = await jawabanTes.find({ respondent_id: respondentId }, { projection: { jenis: 1, skor: 1, benar: 1, total_berkunci: 1, dikirim_pada: 1 } }).toArray();

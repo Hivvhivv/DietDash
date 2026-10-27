@@ -48,6 +48,7 @@ Terdaftarnya seseorang sudah mengungkap bahwa ia memiliki hipertensi → daftar 
 - Nomor HP selalu tersamarkan (`0812****7890`). Nomor lengkap hanya lewat tombol "Lihat nomor lengkap" yang tercatat di log.
 - Nomor HP, nama, token, dan data pribadi tidak boleh masuk URL, judul halaman, atau log aplikasi. Pencarian nama/nomor di daftar responden dilakukan di peramban (nomor dicocokkan via hash), saringan di URL hanya berisi status/tanggal.
 - Ekspor (CSV/Excel) memakai ID peserta saja, tanpa nama dan nomor HP; bawaan hanya `responden_penelitian`; nama berkas memuat label versi & tanggal; setiap ekspor tercatat di log.
+- Ekspor Data per responden (PDF lewat jendela cetak, `/admin/cetak/responden/<ID>/?b=...`): URL hanya berisi ID peserta dan nama bagian; identitas (nama + nomor **tersamar**) hanya bila admin mencentang "Identitas responden" (bawaan tidak); kode akses dan nomor lengkap tidak pernah ikut; setiap ekspor tercatat di log (`ekspor_pdf_responden`, objek = ID, keterangan = bagian). Jangan menambah tautan WhatsApp (`wa.me/<nomor>`) karena nomor HP akan masuk URL.
 - Tidak ada analitik, pixel, atau pelacak pihak ketiga. Lama baca dicatat di server sendiri (`/api/baca/`) hanya saat halaman aktif dan berhenti setelah 5 menit tanpa interaksi.
 
 ## Konsistensi intervensi (PRD 17)

@@ -84,6 +84,7 @@ const KALIMAT: Record<string, (e: DokLogAudit) => [string, JenisAktivitas]> = {
   buka_kunci_manual: (e) => [`Materi dibuka manual untuk ${e.objek ?? 'responden'}`, 'pengguna'],
   ubah_status_sampel: (e) => [`Status sampel ${e.objek ?? ''} diubah`, 'pengguna'],
   ekspor_data: () => ['Data penelitian diekspor', 'data'],
+  ekspor_pdf_responden: (e) => [e.objek ? `Data ${e.objek} diekspor ke PDF` : `Daftar responden diekspor ke PDF (${e.keterangan ?? ''})`, 'data'],
   ubah_pengaturan: () => ['Pengaturan penelitian diubah', 'data'],
   undang_admin: (e) => [`Admin baru diundang (${e.objek ?? ''})`, 'akun'],
   terima_undangan: () => ['Admin baru bergabung', 'akun'],

@@ -179,8 +179,54 @@ export async function detailResponden(idPeserta: string) {
       versi: pr ? (versiPetaLabel.get(pr.version_id.toHexString()) ?? '—') : '—',
     };
   });
-  return { r: r as DokResponden, p, ringkasan, garisWaktu, riwayat: riwayat as DokRiwayatAkun[], struktur, atur };
+  const modul = (struktur?.modul ?? []).map((md) => {
+    const milik = garisWaktu.filter((g) => g.materi.modul.kunci === md.kunci);
+    const selesai = milik.filter((g) => g.status === 'selesai').length;
+    const terakhir = milik.reduce<Date | null>((t, g) => (g.dibuka_pada && (!t || g.dibuka_pada > t) ? g.dibuka_pada : t), null);
+    const status: StatusModul =
+      milik.length && selesai === milik.length ? 'selesai' : selesai > 0 ? 'sedang' : milik.some((g) => g.status === 'tersedia') ? 'tersedia' : 'terkunci';
+    return {
+      kunci: md.kunci,
+      nomor: md.nomor,
+      judul: md.judul,
+      selesai,
+      total: milik.length,
+      persen: milik.length ? Math.round((selesai / milik.length) * 100) : 0,
+      status,
+      detik_baca: milik.reduce((n, g) => n + g.detik_baca, 0),
+      menit: milik.reduce((n, g) => n + g.materi.menit, 0),
+      terakhir_dibuka: terakhir,
+    };
+  });
+  return {
+    r: r as DokResponden,
+    p,
+    ringkasan,
+    garisWaktu,
+    modul,
+    totalDetik: progres.reduce((n, x) => n + x.detik_baca, 0),
+    hariKe: Math.floor((Date.now() - r.dibuat_pada.getTime()) / HARI) + 1,
+    riwayat: riwayat as DokRiwayatAkun[],
+    struktur,
+    atur,
+  };
 }
+
+export const LABEL_RIWAYAT: Record<string, string> = {
+  token_dibuat: 'Kode akses dibuat',
+  token_diganti_responden: 'Kode akses diganti responden',
+  token_direset_admin: 'Kode akses dibuat ulang oleh admin',
+  dibuat_admin: 'Akun dibuat oleh super admin',
+  nomor_diganti: 'Nomor HP diganti',
+  nama_diganti: 'Nama diganti',
+  mengundurkan_diri: 'Mengundurkan diri',
+  dinonaktifkan: 'Akun dinonaktifkan',
+  diaktifkan: 'Akun diaktifkan',
+};
+
+// Status modul untuk detail responden: selesai = semua materi dibuka; sedang = sebagian; tersedia = materi pertamanya terbuka.
+export type StatusModul = 'selesai' | 'sedang' | 'tersedia' | 'terkunci';
+export type DetailResponden = NonNullable<Awaited<ReturnType<typeof detailResponden>>>;
 
 // ---------- Ekspor (11.3) ----------
 

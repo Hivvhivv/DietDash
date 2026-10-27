@@ -4,12 +4,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useId, useRef, useState } from 'react';
 import { aksiEditResponden, aksiHapusResponden, aksiResetToken, aksiStatusAkun, type StatusAksiAdmin } from '@/app/admin/aksi-responden';
+import Ikon from '../Ikon';
 import { Pesan } from '../belajar/Bidang';
 import type { BarisResponden } from './TabelResponden';
 
 type Jenis = 'edit' | 'reset' | 'status' | 'hapus';
 
-function Dialog({ judul, buka, tutup, children }: { judul: string; buka: boolean; tutup: () => void; children: React.ReactNode }) {
+export function Dialog({ judul, buka, tutup, children }: { judul: string; buka: boolean; tutup: () => void; children: React.ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null);
   const idJudul = useId();
   useEffect(() => {
@@ -49,7 +50,9 @@ function Alasan({ wajib = true }: { wajib?: boolean }) {
   );
 }
 
-function FormEdit({ b, tutup }: { b: BarisResponden; tutup: () => void }) {
+type DataEdit = Pick<BarisResponden, 'id_peserta' | 'nama' | 'nomor_samar' | 'sampel' | 'pretest' | 'posttest'>;
+
+function FormEdit({ b, tutup }: { b: DataEdit; tutup: () => void }) {
   const { status, jalankan, menunggu } = useAksi(aksiEditResponden, true);
   return (
     <form action={jalankan} className="form-admin">
@@ -211,5 +214,21 @@ export default function AksiResponden({ b, superAdmin }: { b: BarisResponden; su
         {buka === 'hapus' && <FormHapus b={b} tutup={tutup} />}
       </Dialog>
     </div>
+  );
+}
+
+// Tombol "Edit Data" di halaman detail responden (dialog yang sama dengan List Responden).
+export function TombolEditResponden({ b }: { b: DataEdit }) {
+  const [buka, setBuka] = useState(false);
+  const tutup = () => setBuka(false);
+  return (
+    <>
+      <button type="button" className="tombol tombol-sekunder tombol-kecil" onClick={() => setBuka(true)}>
+        <Ikon nama="gerigi" ukuran={18} /> Edit Data
+      </button>
+      <Dialog judul={`Edit responden · ${b.id_peserta}`} buka={buka} tutup={tutup}>
+        <FormEdit b={b} tutup={tutup} />
+      </Dialog>
+    </>
   );
 }
