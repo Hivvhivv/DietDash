@@ -32,6 +32,7 @@ export interface BarisResponden {
   hari_sejak_daftar: number;
   mendekati_batas: boolean;
   pretest_selesai: boolean;
+  posttest_selesai: boolean;
   ringkasan: RingkasanBelajar | null;
 }
 
@@ -101,6 +102,7 @@ export async function daftarResponden(): Promise<{ baris: BarisResponden[]; stru
       hari_sejak_daftar: hari,
       mendekati_batas: r.aktif && statusBelajar !== 'selesai' && hari >= atur.batas_intervensi_hari - 2,
       pretest_selesai: !!p.pretest_selesai_pada,
+      posttest_selesai: !!p.posttest_selesai_pada,
       ringkasan,
     };
     return [b];
@@ -194,13 +196,13 @@ export async function dataEkspor(jenis: JenisEkspor, semua: boolean) {
   const progres = await k.progres.find({}).toArray();
 
   if (jenis === 'ringkasan') {
-    const kepala = ['id_peserta', 'status_sampel', 'status_akun', 'status_belajar', 'tanggal_daftar', 'terakhir_aktif', 'materi_selesai', 'total_materi', 'persen_selesai', 'materi_berikutnya', 'total_detik_baca', 'pretest_selesai', 'versi_konten_aktif'];
+    const kepala = ['id_peserta', 'status_sampel', 'status_akun', 'status_belajar', 'tanggal_daftar', 'terakhir_aktif', 'materi_selesai', 'total_materi', 'persen_selesai', 'materi_berikutnya', 'total_detik_baca', 'pretest_selesai', 'posttest_selesai', 'versi_konten_aktif'];
     const isi = dipilih.map((b) => {
       const pr = progres.filter((x) => x.respondent_id.equals(b.id));
       return [
         b.id_peserta, b.status_sampel, b.status_akun, b.status_belajar, iso(b.dibuat_pada), iso(b.terakhir_aktif),
         b.selesai, b.total, b.persen, b.materi_saat_ini.split(' ')[0], pr.reduce((n, x) => n + x.detik_baca, 0),
-        b.pretest_selesai ? 'ya' : 'tidak', label,
+        b.pretest_selesai ? 'ya' : 'tidak', b.posttest_selesai ? 'ya' : 'tidak', label,
       ];
     });
     return { label, baris: [kepala, ...isi] };

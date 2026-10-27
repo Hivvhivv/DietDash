@@ -6170,6 +6170,259 @@ a.beranda-kartu:hover .beranda-kartu-panah {
   white-space: nowrap;
 }
 
+/* ===== List Responden ===== */
+.pengguna-alat {
+  justify-content: flex-end;
+}
+
+.pengguna-judul-tabel {
+  margin: 0 0 0.75rem;
+  font-size: 1.3rem;
+}
+
+.tabel-responden th[scope='row'] {
+  min-width: 10rem;
+}
+
+.tabel-responden-id {
+  font-weight: 800;
+}
+
+.tabel-responden-nama {
+  display: block;
+  margin-top: 0.15rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tabel-responden th[scope='row'] .label-kecil,
+.tabel-responden td > .label-kecil {
+  display: block;
+  font-weight: 400;
+}
+
+.tabel-responden .monitor-progres-baris {
+  min-width: 5rem;
+}
+
+.tabel-responden thead th {
+  white-space: normal;
+}
+
+.lihat-kode-ringkas {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+}
+
+.lihat-kode-ringkas .lihat-kode-tombol {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.aksi-responden {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem;
+  min-width: 13.5rem;
+}
+
+.tabel-responden-prepost span {
+  display: block;
+  white-space: nowrap;
+}
+
+.aksi-responden .tombol {
+  padding-inline: 0.6rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.tabel-responden td,
+.tabel-responden th {
+  padding-inline: 0.55rem;
+}
+
+.dialog-admin {
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--warna-garis);
+  border-radius: 20px;
+  background: var(--warna-permukaan);
+  color: var(--warna-teks);
+  box-shadow: 0 24px 60px rgba(18, 61, 44, 0.25);
+}
+
+.dialog-admin::backdrop {
+  background: rgba(18, 40, 30, 0.45);
+}
+
+.dialog-admin-kepala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.dialog-admin-kepala h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.dialog-admin .form-admin {
+  max-width: none;
+}
+
+/* Halaman cetak kartu & daftar (Ekspor PDF) */
+.cetak {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1.25rem;
+  background: #fff;
+}
+
+.cetak-alat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  background: var(--warna-utama-muda);
+}
+
+.cetak-alat p {
+  margin: 0;
+}
+
+.cetak-kartu-kisi {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cetak-kartu {
+  margin: 0;
+  padding: 1rem 1.15rem;
+  border: 2px dashed #9bbfa9;
+  border-radius: 14px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.cetak-kartu-merek {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.cetak-kartu-merek > span {
+  display: grid;
+  line-height: 1.2;
+}
+
+.cetak-kartu-merek > span span {
+  font-size: 0.85rem;
+  color: var(--warna-teks-sekunder);
+}
+
+.cetak-kartu dl {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+}
+
+.cetak-kartu dl > div {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+}
+
+.cetak-kartu dt {
+  color: var(--warna-teks-sekunder);
+}
+
+.cetak-kartu dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.cetak-kartu-kode dd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+  color: #123d2c;
+}
+
+.cetak-kartu-cara,
+.cetak-kartu-pesan {
+  margin: 0.6rem 0 0;
+  font-size: 0.9rem;
+}
+
+.cetak-kartu-pesan {
+  color: #8a2c33;
+}
+
+.cetak-kepala {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.cetak-kepala h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.cetak-kepala p,
+.cetak-catatan {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: var(--warna-teks-sekunder);
+}
+
+.cetak-tabel {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.cetak-tabel th,
+.cetak-tabel td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #ccd9d1;
+  text-align: left;
+}
+
+@media print {
+  .cetak-alat {
+    display: none;
+  }
+
+  .cetak {
+    max-width: none;
+    padding: 0;
+  }
+
+  .cetak-kartu-kisi {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cetak-tabel tr {
+    break-inside: avoid;
+  }
+}
+
 /* ===== Tambah Pengguna Baru ===== */
 .pilih-peran {
   margin: 0 0 1.25rem;

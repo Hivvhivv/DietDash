@@ -31,6 +31,7 @@ export interface DokPeserta {
   id_peserta: string; // mis. DS-4827
   status_sampel: StatusSampel;
   pretest_selesai_pada: Date | null; // dipakai bila gerbang pretest diaktifkan
+  posttest_selesai_pada?: Date | null; // tanda dari admin; posttest dikerjakan di luar website
 }
 
 export type JenisRiwayatAkun =

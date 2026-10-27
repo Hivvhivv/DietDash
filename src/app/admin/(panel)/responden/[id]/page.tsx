@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { aksiBukaKunci, aksiLihatNomor, aksiPretest, aksiResetToken, aksiStatusAkun, aksiStatusSampel } from '../../../aksi-responden';
+import { aksiBukaKunci, aksiLihatNomor, aksiPosttest, aksiPretest, aksiResetToken, aksiStatusAkun, aksiStatusSampel } from '../../../aksi-responden';
 import { FormAksi } from '@/components/admin/FormAdmin';
 import LencanaStatusMateri from '@/components/belajar/StatusMateri';
 import LihatKodeAkses from '@/components/admin/LihatKodeAkses';
@@ -92,12 +92,13 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
           <dt>Progres</dt>
           <dd>{ringkasan ? `${ringkasan.selesai}/${ringkasan.total} materi (${ringkasan.persen}%)` : '—'}</dd>
         </div>
-        {atur.gerbang_pretest && (
-          <div>
-            <dt>Pretest</dt>
-            <dd>{p.pretest_selesai_pada ? `✓ Selesai (${formatWaktu(p.pretest_selesai_pada)})` : 'Belum ditandai'}</dd>
-          </div>
-        )}
+        <div>
+          <dt>Pretest / Posttest</dt>
+          <dd>
+            {p.pretest_selesai_pada ? `✓ Pretest (${formatWaktu(p.pretest_selesai_pada)})` : 'Pretest belum ditandai'} ·{' '}
+            {p.posttest_selesai_pada ? `✓ Posttest (${formatWaktu(p.posttest_selesai_pada)})` : 'Posttest belum ditandai'}
+          </dd>
+        </div>
       </dl>
 
       <section className="bagian-kartu" aria-labelledby="judul-garis">
@@ -185,6 +186,19 @@ export default async function DetailResponden({ params }: { params: Promise<{ id
             >
               <KolomAlasan id="alasan-sampel" wajib={false} />
             </FormAksi>
+          </div>
+        </details>
+
+        <details className="tanya">
+          <summary>Tanda posttest</summary>
+          <div className="tanya-isi">
+            <p className="label-kecil">Posttest dikerjakan di luar website; tanda ini hanya untuk memantau kelengkapan data penelitian.</p>
+            <FormAksi
+              aksi={aksiPosttest}
+              data={{ ...data, selesai: p.posttest_selesai_pada ? 'tidak' : 'ya' }}
+              label={p.posttest_selesai_pada ? 'Batalkan tanda posttest' : 'Tandai posttest selesai'}
+              sekunder
+            />
           </div>
         </details>
 

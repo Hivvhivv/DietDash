@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import TabelMonitor, { type BarisMonitor } from '@/components/admin/TabelMonitor';
+import TabelResponden, { type BarisResponden as BarisTabel } from '@/components/admin/TabelResponden';
 import Ikon, { type NamaIkon } from '@/components/Ikon';
 import { wajibAdmin } from '@/lib/admin-auth';
-import { barisMonitorAdmin, barisMonitorResponden } from '@/lib/dashboard-admin';
+import { waktuRelatif } from '@/lib/dashboard-admin';
 import { koleksi } from '@/lib/db';
+import { sha256 } from '@/lib/identitas';
 import { daftarResponden } from '@/lib/monitor';
 import { ambilPengaturan } from '@/lib/pengaturan';
+import { formatWaktu } from '@/lib/waktu';
 
 export const metadata: Metadata = { title: 'Manajemen Pengguna' };
 export const dynamic = 'force-dynamic';
@@ -55,10 +57,34 @@ export default async function ManajemenPengguna() {
   const nAdmin = admins.filter((a) => a.peran === 'admin' && a.aktif).length;
 
   // Daftar akun admin hanya untuk super admin (sama seperti halaman Akun Admin).
-  const barisTabel: BarisMonitor[] = [
-    ...baris.map((b) => barisMonitorResponden(b, sekarang)),
-    ...(superAdmin ? admins.map((a) => barisMonitorAdmin(a)) : []),
-  ];
+  // Responden yang punya salinan kode terenkripsi (bisa "Tampilkan"); isi kodenya tidak dibaca di sini.
+  const punyaKode = new Set(
+    (await k.responden.find({ kode_terenkripsi: { $type: 'string' } }, { projection: { _id: 1 } }).toArray()).map((r) => r._id.toHexString()),
+  );
+  const barisTabel: BarisTabel[] = baris.map((b) => ({
+    id_peserta: b.id_peserta,
+    nama: b.nama,
+    nomor_samar: b.nomor_samar,
+    hp_hash: sha256(b.nomor_hp),
+    sampel: b.status_sampel === 'responden_penelitian',
+    aktif: b.status_akun === 'aktif',
+    status_akun: b.status_akun,
+    status_belajar: b.status_belajar,
+    hari_ke: b.hari_sejak_daftar + 1,
+    batas_hari: atur.batas_intervensi_hari,
+    selesai: b.selesai,
+    total: b.total,
+    persen: b.persen,
+    pretest: b.pretest_selesai,
+    posttest: b.posttest_selesai,
+    terakhir_aktif: formatWaktu(b.terakhir_aktif),
+    terakhir_relatif: waktuRelatif(b.terakhir_aktif, sekarang),
+    waktu_aktif: b.terakhir_aktif.getTime(),
+    waktu_daftar: b.dibuat_pada.getTime(),
+    tidak_aktif: b.tidak_aktif,
+    mendekati_batas: b.mendekati_batas,
+    punya_kode: punyaKode.has(b.id.toHexString()),
+  }));
 
   return (
     <>
@@ -66,23 +92,34 @@ export default async function ManajemenPengguna() {
         <div>
           <p className="label-kecil dasbor-label">
             Manajemen Pengguna & Hak Akses{' '}
-            <span className="lencana lencana-materi-selesai">● {baris.length + (superAdmin ? admins.length : 0)} akun terdaftar</span>
+            <span className="lencana lencana-materi-selesai">● {baris.length} responden terdaftar</span>
           </p>
           <h1 className="dasbor-judul-besar">Manajemen Pengguna</h1>
           <p className="label-kecil">
-            Kelola akun responden penelitian{superAdmin ? ' dan tim peneliti (admin)' : ''}. Nomor HP tampil tersamar; nomor lengkap
-            hanya dapat dibuka di halaman detail dan tercatat di log.
+            Kelola akun responden penelitian. Nomor HP tampil tersamar; nomor lengkap hanya di halaman detail. Akun admin dikelola di
+            {superAdmin ? ' Akun Admin' : ' menu super admin'}. Membuka kode akses, mencetak kartu, dan mengunduh daftar kode tercatat di log.
           </p>
         </div>
-        <div className="grup-tombol">
-          <Link className="tombol tombol-sekunder tombol-kecil" href="/admin/laporan/#ekspor">
-            <Ikon nama="grafik" ukuran={18} /> Ekspor Data (.csv / Excel)
-          </Link>
+        <div className="grup-tombol pengguna-alat">
           {superAdmin && (
-            <Link className="tombol tombol-kecil" href="/admin/responden/tambah/">
-              <Ikon nama="tambah-orang" ukuran={18} /> Tambah Pengguna Baru
-            </Link>
+            <>
+              <Link className="tombol tombol-kecil" href="/admin/responden/tambah/">
+                <Ikon nama="tambah-orang" ukuran={18} /> Tambah Responden
+              </Link>
+              <Link className="tombol tombol-sekunder tombol-kecil" href="/admin/responden/impor/">
+                Impor CSV
+              </Link>
+              <a className="tombol tombol-sekunder tombol-kecil" href="/admin/responden/kode-akses/unduh/">
+                Unduh daftar kode
+              </a>
+              <a className="tombol tombol-sekunder tombol-kecil" href="/admin/cetak/?mode=kartu" target="_blank" rel="noopener">
+                Cetak semua kartu
+              </a>
+            </>
           )}
+          <a className="tombol tombol-kecil" href="/admin/cetak/?mode=daftar" target="_blank" rel="noopener">
+            Ekspor PDF
+          </a>
         </div>
       </div>
 
@@ -134,8 +171,9 @@ export default async function ManajemenPengguna() {
         />
       </ul>
 
-      <section className="kartu-panel" aria-label="Daftar pengguna">
-        <TabelMonitor baris={barisTabel} lengkap lihatKode={superAdmin} />
+      <section className="kartu-panel" aria-labelledby="judul-list-responden">
+        <h2 id="judul-list-responden" className="pengguna-judul-tabel">List Responden</h2>
+        <TabelResponden baris={barisTabel} superAdmin={superAdmin} />
       </section>
     </>
   );

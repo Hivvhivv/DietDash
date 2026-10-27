@@ -4,9 +4,9 @@ import { hash, verify } from '@node-rs/argon2';
 import { MongoServerError, ObjectId } from 'mongodb';
 import { redirect } from 'next/navigation';
 import { alamatIp, catatPercobaan, hapusPercobaan, kunciBatas, sudahDibatasi } from './batas';
-import { catatAudit, koleksi, type DokPeserta, type DokResponden, type JenisRiwayatAkun } from './db';
+import { ambilDb, catatAudit, koleksi, type DokPeserta, type DokResponden, type JenisRiwayatAkun } from './db';
 import { dekripsiKode, enkripsiAktif, enkripsiKode } from './kode-akses';
-import { buatIdPeserta, buatToken, normalkanNomorHp, normalkanToken, PANJANG_KODE } from './identitas';
+import { buatIdPeserta, buatToken, normalkanNomorHp, normalkanToken, PANJANG_KODE, samarkanNomorHp } from './identitas';
 import { ambilPengaturan } from './pengaturan';
 import { bacaSesi, buatSesi, hapusSemuaSesi, hapusSesiIni } from './sesi';
 
@@ -314,4 +314,122 @@ export async function ubahStatusAkun(respondentId: ObjectId, aktif: boolean, adm
   const p = await peserta.findOne({ respondent_id: respondentId });
   await catatAudit({ admin: adminEmail, aksi: aktif ? 'aktifkan_responden' : 'nonaktifkan_responden', objek: p?.id_peserta, alasan: alasan.trim() });
   return { ok: true };
+}
+
+// ---------- Pengelolaan oleh admin (List Responden) ----------
+
+// Ubah nama/nomor HP oleh admin. Nomor tetap unik; setiap perubahan tercatat di riwayat akun dan log.
+export async function ubahDataOlehAdmin(
+  respondentId: ObjectId,
+  adminEmail: string,
+  idPeserta: string,
+  ubahan: { nama: string; nomor: string },
+): Promise<Hasil<{ berubah: string[] }>> {
+  const galatNama = periksaNama(ubahan.nama);
+  if (galatNama) return { ok: false, pesan: galatNama, kolom: 'nama' };
+  const { responden } = await koleksi();
+  const akun = await responden.findOne({ _id: respondentId }, { projection: { nama: 1, nomor_hp: 1 } });
+  if (!akun) return { ok: false, pesan: 'Responden tidak ditemukan.' };
+  // Nomor kosong = tidak diubah (nomor lengkap tidak dikirim ke formulir).
+  const nomor = ubahan.nomor.trim() ? normalkanNomorHp(ubahan.nomor) : akun.nomor_hp;
+  if (!nomor) return { ok: false, pesan: PESAN.nomorTidakValid, kolom: 'nomor' };
+  const set: Partial<DokResponden> = {};
+  const berubah: string[] = [];
+  if (ubahan.nama.trim() !== akun.nama) {
+    set.nama = ubahan.nama.trim();
+    berubah.push('nama');
+  }
+  if (nomor !== akun.nomor_hp) {
+    if (await responden.findOne({ nomor_hp: nomor, _id: { $ne: respondentId } })) {
+      return { ok: false, pesan: 'Nomor ini sudah dipakai responden lain.', kolom: 'nomor' };
+    }
+    set.nomor_hp = nomor;
+    set.nomor_terverifikasi_pada = null;
+    berubah.push('nomor HP');
+  }
+  if (!berubah.length) return { ok: true, berubah };
+  await responden.updateOne({ _id: respondentId }, { $set: set });
+  if (set.nama) await catatRiwayat(respondentId, 'nama_diganti', adminEmail);
+  if (set.nomor_hp) await catatRiwayat(respondentId, 'nomor_diganti', adminEmail);
+  await catatAudit({ admin: adminEmail, aksi: 'ubah_data_responden', objek: idPeserta, keterangan: berubah.join(', ') });
+  return { ok: true, berubah };
+}
+
+// Hapus permanen hanya untuk akun "bukan sampel" (uji coba / tim). Responden penelitian dinonaktifkan,
+// bukan dihapus, sampai ada keputusan etik tentang data responden yang mundur.
+export async function hapusAkunUji(respondentId: ObjectId, adminEmail: string, alasan: string): Promise<Hasil> {
+  if (alasan.trim().length < 5) return { ok: false, pesan: 'Tulis alasan menghapus (minimal 5 karakter).', kolom: 'alasan' };
+  const k = await koleksi();
+  const p = await k.peserta.findOne({ respondent_id: respondentId });
+  if (!p) return { ok: false, pesan: 'Responden tidak ditemukan.' };
+  if (p.status_sampel !== 'bukan_sampel') {
+    return { ok: false, pesan: 'Responden penelitian tidak dapat dihapus. Nonaktifkan akunnya, atau ubah dulu kelompoknya menjadi "Bukan sampel" bila ini akun uji coba.' };
+  }
+  await hapusSemuaSesi(respondentId);
+  await Promise.all([
+    k.progres.deleteMany({ respondent_id: respondentId }),
+    k.riwayatAkun.deleteMany({ respondent_id: respondentId }),
+    (await ambilDb()).collection('quiz_attempts').deleteMany({ respondent_id: respondentId }),
+    k.peserta.deleteOne({ _id: p._id }),
+  ]);
+  await k.responden.deleteOne({ _id: respondentId });
+  await catatAudit({ admin: adminEmail, aksi: 'hapus_akun_uji', objek: p.id_peserta, alasan: alasan.trim() });
+  return { ok: true };
+}
+
+// Kode akses beberapa responden sekaligus untuk cetak kartu / unduh daftar kode (super admin; dicatat pemanggil).
+export async function kodeBeberapaResponden(ids: ObjectId[]): Promise<Map<string, string>> {
+  const { responden } = await koleksi();
+  const daftar = await responden.find({ _id: { $in: ids } }, { projection: { kode_terenkripsi: 1 } }).toArray();
+  const peta = new Map<string, string>();
+  for (const r of daftar) {
+    const kode = dekripsiKode(r.kode_terenkripsi, r._id);
+    if (kode) peta.set(r._id.toHexString(), kode);
+  }
+  return peta;
+}
+
+export interface HasilImpor {
+  baris: number;
+  nama: string;
+  nomor_samar: string;
+  id_peserta?: string;
+  kode?: string;
+  pesan?: string;
+}
+
+// Impor CSV (kolom: nama, nomor HP). Kelayakan & persetujuan dikonfirmasi sekali untuk seluruh berkas.
+export async function imporResponden(adminEmail: string, teks: string, sampel: DokPeserta['status_sampel']): Promise<Hasil<{ hasil: HasilImpor[] }>> {
+  const baris = teks
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+  if (baris.length && /nama/i.test(baris[0]) && !/\d{8,}/.test(baris[0])) baris.shift();
+  if (!baris.length) return { ok: false, pesan: 'Berkas kosong. Isi satu responden per baris: nama, nomor HP.' };
+  if (baris.length > 300) return { ok: false, pesan: 'Maksimal 300 responden per impor.' };
+  const hasil: HasilImpor[] = [];
+  const dipakai = new Set<string>();
+  for (const [i, b] of baris.entries()) {
+    const kolom = b.split(/[;,\t]/).map((x) => x.trim().replace(/^"|"$/g, ''));
+    const nama = kolom[0] ?? '';
+    const nomor = normalkanNomorHp(kolom[1] ?? '');
+    const dasar = { baris: i + 1, nama, nomor_samar: nomor ? samarkanNomorHp(nomor) : (kolom[1] ?? '') };
+    const galat = periksaNama(nama) ?? (!nomor ? PESAN.nomorTidakValid : dipakai.has(nomor) ? 'Nomor ganda di berkas.' : null);
+    if (galat || !nomor) {
+      hasil.push({ ...dasar, pesan: galat ?? PESAN.nomorTidakValid });
+      continue;
+    }
+    dipakai.add(nomor);
+    const h = await buatAkun({ nama, nomor, layak: true, tokenDisimpan: true, sampel });
+    if (!h.ok) {
+      hasil.push({ ...dasar, pesan: h.kolom === 'nomor' ? 'Nomor sudah terdaftar.' : h.pesan });
+      continue;
+    }
+    await catatRiwayat(h.id, 'dibuat_admin', adminEmail, 'Impor CSV');
+    hasil.push({ ...dasar, id_peserta: h.id_peserta, kode: h.token });
+  }
+  const jadi = hasil.filter((x) => x.kode).length;
+  await catatAudit({ admin: adminEmail, aksi: 'impor_responden', keterangan: `${jadi} dibuat, ${hasil.length - jadi} gagal` });
+  return { ok: true, hasil };
 }

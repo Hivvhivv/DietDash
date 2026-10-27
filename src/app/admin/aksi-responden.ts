@@ -8,7 +8,7 @@ import { formatNomorHp, formatToken } from '@/lib/identitas';
 import { strukturAktif } from '@/lib/konten';
 import { simpanPengaturan } from '@/lib/pengaturan';
 import { bukaKunciManual } from '@/lib/progres';
-import { lihatKodeAkses, resetTokenOlehAdmin, tambahRespondenOlehAdmin, ubahStatusAkun } from '@/lib/responden';
+import { hapusAkunUji, imporResponden, lihatKodeAkses, resetTokenOlehAdmin, tambahRespondenOlehAdmin, ubahDataOlehAdmin, ubahStatusAkun, type HasilImpor } from '@/lib/responden';
 
 export interface StatusAksiAdmin {
   pesan?: string;
@@ -19,6 +19,7 @@ export interface StatusAksiAdmin {
   nama?: string;
   kolom?: string;
   nilai?: Record<string, string>;
+  hasil?: HasilImpor[];
 }
 
 const teks = (fd: FormData, k: string) => String(fd.get(k) ?? '');
@@ -145,4 +146,84 @@ export async function aksiPengaturan(_: StatusAksiAdmin | undefined, fd: FormDat
   await catatAudit({ admin: admin.email, aksi: 'ubah_pengaturan', keterangan: `Pendaftaran ${ubah.pendaftaran_dibuka ? 'dibuka' : 'ditutup'}; tidak aktif ${ubah.batas_tidak_aktif_hari} hari; intervensi ${ubah.batas_intervensi_hari} hari; target ${ubah.target_responden || 'belum ditetapkan'} responden; kelayakan ${ubah.wajib_pernyataan_kelayakan ? 'wajib' : 'tidak'}; gerbang pretest ${ubah.gerbang_pretest ? 'aktif' : 'tidak'}` });
   revalidatePath('/', 'layout');
   return { sukses: 'Pengaturan tersimpan.' };
+}
+
+// ---------- List Responden ----------
+
+// Edit nama, nomor HP, kelompok, dan tanda pretest/posttest dari dialog Edit.
+export async function aksiEditResponden(_: StatusAksiAdmin | undefined, fd: FormData): Promise<StatusAksiAdmin> {
+  const admin = await wajibAdmin();
+  const p = await cariResponden(teks(fd, 'id_peserta'));
+  if (!p) return { pesan: 'Responden tidak ditemukan.' };
+  const nilai = { nama: teks(fd, 'nama'), nomor: teks(fd, 'nomor') };
+  const h = await ubahDataOlehAdmin(p.respondent_id, admin.email, p.id_peserta, nilai);
+  if (!h.ok) return { pesan: h.pesan, kolom: h.kolom, nilai };
+  const { peserta } = await koleksi();
+  const sampel = teks(fd, 'sampel') === 'bukan_sampel' ? 'bukan_sampel' : 'responden_penelitian';
+  const pretest = fd.get('pretest') === 'ya';
+  const posttest = fd.get('posttest') === 'ya';
+  const catatan: string[] = [...h.berubah];
+  const set: Record<string, unknown> = {};
+  if (sampel !== p.status_sampel) {
+    set.status_sampel = sampel;
+    catatan.push('kelompok');
+    await catatAudit({ admin: admin.email, aksi: 'ubah_status_sampel', objek: p.id_peserta, keterangan: sampel });
+  }
+  if (pretest !== !!p.pretest_selesai_pada) {
+    set.pretest_selesai_pada = pretest ? new Date() : null;
+    catatan.push('pretest');
+    await catatAudit({ admin: admin.email, aksi: pretest ? 'tandai_pretest_selesai' : 'batalkan_tanda_pretest', objek: p.id_peserta });
+  }
+  if (posttest !== !!p.posttest_selesai_pada) {
+    set.posttest_selesai_pada = posttest ? new Date() : null;
+    catatan.push('posttest');
+    await catatAudit({ admin: admin.email, aksi: posttest ? 'tandai_posttest_selesai' : 'batalkan_tanda_posttest', objek: p.id_peserta });
+  }
+  if (Object.keys(set).length) await peserta.updateOne({ _id: p._id }, { $set: set });
+  revalidatePath('/admin/responden/');
+  return { sukses: catatan.length ? `Tersimpan: ${catatan.join(', ')}.` : 'Tidak ada perubahan.' };
+}
+
+export async function aksiPosttest(_: StatusAksiAdmin | undefined, fd: FormData): Promise<StatusAksiAdmin> {
+  const admin = await wajibAdmin();
+  const p = await cariResponden(teks(fd, 'id_peserta'));
+  if (!p) return { pesan: 'Responden tidak ditemukan.' };
+  const selesai = teks(fd, 'selesai') === 'ya';
+  const { peserta } = await koleksi();
+  await peserta.updateOne({ _id: p._id }, { $set: { posttest_selesai_pada: selesai ? new Date() : null } });
+  await catatAudit({ admin: admin.email, aksi: selesai ? 'tandai_posttest_selesai' : 'batalkan_tanda_posttest', objek: p.id_peserta });
+  revalidatePath(`/admin/responden/${p.id_peserta}/`);
+  return { sukses: selesai ? 'Posttest ditandai selesai.' : 'Tanda posttest dibatalkan.' };
+}
+
+// Hapus permanen: khusus super admin dan hanya akun "bukan sampel".
+export async function aksiHapusResponden(_: StatusAksiAdmin | undefined, fd: FormData): Promise<StatusAksiAdmin> {
+  const admin = await wajibAdmin('super_admin');
+  const p = await cariResponden(teks(fd, 'id_peserta'));
+  if (!p) return { pesan: 'Responden tidak ditemukan.' };
+  const h = await hapusAkunUji(p.respondent_id, admin.email, teks(fd, 'alasan'));
+  if (!h.ok) return { pesan: h.pesan };
+  revalidatePath('/admin/responden/');
+  return { sukses: `Akun ${p.id_peserta} dihapus.` };
+}
+
+// Impor CSV (khusus super admin). Kode akses hasil impor hanya dikembalikan sekali ke halaman ini.
+export async function aksiImporResponden(_: StatusAksiAdmin | undefined, fd: FormData): Promise<StatusAksiAdmin> {
+  const admin = await wajibAdmin('super_admin');
+  if (fd.get('konfirmasi') !== 'ya') return { pesan: 'Centang konfirmasi bahwa semua calon responden memenuhi kriteria dan sudah menyetujui ikut penelitian.', kolom: 'konfirmasi' };
+  const berkas = fd.get('berkas');
+  let isi = teks(fd, 'teks');
+  if (berkas instanceof File && berkas.size) {
+    if (berkas.size > 200_000) return { pesan: 'Berkas terlalu besar (maksimal 200 KB).' };
+    isi = await berkas.text();
+  }
+  const sampel = teks(fd, 'sampel') === 'bukan_sampel' ? 'bukan_sampel' : 'responden_penelitian';
+  const h = await imporResponden(admin.email, isi, sampel);
+  if (!h.ok) return { pesan: h.pesan };
+  revalidatePath('/admin/responden/');
+  const jadi = h.hasil.filter((x) => x.kode);
+  return {
+    sukses: `${jadi.length} akun dibuat${h.hasil.length > jadi.length ? `, ${h.hasil.length - jadi.length} baris gagal` : ''}. Simpan atau cetak kodenya sekarang.`,
+    hasil: h.hasil.map((x) => (x.kode ? { ...x, kode: formatToken(x.kode) } : x)),
+  };
 }
